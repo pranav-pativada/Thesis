@@ -1,0 +1,261 @@
+% !TeX root = ./mainfile.tex
+%% Macros
+
+% define your own macros here
+
+% \newcommand{\Eff} {\ensuremath{\mathit{eff}}}  % example command without arguments
+% \newcommand{\Pre} {\ensuremath{\mathit{pre}}}  % (again)
+
+% Note that you can easily specify arguments:
+% \newcommand{\someMacro}[2] {Argument 1: #1, Argument 2: #2} % example command with two arguments
+% you use it via \someMacro{Hello}{World!}
+
+
+% the following commands are being provided by the amsthm package
+% the first parameter states the new environmet's name that can be
+% used (due to this definition here) and the second the name that
+% will appear in the PDF document
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}   % well, a formal definition!
+\theoremstyle{plain}
+\newtheorem{prop}{Proposition} % like a theorem, but less important or evolved
+\newtheorem{lem}{Lemma}        % used within a proof of a theorem
+\newtheorem{thm}{Theorem}      % well, a theorem! :) important and evolved
+\newtheorem{cor}{Corollary}    % basically either a proposition or theorem,
+                               %  but one that follows from another theorem.
+% There's a lot you can configure about the appearance. If interested,
+% open the manual of amsthm or google for tutorials etc. on that package
+
+% the following add a symbol to the definition environment to make it more
+% clear when a definition ends (as there is no difference in fonts!). From:
+% https://tex.stackexchange.com/questions/226334/change-a-amsthm-theorem-ending
+\newcommand{\xqed}[1]{%
+    \leavevmode\unskip\penalty9999 \hbox{}\nobreak\hfill
+    \quad\hbox{\ensuremath{#1}}}
+\newcommand{\Endofdef}{\xqed{\blacksquare}}
+\newenvironment{defn}[1]{%
+    \begin{definition}#1}{%
+    \Endofdef\end{definition}%
+}
+
+
+% Add a period to the end of an abbreviation unless there's one already, then \xspace.
+\usepackage{xspace}
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+\def\wrt{w.r.t\onedot} \def\dof{d.o.f\onedot}
+\def\iid{i.i.d\onedot} \def\wolog{w.l.o.g\onedot}
+% Italics:
+% \def\eg{\emph{e.g}\onedot} \def\Eg{\emph{E.g}\onedot}
+% \def\ie{\emph{i.e}\onedot} \def\Ie{\emph{I.e}\onedot}
+% \def\cf{\emph{cf}\onedot} \def\Cf{\emph{Cf}\onedot}
+% \def\etc{\emph{etc}\onedot} \def\vs{\emph{vs}\onedot}
+% \def\etal{\emph{et al}\onedot}
+% Roman:
+\def\eg{e.g\onedot} \def\Eg{E.g\onedot}
+\def\ie{i.e\onedot} \def\Ie{I.e\onedot}
+\def\cf{cf\onedot} \def\Cf{Cf\onedot}
+\def\etc{etc\onedot} \def\vs{vs\onedot}
+\def\etal{et al\onedot}
+\makeatother
+
+% Mathematical Functions:
+\newcommand{\zeros}{\textbf{0}}
+\newcommand{\ones}{\textbf{1}}
+\newcommand{\eye}{\mathbf{I}}
+\newcommand{\bools}{\mathbb{B}}
+\newcommand{\bbB}{\mathbb{B}}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\sphere}{\mathbb{S}}
+\newcommand{\bbS}{\mathbb{S}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\integers}{\mathbb{Z}}
+\newcommand{\cardinals}{\mathbb{N}}
+\newcommand{\transpose}{^\mathsf{T}}
+% \newcommand{\ind}{\mathbf{1}}
+%\newcommand{\ind}[1]{\ensuremath{\mathbb{[}#1\mathbb{]}}}
+%\newcommand{\ind}[1]{\ensuremath{\textbf{1}\!\left\{#1\right\}}}
+\newcommand{\ind}[1]{\ensuremath{\makebox[.3ex][l]{[}\makebox{[}#1\makebox[.3ex][l]{]}\makebox{]}}}
+\newcommand{\bigind}[1]{\ensuremath{\makebox[.3ex][l]{\big[}\makebox{\big[}#1\makebox[.3ex][l]{\big]}\makebox{\big]}}}
+\newcommand{\Bigind}[1]{\ensuremath{\makebox[.3ex][l]{\Big[}\makebox{\Big[}#1\makebox[.3ex][l]{\Big]}\makebox{\Big]}}}
+\newcommand{\Biggind}[1]{\ensuremath{\makebox[.3ex][l]{\Bigg[}\makebox{\Bigg[}#1\makebox[.3ex][l]{\Bigg]}\makebox{\Bigg]}}}
+\newcommand{\defeq}{\triangleq}
+
+\newcommand{\dd}[2]{\frac{\text{d} #1}{\text{d} #2}}
+\newcommand{\ddinline}[2]{\text{d} #1 / \text{d} #2}
+\newcommand{\ddx}[1]{\frac{\text{d} #1}{\text{d}x}}
+\newcommand{\ddy}[1]{\frac{\text{d} #1}{\text{d}y}}
+\newcommand{\ddxi}[1]{\frac{\text{d} #1}{\text{d}x_i}}
+
+\newcommand{\pp}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ppx}[1]{\frac{\partial #1}{\partial x}}
+\newcommand{\ppy}[1]{\frac{\partial #1}{\partial y}}
+\newcommand{\pppp}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\ppppm}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+
+% Declare math operators
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\maximize}{maximize}
+\DeclareMathOperator*{\maximise}{maximise}
+\DeclareMathOperator*{\minimize}{minimize}
+\DeclareMathOperator*{\minimise}{minimise}
+\DeclareMathOperator{\abs}{abs}
+\DeclareMathOperator{\atantwo}{atan2}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\domain}{dom}
+\DeclareMathOperator{\median}{median}
+% \DeclareMathOperator{\sign}{sgn}
+\DeclareMathOperator{\st}{subject\,to}
+\DeclareMathOperator{\trace}{trace}
+\DeclareMathOperator{\values}{val}
+\DeclareMathOperator{\vect}{vec}
+\DeclareMathOperator{\softmax}{softmax}
+
+% Declare math commands
+\DeclareRobustCommand{\overbar}[1]{\mkern 2mu\overline{\mkern-2mu#1}}
+\DeclareRobustCommand{\underbar}[1]{\underline{#1\mkern-2mu}\mkern 2mu}
+
+% Bold symbols:
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bbb}{\mathbf{b}}
+\newcommand{\bc}{\mathbf{c}}
+\newcommand{\bd}{\mathbf{d}}
+\newcommand{\be}{\mathbf{e}}
+\newcommand{\bbf}{\mathbf{f}}
+\newcommand{\bg}{{\mathbf{g}}}
+\newcommand{\bh}{{\mathbf{h}}}
+\newcommand{\bi}{{\mathbf{i}}}
+\newcommand{\bj}{{\mathbf{j}}}
+\newcommand{\bk}{{\mathbf{k}}}
+\newcommand{\bl}{{\mathbf{l}}}
+% \newcommand{\bm}{{\mathbf{m}}} % \bm reserved
+\newcommand{\bem}{{\mathbf{m}}}
+\newcommand{\bn}{{\mathbf{n}}}
+\newcommand{\bo}{{\mathbf{o}}}
+\newcommand{\bp}{{\mathbf{p}}}
+\newcommand{\bq}{{\mathbf{q}}}
+\newcommand{\br}{{\mathbf{r}}}
+\newcommand{\bs}{{\mathbf{s}}}
+\newcommand{\bt}{{\mathbf{t}}}
+\newcommand{\bu}{{\mathbf{u}}}
+\newcommand{\bv}{{\mathbf{v}}}
+\newcommand{\bw}{{\mathbf{w}}}
+\newcommand{\bx}{{\mathbf{x}}}
+\newcommand{\by}{{\mathbf{y}}}
+\newcommand{\bz}{{\mathbf{z}}}
+\newcommand{\bA}{{\mathbf{A}}}
+\newcommand{\bB}{{\mathbf{B}}}
+\newcommand{\bC}{{\mathbf{C}}}
+\newcommand{\bD}{{\mathbf{D}}}
+\newcommand{\bE}{{\mathbf{E}}}
+\newcommand{\bF}{{\mathbf{F}}}
+\newcommand{\bG}{{\mathbf{G}}}
+\newcommand{\bH}{{\mathbf{H}}}
+\newcommand{\bI}{{\mathbf{I}}}
+\newcommand{\bJ}{{\mathbf{J}}}
+\newcommand{\bK}{{\mathbf{K}}}
+\newcommand{\bL}{{\mathbf{L}}}
+\newcommand{\bM}{{\mathbf{M}}}
+\newcommand{\bN}{{\mathbf{N}}}
+\newcommand{\bO}{{\mathbf{O}}}
+\newcommand{\bP}{{\mathbf{P}}}
+\newcommand{\bQ}{{\mathbf{Q}}}
+\newcommand{\bR}{{\mathbf{R}}}
+\newcommand{\bS}{{\mathbf{S}}}
+\newcommand{\bT}{{\mathbf{T}}}
+\newcommand{\bU}{{\mathbf{U}}}
+\newcommand{\bV}{{\mathbf{V}}}
+\newcommand{\bW}{{\mathbf{W}}}
+\newcommand{\bX}{{\mathbf{X}}}
+\newcommand{\bY}{{\mathbf{Y}}}
+\newcommand{\bZ}{{\mathbf{Z}}}
+\newcommand{\balpha}{\boldsymbol{\alpha}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\bgamma}{\boldsymbol{\gamma}}
+\newcommand{\bdelta}{\boldsymbol{\delta}}
+\newcommand{\blambda}{\boldsymbol{\lambda}}
+\newcommand{\bmu}{\boldsymbol{\mu}}
+\newcommand{\btheta}{\boldsymbol{\theta}}
+\newcommand{\bphi}{\boldsymbol{\phi}}
+\newcommand{\bpsi}{\boldsymbol{\psi}}
+\newcommand{\bxi}{\boldsymbol{\xi}}
+\newcommand{\bDelta}{\boldsymbol{\Delta}}
+\newcommand{\bPhi}{\boldsymbol{\Phi}}
+\newcommand{\bSigma}{\boldsymbol{\Sigma}}
+
+% matrices
+\newcommand{\mA}{{\mathtt{A}}}
+\newcommand{\mB}{{\mathtt{B}}}
+\newcommand{\mC}{{\mathtt{C}}}
+\newcommand{\mD}{{\mathtt{D}}}
+\newcommand{\mE}{{\mathtt{E}}}
+\newcommand{\mF}{{\mathtt{F}}}
+\newcommand{\mG}{{\mathtt{G}}}
+\newcommand{\mH}{{\mathtt{H}}}
+\newcommand{\mI}{{\mathtt{I}}}
+\newcommand{\mJ}{{\mathtt{J}}}
+\newcommand{\mK}{{\mathtt{K}}}
+\newcommand{\mL}{{\mathtt{L}}}
+\newcommand{\mM}{{\mathtt{M}}}
+\newcommand{\mN}{{\mathtt{N}}}
+\newcommand{\mO}{{\mathtt{O}}}
+\newcommand{\mP}{{\mathtt{P}}}
+\newcommand{\mQ}{{\mathtt{Q}}}
+\newcommand{\mR}{{\mathtt{R}}}
+\newcommand{\mS}{{\mathtt{S}}}
+\newcommand{\mT}{{\mathtt{T}}}
+\newcommand{\mU}{{\mathtt{U}}}
+\newcommand{\mV}{{\mathtt{V}}}
+\newcommand{\mW}{{\mathtt{W}}}
+\newcommand{\mX}{{\mathtt{X}}}
+\newcommand{\mY}{{\mathtt{Y}}}
+\newcommand{\mZ}{{\mathtt{Z}}}
+
+% Calligraphic symbols:
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cJ}{\mathcal{J}}
+\newcommand{\cK}{\mathcal{K}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cW}{\mathcal{W}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cY}{\mathcal{Y}}
+\newcommand{\cZ}{\mathcal{Z}}
+
+\newcommand{\inlinesection}[1]{\medskip\noindent\textbf{#1:}}
+
+% Image Placeholders
+\newcommand{\placeholder}[2]{\framebox{\begin{minipage}{#1\columnwidth}
+      \centering \vspace{#2}TODO\vspace{#2}
+\end{minipage}}}
+
+% Better tables
+\usepackage{tabularx}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+
+% Support for easy cross-referencing
+\usepackage[capitalize]{cleveref}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Section}{Sections}
+\Crefname{table}{Table}{Tables}
+\crefname{table}{Tab.}{Tabs.}

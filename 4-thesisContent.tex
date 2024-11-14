@@ -1,0 +1,194 @@
+\chapter{Reasonable Title for Main Content}
+\label{chap:content}
+
+% Standard structure:
+% Formal task description + notation
+% Relevant technical background
+%% Can refer back to your technical background \Cref{sec:bkg_nerf}.
+% Main technical concept
+% Architectural details: how the above fits into the network
+% Training details
+
+% Words need to go here, two sentences!
+
+% \section{Section heading}
+% \label{sec:first_section}
+
+% Also text goes here.
+
+% \subsection{Subsection heading}
+% \label{sec:thisone}
+
+% \paragraph{Implementation details. }
+% Sentence starts here.
+
+% Replace template text! So many people leave Pascal's words in their final thesis...
+
+% Tables: 
+%% See example below
+%% tabularx, no vertical lines, toprule, midrule after headings, bottomrule
+
+\begin{table}[!t] % !
+\centering
+\caption{Ablation study. Meaningful detailed caption full stop. What does the table show? Explain it to me. Who can tell me what a baseline is? Best results are denoted in bold, second-best results are underlined.}
+\label{tab:label_here}
+\begin{tabularx}{\linewidth}{@{}lCC@{}} % !
+\toprule % !
+Method & Your Metric $\uparrow$ & Your Other Metric $\downarrow$\\
+\midrule % !
+Baseline-Random & 3.2 & 12.1 \\
+Method A \citep{Oetiker2021LatexIntroduction} & 21.2 & 10.3 \\
+Method B \citep{Smith2021Wubalubadubdub} & \underline{21.7} & \textbf{9.8}\\
+\midrule % !
+Ours & \textbf{22.8} & \underline{9.9}\\
+\bottomrule% !
+\end{tabularx}
+\end{table}
+
+We show in \Cref{tab:label_here} that\dots
+Always refer to your tables and figures in the text.
+
+\begin{figure}[!t]
+  \includegraphics[width=0.5\linewidth]{figures/escalators.png}
+  \caption[Short caption for the index]{A detailed meaningful caption. Longer than you would want in your index.}
+  \label{fig:your_label}
+\end{figure}%
+We show in \Cref{fig:your_label} that\dots
+
+% Subcaption for multiple figures in a grid
+An example of a $1\times 2$ subfigure on a $1\times 3$ subfigure is given in \Cref{fig:subfig}. You can also refer to subfigures like \Cref{fig:sub_label_a} or just the sub-label \subref{fig:sub_label_a}. This is also an example of using PGFPlot in your thesis, which builds on top of Tikz (draw with vector graphics within latex).
+
+\begin{figure}[!t]\centering
+    \begin{subfigure}[]{0.5\linewidth}\centering % this part takes up 50% of the line
+        \input{./figures/qpn_pdf_comparison.tex}
+        \vspace{-18pt}
+        \caption{Relative likelihood ($\rho = 1$)}
+        \label{fig:sub_label_a}
+    \end{subfigure}\hfill % any excess horizontal space goes between the subfigures
+    \begin{subfigure}[]{0.5\linewidth}\centering
+        \input{./figures/qpn_pdf_mae.tex}
+        \vspace{-18pt}
+        \caption{Mean Absolute Error}
+        \label{fig:sub_label_b}
+    \end{subfigure}\vfill % This indicates to add a new row
+    \begin{subfigure}[]{0.33\linewidth}\centering % this part takes up 50% of the line
+        \input{./figures/qpn_pdf_comparison.tex}
+        \vspace{-18pt}
+        \caption{Relative likelihood ($\rho = 1$)}
+        \label{fig:sub_label_c}
+    \end{subfigure}\hfill % any excess horizontal space goes between the subfigures
+    \begin{subfigure}[]{0.33\linewidth}\centering
+        \input{./figures/qpn_pdf_mae.tex}
+        \vspace{-18pt}
+        \caption{Mean Absolute Error}
+        \label{fig:sub_label_d}
+    \end{subfigure}\hfill
+    \begin{subfigure}[]{0.33\linewidth}\centering
+        \input{./figures/qpn_pdf_mae.tex}
+        \vspace{-18pt}
+        \caption{Mean Absolute Error}
+        \label{fig:sub_label_e}
+    \end{subfigure}%
+    \caption{Main caption here. \subref{fig:sub_label_a} A nice plot in Tikz. \subref{fig:sub_label_b} Also something. \subref{fig:sub_label_c} Ground truth. \subref{fig:sub_label_d} ???? \subref{fig:sub_label_e} !!!!}
+    \label{fig:subfig}
+\end{figure}
+
+% tikz: high quality vector graphics (diagrams) including in 3D; pgfplots: graphs and data management
+
+% Mathematics:
+Inline symbols like this $\Gamma = 0.01$. The flow rate is given by
+\begin{equation}
+    r = 2VP,
+    \label{eq:flowrate}
+\end{equation}
+where the volume is denoted by $V$ and blah. As shown in \Cref{eq:flowrate}, we see\dots
+The other equation environment is this one
+\begin{align}
+    E &= mc^2\\
+      &= m(1-p)\\
+      &\rightarrow \sum_{i=1}^{N} w_i \hat{x},
+\end{align}
+where\dots
+$\bv \in \reals^n$ and the loss $\cL_\text{heatmap}$.
+Can declare math operators in the macros.
+\begin{equation}
+    x =
+    \begin{cases}
+        1 \text{ if bingo,}\\
+        2 \text{ otherwise.}
+    \end{cases}
+\end{equation}
+
+% Referencing:
+% Sentence should make sense if you delete the parts inside the parentheses
+% Google Scholar
+% Use official details rather than arxiv version where possible
+% @inproceedings for conferences
+% @article for journal articles
+% @misc for websites
+% ANU library has details on how to do these
+For example, these people \citep{engelhardt2024shinobi,Cooper2015SuperfluidVacuumTheory,Oetiker2021LatexIntroduction}.
+\citet{Cooper2015SuperfluidVacuumTheory} believe\dots
+The trial is stacked \citep{Cooper2015SuperfluidVacuumTheory}.
+
+% References (non-bibliographic):
+\Cref{chap:background}
+\Cref{eq:flowrate}
+\Cref{fig:pageBorders}
+
+% Lists:
+\begin{enumerate}
+    \item ordered elements
+    \item like this
+\end{enumerate}
+\begin{itemize}
+    \item unordered elements
+    \item like this
+\end{itemize}
+
+% Misc:
+% Formal language: no contractions, no idioms
+% Clear communication is the goal: precise, concrete examples, reference everything
+% First person or passive
+% spell-check
+% no random capitalisation, only proper nouns or at sentence start
+% do not over-use bold or italics
+% macros: see macro.tex -- define your own and use them
+Smith \etal believe X \citep{Smith2021Wubalubadubdub}.
+Jelly, \eg, aeroplane, is good.
+Jelly, \ie, aeroplane, is good.
+% quotation marks
+``Quote here''. % note the ``
+% -,--,---
+Compound words get hyphens like self-attention. Those hard-to-reach locations.
+En dashes are used for ranges like 2--5, and if you have two complete words that you are joining, like Navier--Stokes Theorem or 2D--3D projection.
+Em dashes are for emphatic subclauses---like this one---in the middle of a sentence.
+
+% Advice:
+%% How to start? Write down all section titles, then subsections, then add a few dot points about what you want to say in each, then fill them out
+%% Put in placeholder (empty) figures and tables with a note in the caption saying what you want to be there.
+%% Use latex comments (like this) to structure your thoughts. E.g.,
+
+% Task:
+This thesis considers the task of\dots
+%
+% Motivation:
+This is a key component of many driver safety systems and so any efficiency improvements have real-world implications.
+% Challenges:
+However, it's a pain.
+
+This chapter holds your contributions. Depending on your exact topic, you might use only a single chapter for your actual contributions, or several. Even having several is not unusual. Discuss your proposal with your supervisor(s) and propose descriptive titles. 
+
+The following sections give additional advice that is specifically tailored to students who are new to either \LaTeX{} or scientific writing. I \emph{strongly} suggest that you read the entire document carefully! Also use it as checklist after you started writing and after finishing.
+
+
+\section{Abstract Advice}
+
+\begin{itemize}
+ \item \textbf{Start early.} Writing a report is hard and takes time. More than you think. \emph{Hofstadter's Law:} ``It always takes longer than you expect, even when you take into account Hofstadter's Law.'' -- \emph{So start early!}
+ \item \textbf{Read and check your work!} Each \LaTeX{} editor has a spellchecker. Use it!! Read your work \emph{carefully} and \emph{multiple times} before showing it to your supervisor. And \emph{please} read the next sections before doing so! I \emph{guarantee} that it explains errors that you do! Prevent them! Use the next section as checklist!
+ \item \textbf{Involve your supervisor!} Don't be afraid to reach out to your supervisor(s)! It's quite literally his/her/their job to supervise you and help you succeed! :) So make sure you get what you need to be successful, don't hold back. But make it easy for them. Most academics are overworked...
+ \item \textbf{Choose your title page.} This template has two distinct title pages. Choose the one you like more by setting up the configuration file accordingly. You could even change the template if you like. It's not to restrict you but to save you time.
+
+\end{itemize}
+
