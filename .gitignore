@@ -1,0 +1,21 @@
+# Auxiliary and generated files to ignore
+*.aux
+*.log
+*.out
+*.bbl
+*.brf
+*.blg
+*.synctex.gz
+*.pdf 
+
+# Ignoring specific generated files by name
+mainfile.brf
+mainfile.aux
+mainfile.bbl
+mainfile.log
+mainfile.out
+mainfile.synctex.gz
+
+# Any additional temporary files
+*.fls
+*.fdb_latexmk
