@@ -21,6 +21,7 @@
 @String(AAAI = {AAAI})
 @String(CVPRW= {IEEE Conf. Comput. Vis. Pattern Recog. Worksh.})
 @String(CSVT = {IEEE Trans. Circuit Syst. Video Technol.})
+@String(ICML = {Int. Conf. Mach. Learn.})
 
 @String(SPL	= {IEEE Sign. Process. Letters})
 @String(VR   = {Vis. Res.})
@@ -36,6 +37,38 @@
   journal = {NIPS},
   volume  = {5},
   year    = {1992}
+}
+
+@article{chen2024symbolic,
+  title   = {Symbolic discovery of optimization algorithms},
+  author  = {Chen, Xiangning and Liang, Chen and Huang, Da and Real, Esteban and Wang, Kaiyuan and Pham, Hieu and Dong, Xuanyi and Luong, Thang and Hsieh, Cho-Jui and Lu, Yifeng and others},
+  journal = {NIPS},
+  volume  = {36},
+  year    = {2024}
+}
+
+@inproceedings{choromanska2015loss,
+  title        = {The loss surfaces of multilayer networks},
+  author       = {Choromanska, Anna and Henaff, Mikael and Mathieu, Michael and Arous, G{\'e}rard Ben and LeCun, Yann},
+  booktitle    = {Artificial intelligence and statistics},
+  pages        = {192--204},
+  year         = {2015},
+  organization = {PMLR}
+}
+
+@book{conn2009derivfree,
+  title     = {Introduction to derivative-free optimization},
+  author    = {Conn, Andrew R and Scheinberg, Katya and Vicente, Luis N},
+  year      = {2009},
+  publisher = {SIAM}
+}
+
+@article{dauphin2014sfn,
+  title   = {Identifying and attacking the saddle point problem in high-dimensional non-convex optimization},
+  author  = {Dauphin, Yann N and Pascanu, Razvan and Gulcehre, Caglar and Cho, Kyunghyun and Ganguli, Surya and Bengio, Yoshua},
+  journal = {NIPS},
+  volume  = {27},
+  year    = {2014}
 }
 
 @article{dozat2016nadam,
@@ -56,7 +89,7 @@
 @inproceedings{henriques2019small,
   title     = {Small steps and giant leaps: Minimal newton solvers for deep learning},
   author    = {Henriques, Jo{\~a}o F and Ehrhardt, Sebastien and Albanie, Samuel and Vedaldi, Andrea},
-  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  booktitle = {ICCV},
   pages     = {4763--4772},
   year      = {2019}
 }
@@ -64,7 +97,7 @@
 @article{johnson2013accelerating,
   title   = {Accelerating stochastic gradient descent using predictive variance reduction},
   author  = {Johnson, Rie and Zhang, Tong},
-  journal = {Advances in neural information processing systems},
+  journal = {NIPS},
   volume  = {26},
   year    = {2013}
 }
@@ -91,11 +124,27 @@
   year      = {1980}
 }
 
+@article{liu2023sophia,
+  title   = {Sophia: A scalable stochastic second-order optimizer for language model pre-training},
+  author  = {Liu, Hong and Li, Zhiyuan and Hall, David and Liang, Percy and Ma, Tengyu},
+  journal = {arXiv preprint arXiv:2305.14342},
+  year    = {2023}
+}
+
 @article{loshchilov2017decoupled,
   title   = {Decoupled weight decay regularization},
   author  = {Loshchilov, I},
   journal = {arXiv preprint arXiv:1711.05101},
   year    = {2017}
+}
+
+@inproceedings{martens2010hessianfree,
+  title     = {Deep learning via hessian-free optimization.},
+  author    = {Martens, James and others},
+  booktitle = {ICML},
+  volume    = {27},
+  pages     = {735--742},
+  year      = {2010}
 }
 
 @article{nemirovski2009robust,
@@ -139,7 +188,7 @@
   publisher = {Elsevier}
 }
 
-@article{reddi2019convergence,
+@article{reddi2019asmgrad,
   title   = {On the convergence of adam and beyond},
   author  = {Reddi, Sashank J and Kale, Satyen and Kumar, Sanjiv},
   journal = {arXiv preprint arXiv:1904.09237},
@@ -178,10 +227,35 @@
   publisher = {IEEE}
 }
 
+@inproceedings{sutskever2013importance,
+  title        = {On the importance of initialization and momentum in deep learning},
+  author       = {Sutskever, Ilya and Martens, James and Dahl, George and Hinton, Geoffrey},
+  booktitle    = {ICML},
+  pages        = {1139--1147},
+  year         = {2013},
+  organization = {PMLR}
+}
+
+@article{taniguchi2024adopt,
+  title   = {ADOPT: Modified Adam Can Converge with Any $\beta_2$ with the Optimal Rate},
+  author  = {Taniguchi, Shohei and Harada, Keno and Minegishi, Gouki and Oshima, Yuta and Jeong, Seong Cheol and Nagahara, Go and Iiyama, Tomoshi and Suzuki, Masahiro and Iwasawa, Yusuke and Matsuo, Yutaka},
+  journal = {NIPS},
+  year    = {2024}
+}
+
+@inproceedings{vinyals2012krylov,
+  title        = {Krylov subspace descent for deep learning},
+  author       = {Vinyals, Oriol and Povey, Daniel},
+  booktitle    = {Artificial intelligence and statistics},
+  pages        = {1261--1268},
+  year         = {2012},
+  organization = {PMLR}
+}
+
 @inproceedings{yao2021adahessian,
   title     = {Adahessian: An adaptive second order optimizer for machine learning},
   author    = {Yao, Zhewei and Gholami, Amir and Shen, Sheng and Mustafa, Mustafa and Keutzer, Kurt and Mahoney, Michael},
-  booktitle = {proceedings of the AAAI conference on artificial intelligence},
+  booktitle = {AAAI},
   volume    = {35},
   number    = {12},
   pages     = {10665--10673},
