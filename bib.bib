@@ -30,46 +30,167 @@
 @String(CGF  = {Comput. Graph. Forum})
 @String(CVM = {Computational Visual Media})
 
-@Book{NoceWrig06,
+@article{alspector1992parallel,
+  title   = {A parallel gradient descent method for learning in analog VLSI neural networks},
+  author  = {Alspector, Joshua and Meir, Ronny and Yuhas, B and Jayakumar, Anthony and Lippe, D},
+  journal = {NIPS},
+  volume  = {5},
+  year    = {1992}
+}
+
+@article{dozat2016nadam,
+  title  = {Incorporating nesterov momentum into adam},
+  author = {Dozat, Timothy},
+  year   = {2016}
+}
+
+@article{duchi2011adagrad,
+  title   = {Adaptive subgradient methods for online learning and stochastic optimization.},
+  author  = {Duchi, John and Hazan, Elad and Singer, Yoram},
+  journal = {Journal of machine learning research},
+  volume  = {12},
+  number  = {7},
+  year    = {2011}
+}
+
+@inproceedings{henriques2019small,
+  title     = {Small steps and giant leaps: Minimal newton solvers for deep learning},
+  author    = {Henriques, Jo{\~a}o F and Ehrhardt, Sebastien and Albanie, Samuel and Vedaldi, Andrea},
+  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages     = {4763--4772},
+  year      = {2019}
+}
+
+@article{johnson2013accelerating,
+  title   = {Accelerating stochastic gradient descent using predictive variance reduction},
+  author  = {Johnson, Rie and Zhang, Tong},
+  journal = {Advances in neural information processing systems},
+  volume  = {26},
+  year    = {2013}
+}
+
+@article{kingma2014adam,
+  title   = {Adam: A method for stochastic optimization},
+  author  = {Kingma, Diederik P},
+  journal = {arXiv preprint arXiv:1412.6980},
+  year    = {2014}
+}
+
+@article{LBFGS,
+  issn      = {00255718, 10886842},
+  url       = {http://www.jstor.org/stable/2006193},
+  abstract  = {We study how to use the BFGS quasi-Newton matrices to precondition minimization methods for problems where the storage is critical. We give an update formula which generates matrices using information from the last $m$ iterations, where $m$ is any number supplied by the user. The quasi-Newton matrix is updated at every iteration by dropping the oldest information and replacing it by the newest information. It is shown that the matrices generated have some desirable properties. The resulting algorithms are tested numerically and compared with several well-known methods.},
+  author    = {Jorge Nocedal},
+  journal   = {Mathematics of Computation},
+  number    = {151},
+  pages     = {773--782},
+  publisher = {American Mathematical Society},
+  title     = {Updating Quasi-Newton Matrices with Limited Storage},
+  urldate   = {2024-10-25},
+  volume    = {35},
+  year      = {1980}
+}
+
+@article{loshchilov2017decoupled,
+  title   = {Decoupled weight decay regularization},
+  author  = {Loshchilov, I},
+  journal = {arXiv preprint arXiv:1711.05101},
+  year    = {2017}
+}
+
+@article{nemirovski2009robust,
+  title     = {Robust stochastic approximation approach to stochastic programming},
+  author    = {Nemirovski, Arkadi and Juditsky, Anatoli and Lan, Guanghui and Shapiro, Alexander},
+  journal   = {SIAM Journal on optimization},
+  volume    = {19},
+  number    = {4},
+  pages     = {1574--1609},
+  year      = {2009},
+  publisher = {SIAM}
+}
+
+@inproceedings{nesterov1983method,
+  title     = {A method for unconstrained convex minimization problem with the rate of convergence O (1/k2)},
+  author    = {Nesterov, Yurii},
+  booktitle = {Dokl. Akad. Nauk. SSSR},
+  volume    = {269},
+  number    = {3},
+  pages     = {543},
+  year      = {1983}
+}
+
+@book{NoceWrig06,
   author    = {Jorge Nocedal and Stephen J. Wright},
   publisher = {Springer},
   title     = {Numerical Optimization},
   year      = {2006},
   address   = {New York, NY, USA},
-  edition   = {2e},
+  edition   = {2e}
 }
 
-@article{LBFGS,
- ISSN = {00255718, 10886842},
- URL = {http://www.jstor.org/stable/2006193},
- abstract = {We study how to use the BFGS quasi-Newton matrices to precondition minimization methods for problems where the storage is critical. We give an update formula which generates matrices using information from the last $m$ iterations, where $m$ is any number supplied by the user. The quasi-Newton matrix is updated at every iteration by dropping the oldest information and replacing it by the newest information. It is shown that the matrices generated have some desirable properties. The resulting algorithms are tested numerically and compared with several well-known methods.},
- author = {Jorge Nocedal},
- journal = {Mathematics of Computation},
- number = {151},
- pages = {773--782},
- publisher = {American Mathematical Society},
- title = {Updating Quasi-Newton Matrices with Limited Storage},
- urldate = {2024-10-25},
- volume = {35},
- year = {1980}
+@article{polyak1964some,
+  title     = {Some methods of speeding up the convergence of iteration methods},
+  author    = {Polyak, Boris T},
+  journal   = {Ussr computational mathematics and mathematical physics},
+  volume    = {4},
+  number    = {5},
+  pages     = {1--17},
+  year      = {1964},
+  publisher = {Elsevier}
 }
 
-@article{yao2021adahessianadaptivesecondorder,
-      title={ADAHESSIAN: An Adaptive Second Order Optimizer for Machine Learning}, 
-      author={Zhewei Yao and Amir Gholami and Sheng Shen and Mustafa Mustafa and Kurt Keutzer and Michael W. Mahoney},
-      year={2021},
-      eprint={2006.00719},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2006.00719}, 
+@article{reddi2019convergence,
+  title   = {On the convergence of adam and beyond},
+  author  = {Reddi, Sashank J and Kale, Satyen and Kumar, Sanjiv},
+  journal = {arXiv preprint arXiv:1904.09237},
+  year    = {2019}
 }
 
-@article{ruder2017overviewgd,
-      title={An overview of gradient descent optimization algorithms}, 
-      author={Sebastian Ruder},
-      year={2017},
-      eprint={1609.04747},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/1609.04747}, 
+@misc{rmsprop2012,
+  title  = {RMSProp, COURSERA: Neural Networks for Machine Learning},
+  author = {Geoff, Hinton},
+  year   = {2012}
+}
+
+@article{robbins1951stochastic,
+  title     = {A stochastic approximation method},
+  author    = {Robbins, Herbert and Monro, Sutton},
+  journal   = {The annals of mathematical statistics},
+  pages     = {400--407},
+  year      = {1951},
+  publisher = {JSTOR}
+}
+
+@article{ruder2016overview,
+  title  = {An overview of gradient descent optimization algorithms},
+  author = {Ruder, Sebastian},
+  year   = {2016}
+}
+
+@article{sun2019survey,
+  title     = {A survey of optimization methods from a machine learning perspective},
+  author    = {Sun, Shiliang and Cao, Zehui and Zhu, Han and Zhao, Jing},
+  journal   = {IEEE transactions on cybernetics},
+  volume    = {50},
+  number    = {8},
+  pages     = {3668--3681},
+  year      = {2019},
+  publisher = {IEEE}
+}
+
+@inproceedings{yao2021adahessian,
+  title     = {Adahessian: An adaptive second order optimizer for machine learning},
+  author    = {Yao, Zhewei and Gholami, Amir and Shen, Sheng and Mustafa, Mustafa and Keutzer, Kurt and Mahoney, Michael},
+  booktitle = {proceedings of the AAAI conference on artificial intelligence},
+  volume    = {35},
+  number    = {12},
+  pages     = {10665--10673},
+  year      = {2021}
+}
+
+@article{zeiler2012adadelta,
+  title   = {ADADELTA: an adaptive learning rate method},
+  author  = {Zeiler, Matthew D},
+  journal = {arXiv preprint arXiv:1212.5701},
+  year    = {2012}
 }
