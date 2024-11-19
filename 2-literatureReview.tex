@@ -148,7 +148,7 @@ A common variant of BFGS, Limited BFGS (L-BFGS), reduces the memory requirement 
 
 \textbf{SR1}: The Symmetric Rank-One (SR1) method further tackles the infeasibility problem. It approximates the inverse Hessian using the difference between a history of gradients and positions, while ensuring symmetry in the update \citep{NoceWrig06}. The key advantage of SR1 is that it uses only rank-updates, but also does not guarantee positive definiteness \citep{NoceWrig06}. This makes it beneficial in non-convex settings, where positive definiteness guarantee is hard to maintain. Albeit at the cost of stability, it helps the algorithm capture more curvature information.
 
-\textbf{Stochastic Trust Region Methods}: L-BFGS and SR1 methods have been incorporated into a stochastic trust region framework. Specifically, 
+\textbf{Stochastic Quasi-Newton with Trust Region}: BFGS and SR1 methods can be adapted into a stochastic setting with a trust region framework. sL-BFGS-TR and sL-SR1-TR were proposed as methods following this setting. These methods compute the Hessian approximation $D_k$ at each iteration using either L-BFGS or SR1. This $D_k$ is then used in the second-order approximation of $F$ to solve the trust region subproblem. Results for sL-BFGS-TR and sL-SR1-TR show that they are efficient and are able to keep up with Adam on MNIST and CIFAR10 tasks \citep{yousefi2023deep}. Specifically, as batch size increases, these algorithms are faster than Adam on models such as LeNet, ResNet and a 3C3L (3 Convolution 3 Linear) ConvNet \citep{yousefi2023deep}. Together with an effective mini-batch sampling strategy, sL-BFGS-TR and sL-SR1-TR converge faster than Adam \citep{yousefi2023deep}. This shows that Quasi-Newton methods can be effective in deep learning, and can be used in a stochastic setting, even if contrary to popular belief.
 
 \subsection{Diagonal Hessian Estimation} \label{sec:diag_hessian}
 \textbf{AdaHessian}: As Quasi-Newton methods aim to estimate the inverse Hessian, improvements have been made to use diagonal hessian estimates as well. AdaHessian modifies the second moment from Adam to use the squared diagonal estimate of the Hessian \citep{yao2021adahessian}.
@@ -162,7 +162,7 @@ This brings down the space complexity to $O(D)$, and makes it more feasible to u
 
 Sophia first computes the diagonal estimate of the Hessian, $\bar{D}_t$, every $k$ iterations using either the Hutchinson or Gauss-Newton-Bartlett estimation methods via an estimator $E$ \citep{liu2023sophia}. 
 \begin{align}
-    \hat{D}_t &= E(\theta_t) \quad E \in \{\text{Hutchinson, Gauss-Newton-Bartlett} \} \\
+    \hat{D}_t &= E(H_t) \quad E \in \{\text{Hutchinson, Gauss-Newton-Bartlett} \} \\
     \bar{D}_t &= 
     \begin{cases}
         \beta_2 \bar{D}_{t-k} + (1 - \beta_2) \hat{D}_t & \text{if } t \mod k = 1, \\
