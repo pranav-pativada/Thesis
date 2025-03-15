@@ -86,12 +86,12 @@ citecolor   = blue
 
 % fixes a compilation errror that otherwise occurs in combination with scrbook
 % see https://tex.stackexchange.com/questions/625083/adding-horizontal-line-before-and-after-chapter-heading-in-scrbook
-% \titleformat{\section}
-%  {\normalfont\Large\bfseries}{\thesection}{1em}{}
-% \titleformat{\subsection}
-%  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
-% \titleformat{\subsubsection}
-%  {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+\titleformat{\section}
+ {\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+ {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+ {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
  
 
  
@@ -107,20 +107,20 @@ citecolor   = blue
 \begin{document}
 
 \pagenumbering{roman}
-% \input{0-titlepage}                               % define your title page
-% \input{0-declaration}                             % includes the declaration of authorship
-% \input{0-acknowledgements}                        % optional acknowledgements
-% \input{0-abstract}                                % your abstract
+\input{0-titlepage}                               % define your title page
+\input{0-declaration}                             % includes the declaration of authorship
+\input{0-acknowledgements}                        % optional acknowledgements
+\input{0-abstract}                                % your abstract
 
 % table of contents (nothing to do for you)
-% \renewcommand{\contentsname}{Table of Contents}   % would otherwise just be "Contents",
-% \cleardoublepage\tableofcontents\cleardoublepage  % which might sound less nice
+\renewcommand{\contentsname}{Table of Contents}   % would otherwise just be "Contents",
+\cleardoublepage\tableofcontents\cleardoublepage  % which might sound less nice
 \pagenumbering{arabic}
 
 % actual report content
-% \input{1-introduction}                  % introduction
-\input{2-literatureReview}                   % related work
-% \input{3-background}                    % background/framework
+\input{1-introduction}                  % introduction
+\input{2-background}                % background
+\input{3-litReview}                    % lit review
 % \input{4-thesisContent}                 % about thesis structure and compilation
 % \input{5-writingAdvice}                 % general writing advice
 % \input{6-latexAdvice}                   % latex advice
@@ -134,7 +134,7 @@ citecolor   = blue
 
 
 % literature
-\bibliographystyle{unsrt} % or plainnat or whatever
+\bibliographystyle{anuthesis} % or plainnat or whatever
 \cleardoublepage\phantomsection
 % see https://tex.stackexchange.com/questions/60556/link-to-bibliography-in-the-toc-fails
 \bibliography{bib}
