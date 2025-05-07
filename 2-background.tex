@@ -6,15 +6,67 @@ In this chapter, we provide the relevant technical background required to unders
 \section{The Optimisation Problem}
 \label{sec:optimisation_problem}
 
-In this section, we formalise the optimisation problem. In the simplest case, we minimise an objective function $f$ with respect to real-valued variables. The formulation is 
+In this section, we formalise the optimisation problem. In the most fundamental case, we consider unconstrained optimisation, where we minimise an objective function $f$ with respect to real-valued variables with no constraints. The formulation is 
 \begin{align}
     \min_{x} f(x)
 \end{align}
-where $x \in \mathbb{R}^n$ given $n \geq 1$ and $f: \mathbb{R}^n \to \mathbb{R}$.
-
+where
+\begin{itemize}
+    \item $x \in \mathbb{R}^n$ is a real-valued vector with $n \geq 1$ components,
+    \item $f: \mathbb{R}^n \to \mathbb{R}$ is a real-valued function,
+    \item $f \in C^k$ s.t. $k \geq 1$ is smooth.
+\end{itemize}
+We only have a local perspective of $f$, since it is usually expensive to evaluate. We only know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to find an optimal point $x^*$ that minimises $f$, as the solution. 
 
 \subsection{The Geometry of Optimisation}
 \label{sec:geometry_of_optimisation}
+
+
+
+Understanding the geometry of the optimisation problem is crucial for developing effective algorithms. The geometry refers to the shape and structure of the objective function's surface. In this section, we discuss critical points and their properties.
+
+\subsubsection{Critical Points}
+
+A point $x^* \in \mathbb{R}^n$ is called a \textit{critical point} of $f$ if the gradient vanishes at that point:
+\begin{align}
+    \nabla f(x^*) = 0
+\end{align}
+
+Critical points can be classified into three main categories based on the properties of the Hessian matrix $H(x^*) = \nabla^2 f(x^*)$ at that point:
+
+\begin{itemize}
+    \item \textbf{Local Minimum}: A point $x^*$ is a local minimum if $H(x^*)$ is positive definite, meaning all eigenvalues of $H(x^*)$ are positive. At a local minimum, the function value is smaller than all neighboring points within some small region.
+    
+    \item \textbf{Local Maximum}: A point $x^*$ is a local maximum if $H(x^*)$ is negative definite, meaning all eigenvalues of $H(x^*)$ are negative. At a local maximum, the function value is larger than all neighboring points within some small region.
+    
+    \item \textbf{Saddle Point}: A point $x^*$ is a saddle point if $H(x^*)$ has both positive and negative eigenvalues. At a saddle point, the function increases in some directions and decreases in others, resembling a mountain pass.
+\end{itemize}
+
+A \textit{global minimum} is a point $x^*$ such that $f(x^*) \leq f(x)$ for all $x \in \mathbb{R}^n$. Finding the global minimum is the ultimate goal in optimisation, but it is generally difficult for non-convex functions.
+
+\subsubsection{Convexity}
+
+A function $f$ is \textit{convex} if for any $x_1, x_2 \in \mathbb{R}^n$ and $\lambda \in [0, 1]$:
+\begin{align}
+    f(\lambda x_1 + (1-\lambda)x_2) \leq \lambda f(x_1) + (1-\lambda)f(x_2)
+\end{align}
+
+For twice-differentiable functions, convexity is equivalent to the Hessian matrix being positive semidefinite everywhere. Convex functions have the advantageous property that any local minimum is also a global minimum.
+
+A function $f$ is \textit{strongly convex} with parameter $\mu > 0$ if for all $x_1, x_2 \in \mathbb{R}^n$:
+\begin{align}
+    f(x_2) \geq f(x_1) + \nabla f(x_1)^T(x_2 - x_1) + \frac{\mu}{2}||x_2 - x_1||^2
+\end{align}
+
+Strongly convex functions have unique global minima and their optimisation tends to be more well-behaved.
+
+\subsubsection{The Role of Saddle Points in Deep Learning}
+
+In deep learning, the loss landscapes are typically high-dimensional and non-convex. A significant challenge in optimising deep neural networks is the prevalence of saddle points rather than local minima. Research by \citet{dauphin2014sfn} and \citet{choromanska2015loss} has shown that in high-dimensional spaces, the probability of encountering saddle points dramatically increases while the probability of getting trapped in poor local minima decreases.
+
+Specifically, as the dimensionality increases, the ratio of saddle points to local minima grows exponentially. This is because in high dimensions, for a critical point to be a local minimum, all eigenvalues of the Hessian need to be positive. The probability of this occurring decreases exponentially with the dimension.
+
+Furthermore, in many deep learning problems, local minima tend to have loss values that are relatively close to the global minimum, while saddle points often have significantly higher loss values. Therefore, effectively escaping saddle points becomes crucial for successful optimisation in deep learning.
 
 \subsection{Unconstrained vs Constrained Optimisation}
 So far, we have looked primarily at unconstrained optimisation. 
