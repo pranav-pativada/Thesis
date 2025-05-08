@@ -115,18 +115,17 @@ citecolor   = blue
 % table of contents (nothing to do for you)
 \renewcommand{\contentsname}{Table of Contents}   % would otherwise just be "Contents",
 \cleardoublepage\tableofcontents\cleardoublepage  % which might sound less nice
+\cleardoublepage\listoffigures\cleardoublepage
 \pagenumbering{arabic}
 
 % actual report content
 \input{1-introduction}                  % introduction
-\input{2-background}                % background
-\input{3-litReview}                    % lit review
-% \input{4-thesisContent}                 % about thesis structure and compilation
-% \input{5-writingAdvice}                 % general writing advice
-% \input{6-latexAdvice}                   % latex advice
-% \input{7-marking}                       % notes on marking
-% \input{8-evaluation}                    % evaluation
-% \input{9-conclusion}                    % conclusion
+\input{2-background}                    % background
+\input{3-litReview}                     % lit review
+\input{4-method}                        % method 
+\input{5-results}                       % results
+\input{6-discussion}                    % discussion
+\input{7-conclusion}                    % conclusion
 
 % \appendix
 % \input{z-appendix-1}                    % appendix 1
