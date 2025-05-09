@@ -19,3 +19,6 @@ mainfile.synctex.gz
 # Any additional temporary files
 *.fls
 *.fdb_latexmk
+
+# Context
+context/

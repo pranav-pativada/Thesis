@@ -35,9 +35,9 @@ However, the process of optimisation becomes increasingly difficult as the numbe
     \label{fig:high_dim_resnet}
 \end{figure}
 
-A saddle point is a minimum along some dimensions, but a maximum along others. First-order methods slow down in saddle points since they perceive it as a flat region and do not have information about the curvature of the surrounding landscape. This hinders their convergence to a good solution. 
+A saddle point is where among some dimensions, the second-order derivative of the objective is negative, but along others, it is positive. First-order methods slow down in saddle points since they perceive it as a flat region and do not have information about the curvature of the surrounding landscape. This hinders their convergence to a good solution. 
 
-Higher-order methods, by incorporating this curvature information, can identify the nature of saddle points and navigate away from them more effectively. Despite this, it becomes computationally infeasible to process higher-order information. This is because to obtain higher-order information, we would require at least $O(N^2)$ space for $N$ parameters. The computational cost of obtaining higher-order information becomes prohibitive as $N$ increases, which is the case given our deep learning setting. As a practical example, a ResNet-50 model has $N = 25 \times 10^6$ parameters. If we consider each parameter to be represented by 16-bits, we would require $1.25 \times 10^{15}$ bytes, or $1.25$ terabytes of memory to store the second-order information.
+Higher-order methods, by incorporating this curvature information, can identify the nature of saddle points and navigate away from them more effectively. Despite this, it becomes computationally infeasible to process higher-order information. This is because to obtain higher-order information, we would require at least $O(N^2)$ space for $N$ parameters. The computational cost of obtaining higher-order information becomes prohibitive as $N$ increases, which is the case given our deep learning setting. As a practical example, a ResNet-50 model has $N = 25 \times 10^6$ parameters. If we consider each parameter to be represented by 16-bits, we would require $1.25 \times 10^{15}$ bytes, or $1.25$ terabytes of memory to store the second-order information. This is in stark contrast to the $25$ million bytes, or $25$ megabytes, required for first-order information.
 
 \section{KryBall: the best of both worlds}
 \label{sec:kryball_intro}
@@ -72,7 +72,7 @@ Our work focuses on the design and implementation of a novel optimisation algori
     \item \textbf{Extensive Empirical Evaluation:} Experimental validation of KryBall across a range of tasks, such as function optimisation, image classification, and image reconstruction. 
     (\color{red}{can also add the interpretability work here if needs to be more diverse.}\color{black}).
     \item \textbf{A Flexible Experimental Suite:} The development of a modular and configurable software framework for optimiser experiments. This provides a flexible and extensible framework for the implementation, testing, and comparative analysis of various optimisation algorithms. 
-    (\color{red}{while not research --- I do think the current framework is a good software suite for a range of tasks that I haven't seen anywhere for optimiser research. It's quite efficient and extensible. Happy to remove if it doesn't really count as a contribution.}\color{black}).
+    (\color{red}{while not research --- I do think the current framework is a good software suite for a range of tasks that I haven't seen much for optimiser research (except MLPerf). It's quite easy to use, efficient, and extensible. Happy to remove if it doesn't really count as a contribution.}\color{black}).
 \end{enumerate}
 
 \section{Thesis outline}
@@ -89,4 +89,4 @@ To present our contributions, this thesis is organised in the following manner:
     \item \cref{chap:conclusion} finishes the thesis. We summarise our contributions, discuss the implications of our work, and suggest future work.
 \end{itemize}
 
-This chapter has laid the groundwork for the thesis. We now proceed to \cref{chap:background} to establish the necessary theoretical and mathematical context.
+This chapter has laid the outline for the thesis. We now proceed to \cref{chap:background} to establish the necessary mathematical context.

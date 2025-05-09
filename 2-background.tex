@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chap:background}
 
-In this chapter, we provide the relevant technical background required to understand our work. We start by introducing the optimisation problem and the relevant concepts in \cref{sec:optimisation_problem}, continued by a discussion of optimisation in deep learning and the prevalence of saddle points. We then discuss numerical optimisation methods in the form of Krylov subspaces and trust regions.
+In this chapter, we provide the relevant technical background required to understand our work. We start by introducing the optimisation problem in \cref{sec:optimisation_problem}. This is continued by a mathematical formulation of the optimisation landscape in \cref{sec:optimisation_landscape}. We then discuss optimisation in deep learning in \cref{sec:optimisation_in_deep_learning}. We end this chapter with a discussion of computationally tractable numerical methods for curvature exploitation in \cref{sec:numerical_methods_for_tractable_curvature_exploitation}.
 
 \section{The Optimisation Problem}
 \label{sec:optimisation_problem}
@@ -16,57 +16,147 @@ where
     \item $f: \mathbb{R}^n \to \mathbb{R}$ is a real-valued function,
     \item $f \in C^k$ s.t. $k \geq 1$ is smooth.
 \end{itemize}
-We only have a local perspective of $f$, since it is usually expensive to evaluate. We only know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to find an optimal point $x^*$ that minimises $f$, as the solution. 
+We only have a local perspective of $f$, since it is usually expensive to evaluate. We only know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to find an optimal point $x^*$ that minimises $f$, as the solution. To do this, we must understand the landscape of $f$ and the scenarios that arise when traversing it.
 
-\subsection{The Geometry of Optimisation}
-\label{sec:geometry_of_optimisation}
+\section{The Optimisation Landscape}
+\label{sec:optimisation_landscape}
+In this section, we introduce fundamental concepts that describe the landscape of $f$, which are needed to develop and analyse optimisation algorithms. Here, we introduce the notion of critical points, convexity, and ill-conditioning.
 
+\subsection{Critical Points}
+\label{ssec:critical_points}
 
+When exploring the landscape of an objective function, we are particularly interested in identifying specific points of interest that characterise its features. These are called critical points.
 
-Understanding the geometry of the optimisation problem is crucial for developing effective algorithms. The geometry refers to the shape and structure of the objective function's surface. In this section, we discuss critical points and their properties.
+A point $x^*$ is a \textbf{local minimum} if $f(x^*) \leq f(x)$ for all $x$ in an immediate neighborhood around $x^*$. Conversely, a point $x^*$ is a \textbf{local maximum} if $f(x^*) \geq f(x)$ for all $x$ in its immediate neighborhood. Beyond these, a \textbf{saddle point} is a point that does not qualify as a local minimum or maximum, yet the landscape is flat at that point; typically, the function rises in some directions emanating from the saddle point and falls in others. The ultimate ambition in optimisation is often to find a \textbf{global minimum}, a point $x_{global}^*$ where $f(x_{global}^*) \leq f(x)$ for all possible $x$ in the function's domain, or similarly, a \textbf{global maximum}.
 
-\subsubsection{Critical Points}
-
-A point $x^* \in \mathbb{R}^n$ is called a \textit{critical point} of $f$ if the gradient vanishes at that point:
+For smooth and differentiable functions, calculus provides precise tools for identifying and classifying these points. A necessary condition for a point $x^*$ to be a local minimum, local maximum, or a saddle point is that the function must be locally flat at $x^*$. This means its \textit{gradient}---the vector of first-order partial derivatives, $\nabla f(x^*)$---must be zero:
 \begin{align}
     \nabla f(x^*) = 0
 \end{align}
+Any point $x^*$ that satisfies this condition is termed a \textbf{stationary point}.
 
-Critical points can be classified into three main categories based on the properties of the Hessian matrix $H(x^*) = \nabla^2 f(x^*)$ at that point:
-
+To distinguish between the types of stationary points, we examine the function's local curvature, which is captured by the \textit{Hessian matrix}, $H(x^*) = \nabla^2 f(x^*)$. The Hessian is the $n \times n$ matrix of second-order partial derivatives of $f$. The nature of the Hessian at a stationary point $x^*$ allows for classification:
 \begin{itemize}
-    \item \textbf{Local Minimum}: A point $x^*$ is a local minimum if $H(x^*)$ is positive definite, meaning all eigenvalues of $H(x^*)$ are positive. At a local minimum, the function value is smaller than all neighboring points within some small region.
-    
-    \item \textbf{Local Maximum}: A point $x^*$ is a local maximum if $H(x^*)$ is negative definite, meaning all eigenvalues of $H(x^*)$ are negative. At a local maximum, the function value is larger than all neighboring points within some small region.
-    
-    \item \textbf{Saddle Point}: A point $x^*$ is a saddle point if $H(x^*)$ has both positive and negative eigenvalues. At a saddle point, the function increases in some directions and decreases in others, resembling a mountain pass.
+    \item If $H(x^*)$ is \textit{positive definite} (all its eigenvalues are strictly positive), then $x^*$ is a local minimum. This indicates that the function curves upwards in all directions from $x^*$.
+    \item If $H(x^*)$ is \textit{negative definite} (all its eigenvalues are strictly negative), then $x^*$ is a local maximum. This indicates that the function curves downwards in all directions from $x^*$.
+    \item If $H(x^*)$ is \textit{indefinite} (it has both positive and negative eigenvalues), then $x^*$ is a saddle point. The function curves upwards along some directions and downwards along others.
 \end{itemize}
+It is important to note that if the Hessian is merely positive semidefinite (eigenvalues $\geq 0$) at a stationary point, $x^*$ might be a local minimum or a flat region; similarly, if negative semidefinite (eigenvalues $\leq 0$), it might be a local maximum or a flat region. These conditions related to the Hessian are crucial for understanding the behaviour of optimisation algorithms.
 
-A \textit{global minimum} is a point $x^*$ such that $f(x^*) \leq f(x)$ for all $x \in \mathbb{R}^n$. Finding the global minimum is the ultimate goal in optimisation, but it is generally difficult for non-convex functions.
+\subsection{Convexity and Global Optimality}
+\label{ssec:convexity}
 
-\subsubsection{Convexity}
-
-A function $f$ is \textit{convex} if for any $x_1, x_2 \in \mathbb{R}^n$ and $\lambda \in [0, 1]$:
+The property of convexity significantly simplifies the task of characterising and finding optimal solutions. A function $f: \mathbb{R}^n \to \mathbb{R}$ is termed \textit{convex} if its domain is a convex set and for any two points $x_1, x_2$ in its domain, and any scalar $\lambda \in [0, 1]$:
 \begin{align}
     f(\lambda x_1 + (1-\lambda)x_2) \leq \lambda f(x_1) + (1-\lambda)f(x_2)
+    \label{eq:convexity_definition}
 \end{align}
+Geometrically, this implies that the line segment connecting any two points on the function's graph lies on or above the graph itself. For a twice-differentiable function, convexity is equivalent to its Hessian matrix $H(x)$ being positive semidefinite for all $x$ in its domain.
 
-For twice-differentiable functions, convexity is equivalent to the Hessian matrix being positive semidefinite everywhere. Convex functions have the advantageous property that any local minimum is also a global minimum.
+Convex functions are particularly appealing in optimisation due to two key properties:
+\begin{itemize}
+    \item Any local minimum of a convex function is also a global minimum. This means that if an algorithm finds a local minimum, it has successfully found the best possible solution.
+    \item If a convex function is also differentiable, then any stationary point (where $\nabla f(x^*) = 0$) is guaranteed to be a global minimum.
+\end{itemize}
+These properties remove the concern of optimisation algorithms getting trapped in local minima that are not globally optimal, a common challenge in non-convex optimisation, which will be discussed later.
 
-A function $f$ is \textit{strongly convex} with parameter $\mu > 0$ if for all $x_1, x_2 \in \mathbb{R}^n$:
+\section{Optimisation in Deep Learning}
+\label{sec:optimisation_in_deep_learning}
+
+The optimisation principles discussed earlier are key, but applying them in deep learning brings unique challenges. Deep neural networks have vast parameter spaces and very complex, non-convex loss landscapes. This section examines these specific challenges and introduces the main classes of algorithms used to navigate them.
+
+\subsection{Challenges in High-Dimensional Landscapes}
+\label{ssec:dl_challenges}
+
+The "curse of dimensionality" is especially evident in deep learning. Models can have millions or even billions of parameters, creating very complex loss landscapes. A key result is the increase in \textit{saddle points} rather than poor local minima. Important studies by \citet{dauphin2014sfn} and \citet{choromanska2015loss} showed that for the high-dimensional, non-convex functions common in neural networks, saddle points become exponentially more frequent than local minima as dimension increases. Additionally, many local minima found in deep learning often have loss values close to the global minimum, making saddle points a greater obstacle to training.
+
+Saddle points are a major challenge for optimisation algorithms:
+\begin{itemize}
+    \item \textbf{First-order methods}, using only gradient information, can slow down greatly or get stuck near saddle points. The gradient magnitude can be very small near a saddle point, making these methods see the region as flat and progress very little. They don't have curvature information to find escape routes.
+    \item \textbf{Classical second-order methods}, like Newton's method, also face difficulties. If the Hessian at a saddle point has negative eigenvalues (showing negative curvature), the Newton step might move away from the saddle (possibly to areas of higher loss if not handled carefully) or even towards it if the gradient aligns with positive curvature directions.
+\end{itemize}
+Successfully handling these saddle points, not just avoiding bad local minima, is therefore key in deep learning optimisation.
+
+\subsection{First-Order Methods}
+\label{ssec:first_order_methods}
+
+First-order optimisation methods are widely used in deep learning because they are computationally efficient and scalable. These methods use the first derivative (gradient) of the objective function to find a minimum.
+
+\subsubsection{Gradient Descent (GD)}
+The simplest first-order algorithm is Gradient Descent (GD). It repeatedly updates parameters $\theta$ against the gradient of the objective function $f(\theta)$:
 \begin{align}
-    f(x_2) \geq f(x_1) + \nabla f(x_1)^T(x_2 - x_1) + \frac{\mu}{2}||x_2 - x_1||^2
+    \theta_{t+1} = \theta_t - \alpha \nabla f(\theta_t)
+    \label{eq:gd_update}
 \end{align}
+where $\alpha > 0$ is the \textit{learning rate}, a scalar controlling the step size. While simple, computing the full gradient $\nabla f(\theta_t)$ means evaluating the function over the entire training dataset, which is too computationally expensive for the large datasets often used in deep learning.
 
-Strongly convex functions have unique global minima and their optimisation tends to be more well-behaved.
+\subsubsection{Stochastic Gradient Descent (SGD)}
+To handle GD's computational cost, Stochastic Gradient Descent (SGD) is commonly used. Instead of the full dataset, SGD estimates the gradient using a small, random data sample called a \textit{mini-batch}. If $g_t(\theta_t)$ is this stochastic gradient estimate at iteration $t$, the update is:
+\begin{align}
+    \theta_{t+1} = \theta_t - \alpha g_t(\theta_t)
+    \label{eq:sgd_update}
+\end{align}
+This greatly reduces the cost per iteration. The randomness adds noise to the gradient estimates, which can help the optimiser escape sharp local minima. But this noise can also slow convergence because updates aren't always in the true steepest descent direction. Mini-batch SGD (often just called SGD in deep learning) is standard practice.
 
-\subsubsection{The Role of Saddle Points in Deep Learning}
+\subsubsection{Momentum}
+To speed up SGD and reduce oscillations from noisy gradients, \textit{momentum} is often used. Inspired by physics, momentum methods build up an average of past gradients and keep moving in that direction. A common update is:
+\begin{align}
+    v_{t+1} &= \beta v_t + (1-\beta) g_t(\theta_t) \label{eq:momentum_velocity} \\
+    \theta_{t+1} &= \theta_t - \alpha v_{t+1} \label{eq:momentum_update}
+\end{align}
+where $v_t$ is the momentum (or velocity) at iteration $t$, and $\beta \in [0,1)$ is the momentum coefficient. Often, $(1-\beta)$ is part of the learning rate for $g_t$, or a different formula like $v_{t+1} = \beta v_t + \alpha g_t(\theta_t)$ is used, followed by $\theta_{t+1} = \theta_t - v_{t+1}$. The main idea is that updates gain momentum in consistent gradient directions and reduce variations from different mini-batches.
 
-In deep learning, the loss landscapes are typically high-dimensional and non-convex. A significant challenge in optimising deep neural networks is the prevalence of saddle points rather than local minima. Research by \citet{dauphin2014sfn} and \citet{choromanska2015loss} has shown that in high-dimensional spaces, the probability of encountering saddle points dramatically increases while the probability of getting trapped in poor local minima decreases.
+\subsection{Second-Order Methods}
+\label{ssec:second_order_methods}
 
-Specifically, as the dimensionality increases, the ratio of saddle points to local minima grows exponentially. This is because in high dimensions, for a critical point to be a local minimum, all eigenvalues of the Hessian need to be positive. The probability of this occurring decreases exponentially with the dimension.
+Second-order optimisation methods use curvature information from the objective function, usually with the Hessian matrix. This provides a more direct route to the minimum, especially for poorly shaped landscapes.
 
-Furthermore, in many deep learning problems, local minima tend to have loss values that are relatively close to the global minimum, while saddle points often have significantly higher loss values. Therefore, effectively escaping saddle points becomes crucial for successful optimisation in deep learning.
+\subsubsection{Newton's Method}
+Newton's method forms a second-order Taylor expansion (a quadratic model) of $f$ around the current point $\theta_t$:
+\begin{align}
+    f(\theta_t + p) \approx f(\theta_t) + \nabla f(\theta_t)^T p + \frac{1}{2} p^T H(\theta_t) p
+\end{align}
+where $H(\theta_t) = \nabla^2 f(\theta_t)$ is the Hessian. The next step $p_t$ comes from minimizing this quadratic model, giving the Newton step:
+\begin{align}
+    p_t = -[H(\theta_t)]^{-1} \nabla f(\theta_t)
+    \label{eq:newton_step}
+\end{align}
+Parameters are updated: $\theta_{t+1} = \theta_t + p_t$. Newton's method can converge quickly (quadratically) near a minimum if the Hessian is positive definite. However, it has major drawbacks for deep learning:
+\begin{itemize}
+    \item \textbf{Computational Cost}: Storing the Hessian takes $O(N^2)$ memory, and inverting it takes $O(N^3)$ operations for $N$ parameters. This is not practical for typical neural networks.
+    \item \textbf{Non-Positive Definite Hessian}: If $H(\theta_t)$ is not positive definite (like near saddle points or areas of negative curvature), the Newton step might not reduce the objective value and could even increase it.
+\end{itemize}
 
-\subsection{Unconstrained vs Constrained Optimisation}
-So far, we have looked primarily at unconstrained optimisation. 
+\subsubsection{Saddle-Free Newton (SFN) Method}
+To fix Newton's method's problems with non-positive definite Hessians, especially how it handles saddle points, changes like the Saddle-Free Newton (SFN) approach exist. The main idea is to change the Hessian matrix $H_t$ so the search direction always reduces the objective and can escape saddles. This is often done by changing its eigenvalues, for instance, by taking their absolute values:
+\begin{align}
+    H_t^{SFN} = V |\Lambda| V^T
+    \label{eq:sfn_hessian}
+\end{align}
+where $H_t = V \Lambda V^T$ is the eigendecomposition of the Hessian, and $|\Lambda|$ is a diagonal matrix with the absolute values of the eigenvalues. The update is then:
+\begin{align}
+    p_t = -[H_t^{SFN}]^{-1} \nabla f(\theta_t)
+    \label{eq:sfn_step}
+\end{align}
+This helps the optimiser treat saddle points like minima from the viewpoint of the changed Hessian, making it easier to escape them. Although SFN solves the saddle point issue for Newton-like methods, it still has the high computational costs of creating, decomposing, and inverting an $N \times N$ Hessian matrix if computed directly.
+
+\section{Numerical Methods for Tractable Curvature Exploitation}
+\label{sec:numerical_methods_for_tractable_curvature_exploitation}
+
+While second-order methods like Newton's method offer the promise of rapid convergence by leveraging curvature information, their direct application in deep learning is often crippled by the prohibitive computational cost of forming, storing, and inverting the Hessian matrix. This section introduces techniques that aim to harness curvature information in a more computationally feasible manner.
+
+\subsection{Krylov Subspace Methods}
+\label{ssec:krylov_methods}
+
+Krylov subspace methods provide a powerful framework for approximating the solutions to large linear systems or eigenvalue problems without explicitly forming the matrices involved. In the context of optimisation, particularly for approximating the Newton step $p_t = -[H(\theta_t)]^{-1} \nabla f(\theta_t)$, these methods allow us to work with a much smaller, carefully chosen subspace of the full parameter space.
+
+Given an $N \times N$ matrix $A$ (in our case, often the Hessian $H$) and a vector $v$ (often the gradient $g = \nabla f(\theta_t)$ or the negative gradient), the $m$-th Krylov subspace, denoted $\mathcal{K}_m(A, v)$, is defined as the span of the vectors $\{v, Av, A^2v, \ldots, A^{m-1}v\}$:
+\begin{align}
+    \mathcal{K}_m(A, v) = \text{span}\{v, Av, A^2v, \ldots, A^{m-1}v\}
+    \label{eq:krylov_subspace_definition}
+\end{align}
+Typically, $m \ll N$. The intuition is that this subspace contains rich information about the action of $A$ on $v$. Instead of solving the full $N$-dimensional Newton system $H p = -g$, one can seek an approximate solution $p_m$ that lies within this $m$-dimensional Krylov subspace. This effectively reduces the problem to solving a much smaller system.
+
+The key to the computational efficiency of Krylov subspace methods is that the basis vectors $v, Av, \ldots, A^{m-1}v$ can be generated iteratively through repeated \textit{matrix-vector products} (in our context, Hessian-vector products, or HvPs, of the form $Hw$ for some vector $w$). Crucially, these HvPs can often be computed efficiently without explicitly forming the full Hessian matrix $H$. Techniques such as automatic differentiation (as used in backpropagation) can be extended to calculate HvPs at a cost that is only a small constant factor more than computing the gradient itself.
+
+By restricting the search for a direction to a low-dimensional Krylov subspace, these methods can capture dominant curvature information and produce effective Newton-like steps or approximations thereof, while avoiding the $O(N^2)$ storage and $O(N^3)$ computation associated with the explicit Hessian. Algorithms like the Conjugate Gradient (CG) method, a prominent Krylov subspace method, iteratively build up such a subspace to solve linear systems like the Newton equations.
