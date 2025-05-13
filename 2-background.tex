@@ -39,7 +39,8 @@ When exploring the landscape of an objective function, we are interested in iden
     \begin{subfigure}[b]{0.48\linewidth}
         \centering
         \includegraphics[width=\linewidth]{figures/2background/glob_min.png}
-        \caption{A global minimum on $f(x,y) = x^2 + y^2$.}
+        \caption{A global minimum on \\
+        $f(x,y) = (x-\sin(y))^2 + (y-\sin(x))^2$.}
         \label{fig:global_min}
     \end{subfigure}
     \hfill
@@ -50,7 +51,7 @@ When exploring the landscape of an objective function, we are interested in iden
         $f(x,y) = \cos(x^2 + y^2) e^{-0.1 (x^2 + y^2)}$.}
         \label{fig:global_max}
     \end{subfigure}
-    \caption{Examples of global minimum and maximum marked in red.}
+    \caption{Examples of a global minimum and global maximum marked in red.}
     \label{fig:global_min_max}
 \end{figure}
 
@@ -69,7 +70,7 @@ Finding such global optima is challenging, as we only have a limited set of info
         \centering
         \includegraphics[width=\linewidth]{figures/2background/local_min.png}
         \caption{A local minimum on the egg crate function. \\
-        $f(x,y) = (x^2 + y^2) + 5 * (\sin(x)^2 + \sin(y)^2)$.
+        $f(x,y) = (x^2 + y^2) + 5 (\sin(x)^2 + \sin(y)^2)$.
         }
         \label{fig:local_min}
     \end{subfigure}
@@ -82,7 +83,7 @@ Finding such global optima is challenging, as we only have a limited set of info
          4 e^{-(x+1)^2 - (y+1)^2}$.}
         \label{fig:local_max}
     \end{subfigure}
-    \caption{Examples of local minimum and maximum marked in blue. The global minimum and maximum are marked in red for comparison.}
+    \caption{Examples of a local minimum and local maximum marked in blue. The global minimum and global maximum are marked in red for comparison.}
     \label{fig:local_min_max}
 \end{figure}
 
@@ -104,68 +105,187 @@ Beyond these, we have \textit{saddle points}. These are points that are locally 
         $f(x,y) = x^3 - 3xy^2$.}
         \label{fig:monkey_saddle}
     \end{subfigure}
-    \caption{Examples of functions containing saddle points marked in orange.}
+    \caption{Examples of two functions containing saddle points marked in orange.}
     \label{fig:saddle_point}
 \end{figure}
 
 \subsection{Recognising Critical Points}
 \label{ssec:recognising_critical_points}
 
-For smooth and differentiable functions, we can recognise critical points using the first and second order information about $f$. Here, we introduce the necessary conditions that we can use to recognise them. We restrict our attention to the class of functions where $f \in C^k$ for $k \geq 2$.
+For smooth and differentiable functions, we can recognise critical points using the first and second order information about $f$. Here, we introduce the necessary and sufficient conditions that we can use to do this. We restrict our attention to the class of functions that are twice continuously differentiable, where $f \in C^2$.
 
-A key property of any critical point $x^*$ is that $f$ is locally flat at $x^*$. This implies that its gradient---the vector of \textit{first-order} partial derivatives, $\nabla f(x^*)$---must be zero. These are called \textit{stationary points}.
+We start with a specific type of critical point, a \textit{stationary point}. A key property of any stationary point $x^*$ is that $f$ is locally flat at $x^*$. This implies that its gradient---the vector of \textit{first-order} partial derivatives, $\nabla f(x^*)$---must be zero.
 \begin{definition}[Stationary Point]
-    A point $x^*$ is a \textit{stationary point} if its gradient is zero:
+    A point $x^*$ is a \textit{stationary point} if $f$ is continuously differentiable at $x^*$ and its gradient is zero:
     \begin{align}
         \nabla f(x^*) = 0.
     \end{align}
 \end{definition}
 
-We note that all stationary points are critical points, but not all critical points are stationary points. For example, a function may have a critical point at a point where the gradient is undefined. However, as mentioned, given we restrict our attention to twice-differentiable functions, we do not need to consider this case. 
-
-All global optima, local optima and saddle points are stationary points, but not all stationary points are optima. To distinguish between them, we examine the function's \textit{local curvature} at $x^*$, which is captured by the \textit{Hessian matrix}---an $n \times n$ symmetric matrix of \textit{second-order} partial derivatives of $f$, denoted $\nabla^2 f(x)$ for a point $x$. We abbreviate the Hessian matrix for a function $f$ at a point $x$ as $H$ for convenience. The curvature information captured by $H$ can be summarised by its \textit{eigenvalues}. We denote a particular eigenvalue of $H$, and more generally any matrix, as $\lambda_i$. We use these eigenvalues of $H$ at a stationary point $x^*$ to allow for its classification.
-
-\begin{itemize}
-    \item If $H$ is \textit{positive semi-definite}, where all eigenvalues $\lambda_i \geq 0$ for all $i \in [1, n]$, then $x^*$ is a local minimum. 
-    \item If $H$ is \textit{negative semi-definite}, where all eigenvalues $\lambda_i \leq 0$ for all $i \in [1, n]$, then $x^*$ is a local maximum.
-\end{itemize}
-
-\textbf{TODO: Diagram of Hessian matrix and its eigenvalues (? - not sure if this is needed)}
-
-A special case is when $H$ is \textit{indefinite}, where eigenvalues $\lambda_i$ are not all positive or negative, and are a mixture of both. In this case, the function curves upwards in some directions and downwards in others. This is a saddle point.
-
-\begin{definition}[Saddle Point]
-    A point $x^*$ is a \textit{saddle point} if $H$ is indefinite.
+Given we are optimising $f$, we want to find a stationary point that is a local minimum. The following definition formalises the \textit{necessary first-order conditions} for a local minimum.
+\begin{definition}[Necessary First-Order Conditions]
+    If a point $x^*$ is a local minimum, and $f$ is continuously differentiable at $x^*$, then $\nabla f(x^*) = 0$ and $x^*$ is a stationary point.
 \end{definition}
 
-Now, we can classify between local minima, local maxima, and saddle points using the Hessian matrix. However, we can guarantee something stronger, and can distinguish between local minima/maxima and strict local minima/maxima.
+We note that all stationary points are critical points, but not all critical points are stationary points. For example, a function may have a critical point at a point where the gradient is undefined. A simple case is when $f(x) = \abs({x})$. This has a critical point at $x = 0$ where the gradient is undefined. However, as mentioned, given we restrict our attention to twice continuously differentiable functions, we do not need to consider these cases. 
 
-\begin{itemize}
-    \item If $H$ is \textit{positive definite}, where all eigenvalues $\lambda_i > 0$ for all $i \in [1, n]$, then $x^*$ is a strict local minimum. This signifies that the function curves upwards in all directions from $x^*$.
-    \item If $H$ is \textit{negative definite}, where all eigenvalues $\lambda_i < 0$ for all $i \in [1, n]$, then $x^*$ is a strict local maximum. This signifies that the function curves downwards in all directions from $x^*$.
-\end{itemize}
+All global optima, local optima, and saddle points are stationary points, but not all stationary points are optima. To distinguish between them, we examine the function's local curvature at $x^*$, which is captured by the \textit{Hessian matrix}---an $n \times n$ symmetric matrix of \textit{second-order} partial derivatives of $f$, denoted $\nabla^2 f(x)$ for a point $x$. We abbreviate the Hessian matrix for a function $f$ at a point $x$ as $H$ for convenience. The curvature information captured by $H$ can be summarised by its \textit{eigenvalues}. We denote the $i$-th eigenvalue of $H$, and more generally any symmetric matrix $A$, as $\lambda_i$. We use these eigenvalues to characterise two important properties, \textit{positive semidefiniteness} and \textit{negative semidefiniteness}.
 
-This is a stronger condition than positive/negative semi-definiteness, and is a sufficient condition for recognising a local minimum/maximum. If the Hessian at a stationary point is merely positive semidefinite, $x^*$ could be a local minimum or a flat region that is not a strict minimum. Similarly, if $H(x^*)$ is negative semidefinite, $x^*$ could be a local maximum or a flat region. With this we can guarantee a direction of movement from $x^*$ that will optimise $f$, without getting stuck in a flat region. 
+\begin{definition}[Positive Semidefinite Matrix]
+    An $n \times n$ symmetric matrix $A$ is \textit{positive semidefinite} if all its eigenvalues are non-negative, where $\lambda_i \geq 0$ for all $i \in [1, n]$.
+\end{definition}
+\begin{definition}[Negative Semidefinite Matrix]
+    An $n \times n$ symmetric matrix $A$ is \textit{negative semidefinite} if all its eigenvalues are non-positive, where $\lambda_i \leq 0$ for all $i \in [1, n]$.
+\end{definition}
 
-\subsection{Convexity and Global Optimality}
+These properties can now be used to formalise the \textit{necessary second-order conditions} to classify stationary points. We write the necessary second-order conditions for a local minimum as follows.
+\begin{definition}[Necessary Second-Order Conditions]
+    If a point $x^*$ is a local minimum, and $f$ is twice continuously differentiable, then:
+    \begin{itemize}
+        \item $\nabla f(x^*) = 0$
+        \item $H$ is positive semi-definite.
+    \end{itemize}
+\end{definition}
+Similarly, the above definition can be extended to a local maximum when $H$ is negative semi-definite.
+
+A special case is when $H$ is \textit{indefinite}.
+\begin{definition}[Indefinite Matrix]
+    An $n \times n$ symmetric matrix $A$ is \textit{indefinite} if it has eigenvalues that are not all positive or negative, where $\exists \lambda_i > 0 \wedge \exists \lambda_j < 0$ for some $i, j \in [1, n]$.
+\end{definition}
+Here, the function curves upwards in some directions and downwards in others. This is a saddle point.
+
+\begin{definition}[Saddle Point]
+    A stationary point $x^*$ is a \textit{saddle point} if $H$ is indefinite.
+\end{definition}
+
+Now, we can classify between local minima, local maxima, and saddle points based on whether $H$ is positive/negative semi-definite or indefinite. However, we can still fall short of distinguishing between local minima/maxima and strict local minima/maxima. For example, if $H$ is positive semidefinite, $x^*$ could be a local minimum or a flat region that is not a strict minimum. Similarly, if $H$ is negative semidefinite, $x^*$ could be a local maximum or a flat region. To distinguish between this, we consider two further properties---\textit{positive definiteness} and \textit{negative definiteness}, which are stronger conditions than positive and negative semi-definiteness.
+
+\begin{definition}[Positive Definite Matrix]
+    An $n \times n$ symmetric matrix $A$ is \textit{positive definite} if all its eigenvalues are positive, where $\lambda_i > 0$ for all $i \in [1, n]$.
+\end{definition}
+\begin{definition}[Negative Definite Matrix]
+    An $n \times n$ symmetric matrix $A$ is \textit{negative definite} if all its eigenvalues are negative, where $\lambda_i < 0$ for all $i \in [1, n]$.
+\end{definition}
+
+We can now guarantee something stricter about the nature of $x^*$, that it is a strict local minimum/maximum. This guarantees that we will optimise our objective without being trapped in a flat region. We write these as the \textit{sufficient second-order conditions} for optimisation. We formalise this for a strict local minimum as follows.
+\begin{definition}[Sufficient Second-Order Conditions]
+    If $f$ is twice continuously differentiable, and $\nabla f(x^*) = 0$, and $H$ is positive definite at $x^*$, then $x^*$ is a strict local minimum.
+\end{definition}
+Similarly, we can write the sufficient second-order conditions for a strict local maximum when $H$ is negative definite.
+
+We note that the sufficient second-order conditions are not necessary. A point $x^*$ may satisfy the necessary second-order conditions but fail to satisfy the sufficient second-order conditions. For example, the function $f(x) = x^4$ has a strict local minimum at $x^* = 0$, but $H$ vanishes here and is thus not positive definite at $x^*$. 
+
+\subsection{Convexity}
 \label{ssec:convexity}
 
-The property of convexity significantly simplifies the task of characterising and finding optimal solutions. A function $f: \mathbb{R}^n \to \mathbb{R}$ is termed \textit{convex} if its domain is a convex set and for any two points $x_1, x_2$ in its domain, and any scalar $\lambda \in [0, 1]$:
+The property of convexity simplifies the task of finding optima. A function $f$ is \textit{convex} if geometrically, the line segment connecting any two points on the function's graph lies on or above the graph itself. We provide an illustration in \cref{fig:convex_function}, and formally define this as follows.
+\begin{definition}[Convex Function]
+    A function $f: \mathbb{R}^n \to \mathbb{R}$ is \textit{convex} if its domain is a \textit{convex set}, and for any two points $x_1, x_2$ in its domain, and any scalar $t \in [0, 1]$:
+    \begin{align}
+        f(t x_1 + (1-t)x_2) \leq t f(x_1) + (1-t)f(x_2).
+    \end{align}
+    This is a special case of \textit{Jensen's inequality}. Equivalently, a function is convex if $H$ is positive semidefinite for all $x$ in the domain of $f$ given $f$ is twice continuously differentiable.
+\end{definition}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/2background/convex_function.svg.png}
+    \caption{An illustration of a convex function. The line segment created by $x_1$ and $x_2$ clearly lies above the function.}
+    \label{fig:convex_function}
+\end{figure}
+Convex functions are particularly appealing because they possess global properties that simplify the optimisation process. We call these properties the \textit{global optimality conditions} for convex functions.
+\begin{definition}[Global Optimality Conditions for Convex Functions]
+    If $f$ is convex, then: 
+    \begin{itemize}
+        \item Any local minimum $x^*$ is a global minimum of $f$.
+        \item Any stationary point $x^*$ is a global minimum of $f$ given $f$ is continuously differentiable.
+    \end{itemize}
+\end{definition}
+
+This means that if we find a stationary point of a convex function, we have found the overall best possible solution. Additionally, given that $H$ is guaranteed to be positive semidefinite, certain optimisation algorithms can guarantee convergence to a global minimum regardless of the initialisation point. 
+
+We can further strengthen this by considering the property of \textit{strict convexity}. A strictly convex function is one where the line segment connecting any two points on the function's graph lies strictly above the graph between those points. We illustrate the difference between convex and strictly convex functions in \cref{fig:diff_geometric_convexity}. Formally, we define strictly convex functions as follows.
+\begin{definition}[Strictly Convex Function]
+    A function $f: \mathbb{R}^n \to \mathbb{R}$ is \textit{strictly convex} if its domain is a convex set, and for any two distinct points $x_1, x_2$ such that $x_1 \neq x_2$ in its domain, and any scalar $t \in (0, 1)$:
+    \begin{align}
+        f(t x_1 + (1-t)x_2) < t f(x_1) + (1-t)f(x_2).
+    \end{align}
+    Equivalently, a function is strictly convex if $H$ is positive definite for all $x$ in the domain of $f$ given $f$ is twice continuously differentiable.
+\end{definition}
+
+\begin{figure}[h]
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=0.8\linewidth]{figures/2background/relu.png}
+        \caption{The Rectified Linear Unit (ReLU) function, $f(x) = \max(0, x)$, is convex, but not strictly convex since we can pick two points where the line segment is not strictly above the function.}
+        \label{fig:convex_relu}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=0.6\linewidth]{figures/2background/parabola.png}
+        \caption{The parabola function, $f(x) = x^2$, is strictly convex since for any two points, the line segment will always lie above the function.}
+        \label{fig:strict_convex_parabola}
+    \end{subfigure}
+    \caption{The geometrical difference between a convex function and a strictly convex function.}
+    \label{fig:diff_geometric_convexity}
+\end{figure}
+
+
+Strictly convex functions are a subset of convex functions. They inherit the same global optimality conditions, but with an additional \textit{uniqueness} property that makes them incredibly easy to optimise.
+\begin{definition}[Uniqueness of Global Minimum]
+    If $f$ is strictly convex, then there exists \textit{at most one} local minimum of $f$. Consequently, if it exists, then it is the global minimum of $f$.
+\end{definition}
+Thus, if we find any stationary point of a strictly convex function, we have found the global minimum. This is different from convex functions, where there could be multiple global minima. We provide an illustration of this in \cref{fig:diff_convex_functions}. This makes strictly convex functions incredibly easy to optimise, since we have a guaranteed unique solution.
+
+\begin{figure}[h]
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=0.8\linewidth]{figures/2background/convex_func.png}
+        \caption{Multiple global minima on the convex function
+        $f(x,y) = x^2$.}
+        \label{fig:convex_func}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/strict_convex.png}
+        \caption{A unique global minimum on the strictly convex function
+        $f(x,y) = x^2 + y^2$.}
+        \label{fig:strict_convex_func}
+    \end{subfigure}
+    \caption{The difference between a convex function with multiple global minima and a strictly convex function with a unique global minimum.}
+    \label{fig:diff_convex_functions}
+\end{figure}
+
+
+\subsection{Ill-Conditioning and Non-Smoothness}
+\label{ssec:ill_conditioning_nonsmooth}
+
+While the nature of critical points and the property of convexity are fundamental to understanding an optimisation problem, other characteristics of the objective function $f$ can also significantly influence the difficulty of finding a solution. We now discuss two such important aspects: ill-conditioning and non-smoothness.
+
+\subsubsection{Ill-Conditioning}
+\label{sssec:ill_conditioning}
+
+The \textit{conditioning} of an optimisation problem describes how sensitive the solution $x^*$ is to perturbations in the function $f$ or its parameters. In the context of smooth, twice-differentiable functions, ill-conditioning is primarily associated with the properties of the Hessian matrix $H(x)$ near an optimum. If the eigenvalues of $H(x^*)$ exhibit a wide range of magnitudes, the problem is termed \textit{ill-conditioned}. Geometrically, this often manifests as an objective landscape with long, narrow, and flat valleys leading towards the minimum, or conversely, extremely steep ridges.
+
+A common quantitative measure for ill-conditioning, particularly when $H(x^*)$ is positive definite, is the \textit{condition number}, $\kappa(H)$. It is defined as the ratio of the largest eigenvalue ($\lambda_{max}$) to the smallest eigenvalue ($\lambda_{min}$) of the Hessian:
 \begin{align}
-    f(\lambda x_1 + (1-\lambda)x_2) \leq \lambda f(x_1) + (1-\lambda)f(x_2)
-    \label{eq:convexity_definition}
+    \kappa(H) = \frac{\lambda_{max}}{\lambda_{min}}.
+    \label{eq:condition_number}
 \end{align}
-Geometrically, this implies that the line segment connecting any two points on the function's graph lies on or above the graph itself. For a twice-differentiable function, convexity is equivalent to its Hessian matrix $H(x)$ being positive semidefinite for all $x$ in its domain.
+A large condition number (i.e., $\kappa(H) \gg 1$) signifies a high degree of ill-conditioning. Such landscapes pose considerable challenges for many optimisation algorithms. First-order methods, such as gradient descent, tend to converge very slowly, often exhibiting a characteristic zig-zagging behaviour across the narrow valley instead of proceeding directly towards the minimum. While second-order methods can, in principle, rescale the optimisation space using Hessian information to better navigate ill-conditioned landscapes, the computational burden of accurately forming or approximating and then utilising the Hessian remains a significant hurdle, as previously discussed.
 
-Convex functions are particularly appealing in optimisation due to two key properties:
-\begin{itemize}
-    \item Any local minimum of a convex function is also a global minimum. This means that if an algorithm finds a local minimum, it has successfully found the best possible solution.
-    \item If a convex function is also differentiable, then any stationary point (where $\nabla f(x^*) = 0$) is guaranteed to be a global minimum.
-\end{itemize}
-These properties remove the concern of optimisation algorithms getting trapped in local minima that are not globally optimal, a common challenge in non-convex optimisation, which will be discussed later.
+\textbf{TODO: Diagram of ill-conditioned function}
 
-\subsection{Ill-Conditioning}
+\subsubsection{Non-Smooth Problems}
+\label{sssec:non_smooth_problems}
 
+Our discussion has largely presupposed that the objective function $f$ is smooth, typically at least twice continuously differentiable ($f \in C^2$). However, numerous practical optimisation problems, particularly in machine learning, involve \textit{non-smooth functions}. These are functions that may possess points where the gradient, the Hessian, or both, are not well-defined. Such non-smoothness can arise from discontinuities in the function itself or its derivatives. Common examples include functions incorporating absolute values (e.g., $f(x) = |x|$), objectives derived from L1 regularisation which use the L1-norm, or even activation functions like ReLU which have "kinks".
+
+The optimisation of non-smooth functions presents distinct challenges. Standard methods that rely on the existence and computation of gradients (like gradient descent) or Hessians (like Newton's method) may falter or perform erratically because the requisite derivative information is either unavailable or ill-behaved at the points of non-smoothness. The very notion of a unique gradient vector defining a clear direction of steepest descent breaks down.
+
+While a comprehensive exploration of non-smooth optimisation is beyond the purview of this thesis, its prevalence necessitates acknowledgement. Specialised algorithms, such as subgradient methods, bundle methods, and various smoothing techniques, have been developed to address these complexities. In certain specific instances, such as problems involving L1-norm minimisation, it is sometimes possible to reformulate the non-smooth problem into an equivalent smooth, constrained optimisation problem. Nevertheless, for general non-smooth functions, identifying and converging to a minimiser can be considerably more intricate than in the smooth setting.
 
 \section{Optimisation in Deep Learning}
 \label{sec:optimisation_in_deep_learning}
