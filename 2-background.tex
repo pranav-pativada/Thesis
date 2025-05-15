@@ -16,11 +16,11 @@ where
     \item $f: \mathbb{R}^n \to \mathbb{R}$ is a real-valued function,
     \item $f \in C^k$ s.t. $k \geq 1$ is smooth.
 \end{itemize}
-We only have a local perspective of $f$, since it is usually expensive to evaluate. We only know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to find an optimal point $x^*$ that minimises $f$, as the solution. To do this, we must understand the landscape of $f$ and the scenarios that arise when traversing it.
+We only have a local perspective of $f$, since it is usually expensive to evaluate. We know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to iteratively search for an optimal point $x^*$ that minimises $f$. To do this, we must understand the landscape of $f$ and the scenarios that arise when traversing it.
 
 \section{The Optimisation Landscape}
 \label{sec:optimisation_landscape}
-In this section, we introduce fundamental concepts that describe the landscape of $f$, which are needed to develop and analyse optimisation algorithms. Here, we introduce the notion of critical points, convexity, and ill-conditioning.
+In this section, we introduce fundamental concepts that describe the landscape of $f$, which are needed to develop and analyse optimisation algorithms. We start by introducing the notion of critical points and how to recognise them in \cref{ssec:critical_points} and \cref{ssec:recognising_critical_points}. We then discuss convexity in \cref{ssec:convexity}. This is followed by a discussion of ill-conditioning and non-smoothness in \cref{ssec:ill_conditioning_nonsmooth}.
 
 \subsection{Critical Points}
 \label{ssec:critical_points}
@@ -80,14 +80,14 @@ Finding such global optima is challenging, as we only have a limited set of info
         \includegraphics[width=\linewidth]{figures/2background/local_max.png}
         \caption{A local maximum on a multi-bump function. \\
         $f(x,y) = 3 e^{-(x-1.5)^2 - (y-1.5)^2} + \\
-         4 e^{-(x+1)^2 - (y+1)^2}$.}
+         4 e^{-(x+1)^2 - (y+1)^2} $.}
         \label{fig:local_max}
     \end{subfigure}
     \caption{Examples of a local minimum and local maximum marked in blue. The global minimum and global maximum are marked in red for comparison.}
     \label{fig:local_min_max}
 \end{figure}
 
-Beyond these, we have \textit{saddle points}. These are points that are locally flat but are neither a local minimum nor a local maximum, as seen in \cref{fig:saddle_point}. In any neighbourhood $\mathcal{N}$ around a saddle point, the function's value increases along some directions emanating from $x^*$ and decreases along others.
+Beyond these, we have \textit{saddle points}. These are points that are locally flat but are neither a local minimum nor a local maximum, as seen in \cref{fig:saddle_point}. In any neighbourhood $\mathcal{N}$ around a saddle point, the function's value increases along some directions emanating from $x^*$ and decreases along others. We formally define saddle points in \cref{ssec:recognising_critical_points}.
 
 \begin{figure}[h]
     \begin{subfigure}[b]{0.48\linewidth}
@@ -112,8 +112,9 @@ Beyond these, we have \textit{saddle points}. These are points that are locally 
 \subsection{Recognising Critical Points}
 \label{ssec:recognising_critical_points}
 
-For smooth and differentiable functions, we can recognise critical points using the first and second order information about $f$. Here, we introduce the necessary and sufficient conditions that we can use to do this. We restrict our attention to the class of functions that are twice continuously differentiable, where $f \in C^2$.
+For smooth and differentiable functions, we can recognise critical points using the first and second order information about $f$. Here, we introduce the necessary and sufficient conditions that we use to do this. We restrict our attention to the class of functions that are twice continuously differentiable, where $f \in C^2$.
 
+% Nit: Jacobian or gradient here?
 We start with a specific type of critical point, a \textit{stationary point}. A key property of any stationary point $x^*$ is that $f$ is locally flat at $x^*$. This implies that its gradient---the vector of \textit{first-order} partial derivatives, $\nabla f(x^*)$---must be zero.
 \begin{definition}[Stationary Point]
     A point $x^*$ is a \textit{stationary point} if $f$ is continuously differentiable at $x^*$ and its gradient is zero:
@@ -127,8 +128,9 @@ Given we are optimising $f$, we want to find a stationary point that is a local 
     If a point $x^*$ is a local minimum, and $f$ is continuously differentiable at $x^*$, then $\nabla f(x^*) = 0$ and $x^*$ is a stationary point.
 \end{definition}
 
-We note that all stationary points are critical points, but not all critical points are stationary points. For example, a function may have a critical point at a point where the gradient is undefined. A simple case is when $f(x) = \abs({x})$. This has a critical point at $x = 0$ where the gradient is undefined. However, as mentioned, given we restrict our attention to twice continuously differentiable functions, we do not need to consider these cases. 
+We note that all stationary points are critical points, but not all critical points are stationary points. For example, a function may have a critical point at a point where the gradient is undefined. A simple case is when $f(x) = \abs({x})$. This has a critical point at $x = 0$ where the gradient is undefined. However, given we restrict our attention to twice continuously differentiable functions, we do not need to consider these cases. 
 
+% Nit: "Any nxn symmetric matrix A" and also specify that i < n etc.
 All global optima, local optima, and saddle points are stationary points, but not all stationary points are optima. To distinguish between them, we examine the function's local curvature at $x^*$, which is captured by the \textit{Hessian matrix}---an $n \times n$ symmetric matrix of \textit{second-order} partial derivatives of $f$, denoted $\nabla^2 f(x)$ for a point $x$. We abbreviate the Hessian matrix for a function $f$ at a point $x$ as $H$ for convenience. The curvature information captured by $H$ can be summarised by its \textit{eigenvalues}. We denote the $i$-th eigenvalue of $H$, and more generally any symmetric matrix $A$, as $\lambda_i$. We use these eigenvalues to characterise two important properties, \textit{positive semidefiniteness} and \textit{negative semidefiniteness}.
 
 \begin{definition}[Positive Semidefinite Matrix]
@@ -158,6 +160,7 @@ Here, the function curves upwards in some directions and downwards in others. Th
     A stationary point $x^*$ is a \textit{saddle point} if $H$ is indefinite.
 \end{definition}
 
+% Nit: Give example of strict local maximum that's guaranteed to decrease versus a flat region that's a local maximum.
 Now, we can classify between local minima, local maxima, and saddle points based on whether $H$ is positive/negative semi-definite or indefinite. However, we can still fall short of distinguishing between local minima/maxima and strict local minima/maxima. For example, if $H$ is positive semidefinite, $x^*$ could be a local minimum or a flat region that is not a strict minimum. Similarly, if $H$ is negative semidefinite, $x^*$ could be a local maximum or a flat region. To distinguish between this, we consider two further properties---\textit{positive definiteness} and \textit{negative definiteness}, which are stronger conditions than positive and negative semi-definiteness.
 
 \begin{definition}[Positive Definite Matrix]
@@ -179,21 +182,26 @@ We note that the sufficient second-order conditions are not necessary. A point $
 \label{ssec:convexity}
 
 The property of convexity simplifies the task of finding optima. A function $f$ is \textit{convex} if geometrically, the line segment connecting any two points on the function's graph lies on or above the graph itself. We provide an illustration in \cref{fig:convex_function}, and formally define this as follows.
+
+% Nit: Define convex set here - potentially with a diagram.
 \begin{definition}[Convex Function]
-    A function $f: \mathbb{R}^n \to \mathbb{R}$ is \textit{convex} if its domain is a \textit{convex set}, and for any two points $x_1, x_2$ in its domain, and any scalar $t \in [0, 1]$:
+    A function $f$ is \textit{convex} if its domain is a \textit{convex set}, and for any two points $x_1, x_2$ in its domain, and any scalar $t \in [0, 1]$:
     \begin{align}
         f(t x_1 + (1-t)x_2) \leq t f(x_1) + (1-t)f(x_2).
     \end{align}
     This is a special case of \textit{Jensen's inequality}. Equivalently, a function is convex if $H$ is positive semidefinite for all $x$ in the domain of $f$ given $f$ is twice continuously differentiable.
 \end{definition}
 
+% Nit: Image resizing
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.7\linewidth]{figures/2background/convex_function.svg.png}
     \caption{An illustration of a convex function. The line segment created by $x_1$ and $x_2$ clearly lies above the function.}
     \label{fig:convex_function}
 \end{figure}
+
 Convex functions are particularly appealing because they possess global properties that simplify the optimisation process. We call these properties the \textit{global optimality conditions} for convex functions.
+
 \begin{definition}[Global Optimality Conditions for Convex Functions]
     If $f$ is convex, then: 
     \begin{itemize}
@@ -202,7 +210,7 @@ Convex functions are particularly appealing because they possess global properti
     \end{itemize}
 \end{definition}
 
-This means that if we find a stationary point of a convex function, we have found the overall best possible solution. Additionally, given that $H$ is guaranteed to be positive semidefinite, certain optimisation algorithms can guarantee convergence to a global minimum regardless of the initialisation point. 
+This means that if we find a stationary point of a convex function, we have found the overall best possible solution. Additionally, given that $H$ is guaranteed to be positive semidefinite for twice continuously differentiable convex functions, certain optimisation algorithms can guarantee convergence to a global minimum regardless of the initialisation point. 
 
 We can further strengthen this by considering the property of \textit{strict convexity}. A strictly convex function is one where the line segment connecting any two points on the function's graph lies strictly above the graph between those points. We illustrate the difference between convex and strictly convex functions in \cref{fig:diff_geometric_convexity}. Formally, we define strictly convex functions as follows.
 \begin{definition}[Strictly Convex Function]
@@ -213,6 +221,7 @@ We can further strengthen this by considering the property of \textit{strict con
     Equivalently, a function is strictly convex if $H$ is positive definite for all $x$ in the domain of $f$ given $f$ is twice continuously differentiable.
 \end{definition}
 
+% Nit: Make the ReLU one a bit more dark - it's hard to see the line.
 \begin{figure}[h]
     \begin{subfigure}[b]{0.48\linewidth}
         \centering
@@ -231,12 +240,11 @@ We can further strengthen this by considering the property of \textit{strict con
     \label{fig:diff_geometric_convexity}
 \end{figure}
 
-
 Strictly convex functions are a subset of convex functions. They inherit the same global optimality conditions, but with an additional \textit{uniqueness} property that makes them incredibly easy to optimise.
 \begin{definition}[Uniqueness of Global Minimum]
     If $f$ is strictly convex, then there exists \textit{at most one} local minimum of $f$. Consequently, if it exists, then it is the global minimum of $f$.
 \end{definition}
-Thus, if we find any stationary point of a strictly convex function, we have found the global minimum. This is different from convex functions, where there could be multiple global minima. We provide an illustration of this in \cref{fig:diff_convex_functions}. This makes strictly convex functions incredibly easy to optimise, since we have a guaranteed unique solution.
+Thus, if we find any stationary point of a strictly convex function, we have found the global minimum. This is different from convex functions, where there could be multiple global minima. We provide an illustration of this in \cref{fig:diff_convex_functions}. This makes strictly convex functions extremely desirable for optimisation, since we have a guaranteed unique solution.
 
 \begin{figure}[h]
     \begin{subfigure}[b]{0.48\linewidth}
@@ -259,131 +267,158 @@ Thus, if we find any stationary point of a strictly convex function, we have fou
 \end{figure}
 
 
-\subsection{Ill-Conditioning and Non-Smoothness}
+\subsection{Non-Smoothness and Ill-Conditioning}
 \label{ssec:ill_conditioning_nonsmooth}
 
-While the nature of critical points and the property of convexity are fundamental to understanding an optimisation problem, other characteristics of the objective function $f$ can also significantly influence the difficulty of finding a solution. We now discuss two such important aspects: ill-conditioning and non-smoothness.
+While convexity simplifies the process of optimisation, two other characteristics, \textit{ill-conditioning} and \textit{non-smoothness}, significantly increase the difficulty instead. We now discuss these and their influence on optimisation.
 
+% Nit:
+% - We introduce condition number based on H that is strictly convex for f, but then go on to use the Rosenbrock to demonstrate ill-conditioning with the perturbations. [FIXED]
+% - We also don't show how H influences the perturbations for this, but just show an example.
+% TODO - Reference the second-order methods which tackle this.
 \subsubsection{Ill-Conditioning}
 \label{sssec:ill_conditioning}
 
-The \textit{conditioning} of an optimisation problem describes how sensitive the solution $x^*$ is to perturbations in the function $f$ or its parameters. In the context of smooth, twice-differentiable functions, ill-conditioning is primarily associated with the properties of the Hessian matrix $H(x)$ near an optimum. If the eigenvalues of $H(x^*)$ exhibit a wide range of magnitudes, the problem is termed \textit{ill-conditioned}. Geometrically, this often manifests as an objective landscape with long, narrow, and flat valleys leading towards the minimum, or conversely, extremely steep ridges.
-
-A common quantitative measure for ill-conditioning, particularly when $H(x^*)$ is positive definite, is the \textit{condition number}, $\kappa(H)$. It is defined as the ratio of the largest eigenvalue ($\lambda_{max}$) to the smallest eigenvalue ($\lambda_{min}$) of the Hessian:
+An optimisation problem is \textit{ill-conditioned} if the objective function $f$ is highly sensitive to small changes to its parameters in the vicinity of a solution $x^*$. Geometrically, this corresponds to a landscape that is either elongated with narrow valleys, or steep ridges with large dropoffs, as illustrated in \cref{fig:ill_conditioned_functions}. To motivate the problem of ill-conditioning, we consider the deterministic Rosenbrock function
 \begin{align}
-    \kappa(H) = \frac{\lambda_{max}}{\lambda_{min}}.
-    \label{eq:condition_number}
+    f(x,y) = (1 - x)^2 + 100(y - x^2)^2.
+    \label{eq:rosenbrock_function}
 \end{align}
-A large condition number (i.e., $\kappa(H) \gg 1$) signifies a high degree of ill-conditioning. Such landscapes pose considerable challenges for many optimisation algorithms. First-order methods, such as gradient descent, tend to converge very slowly, often exhibiting a characteristic zig-zagging behaviour across the narrow valley instead of proceeding directly towards the minimum. While second-order methods can, in principle, rescale the optimisation space using Hessian information to better navigate ill-conditioned landscapes, the computational burden of accurately forming or approximating and then utilising the Hessian remains a significant hurdle, as previously discussed.
+The global minimum for this function is at $(x,y) = (1,1)$. Suppose we introduce a small perturbation $\epsilon_1 = 0.01$ to $x$ and $\epsilon_2 = 0.02$ to $y$ around the minimum. Our function evaluates to
+\begin{align}
+    f(x + \epsilon_1, y + \epsilon_2) = f(1 + 0.01, 1 + 0.02)
+    \approx 1e-4.
+\end{align}
+If we modify the perturbations to $\epsilon_1 = 0.02$ and $\epsilon_2 = -0.01$ instead, our function value now becomes
+\begin{align}
+    f(x + \epsilon_1, y + \epsilon_2) = f(1 + 0.02, 1 - 0.01)
+    \approx 0.25.
+\end{align}
 
-\textbf{TODO: Diagram of ill-conditioned function}
+\begin{figure}[h]
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/rosenbrock.png}
+        \caption{The deterministic Rosenbrock function \\ 
+        $f(x,y) = (1-x)^2 + 100(y-x^2)^2$}
+        \label{fig:rosenbrock}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/wood_func.png}
+        \caption{A simplified 2D analogue of the wood function \\
+        $f(x,y) = 100*(y - x^2)^2 + (1 - x)^2 + 90*(y^2 - x)^2 + (1 - y)^2$}
+        \label{fig:wood_function}
+    \end{subfigure}
+    \caption{The optimisation landscape of two ill-conditioned functions. The Rosenbrock function (left) shows the narrow valley towards the minimum, whereas the 2D wood function (right) shows a steep dropoff as we approach the minimum.}
+    \label{fig:ill_conditioned_functions}
+\end{figure}
+
+We see a significant change in how our function behaves, where it is now $2500$ times larger than before with only small changes applied to its input. This illustrates the problem of ill-conditioning, which makes it difficult for optimisation algorithms to converge to a solution. We describe the ill-conditioning of a problem in terms of the \textit{condition number}.
+
+% Nit: Be consistent with the notation when you previously defined the eigenvalues before.
+\begin{definition}[Condition Number]
+    For any non-singular matrix $A \in \mathbb{R}^{n \times n}$, its \textit{condition number} with respect to a given matrix norm $||\cdot||$ is defined as:
+    \begin{align}
+        \kappa(A) = ||A||\cdot||A^{-1}||,
+    \end{align}
+    In the context of optimisation, if $f$ is twice continuously differentiable at $x$ and $H$ is positive definite at $x$, then the condition number is the ratio of the largest eigenvalue $\lambda_{\max}$ to the smallest eigenvalue $\lambda_{\min}$ of $H$ at $x$. 
+    \begin{align}
+        \kappa(H) = ||H||_2||H^{-1}||_2 = \lambda_{\max}(H)\lambda_{\max}(H^{-1}) = \lambda_{\max}(H) \cdot \frac{1}{\lambda_{\min}(H)} = \frac{\lambda_{\max}(H)}{\lambda_{\min}(H)}.
+    \end{align}
+\end{definition}
+
+In the Rosenbrock example, the condition number is $2508$ at the minimum, which explains the behaviour we observed. Ill-conditioning poses significant challenges for many optimisation algorithms, especially those relying on gradient information. In these landscapes, finding solutions that are robust to perturbations is difficult. Algorithms may get stuck and make excessively small steps to counteract the ill-conditioning, which slows convergence, or they become unstable due to taking overly aggressive steps. Efficient navigation of these landscapes require algorithms to be \textit{scale-invariant}. We discuss these algorithms in more detail in \cref{sec:optimisation_in_deep_learning}.
 
 \subsubsection{Non-Smooth Problems}
 \label{sssec:non_smooth_problems}
 
-Our discussion has largely presupposed that the objective function $f$ is smooth, typically at least twice continuously differentiable ($f \in C^2$). However, numerous practical optimisation problems, particularly in machine learning, involve \textit{non-smooth functions}. These are functions that may possess points where the gradient, the Hessian, or both, are not well-defined. Such non-smoothness can arise from discontinuities in the function itself or its derivatives. Common examples include functions incorporating absolute values (e.g., $f(x) = |x|$), objectives derived from L1 regularisation which use the L1-norm, or even activation functions like ReLU which have "kinks".
+So far, we have talked about optimisation problems where the objective function $f$ is smooth and usually twice continuously differentiable. However, many optimisation problems that we encounter, particularly in machine learning, involve \textit{non-smooth functions}. These are functions that possess points at which the function or its derivatives are not well-defined. We provide an example of such functions which have points of non-differentiability in \cref{fig:non_smooth_functions}. 
 
-The optimisation of non-smooth functions presents distinct challenges. Standard methods that rely on the existence and computation of gradients (like gradient descent) or Hessians (like Newton's method) may falter or perform erratically because the requisite derivative information is either unavailable or ill-behaved at the points of non-smoothness. The very notion of a unique gradient vector defining a clear direction of steepest descent breaks down.
+\begin{figure}[h]
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/abs_func.png}
+        \caption{The function
+        $f(x, y) = |x| + |y|$ has an undefined gradient at (0,0).}
+        \label{fig:abs_function}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/floor_func.png}
+        \caption{The step function
+        $f(x,y) = \lfloor x \rfloor + \lfloor y \rfloor$ has undefined gradients at all integer points.}
+        \label{fig:step_function}
+    \end{subfigure}
+    \caption{The optimisation landscape of two non-smooth functions, with points of non-differentiability highlighted in red.}
+    \label{fig:non_smooth_functions}
+\end{figure}
 
-While a comprehensive exploration of non-smooth optimisation is beyond the purview of this thesis, its prevalence necessitates acknowledgement. Specialised algorithms, such as subgradient methods, bundle methods, and various smoothing techniques, have been developed to address these complexities. In certain specific instances, such as problems involving L1-norm minimisation, it is sometimes possible to reformulate the non-smooth problem into an equivalent smooth, constrained optimisation problem. Nevertheless, for general non-smooth functions, identifying and converging to a minimiser can be considerably more intricate than in the smooth setting.
+Non-smoothness is common in machine learning, with terms such as ReLU and L1 regularisation being used in many problem settings. At points of non-differentiability, classical optimisation concepts that we have been discussing break down. The optimisation of non-smooth functions requires alternative theoretical frameworks and algorithms. Prominent among these are subgradient methods, which extend the concept of a gradient to non-smooth convex functions by defining a set of subgradients at each point. Bundle methods are also popular, which collect information about previous function values and subgradients to form a more sophisticated model of the objective function. We provide a more detailed overview of such methods in \cref{sec:optimisation_in_deep_learning}. In specific instances, we can reformulate the non-smooth problem into a smooth approximation. For example, the ReLU function has an equivalent smooth approximation given by the Softplus function, $f(x) = \log(1 + e^x)$.
+
+% Nit: I don't think this is relevant it's just showing both activation functions.
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{figures/2background/relu_softplus.png}
+%     \caption{The ReLU function (red) and its smooth approximation, the Softplus function (blue), given by $f(x) = \log(1 + e^x)$. The ReLU function is non-differentiable at $x = 0$, but the Softplus function is differentiable everywhere.}
+%     \label{fig:relu_softplus}
+% \end{figure} 
 
 \section{Optimisation in Deep Learning}
 \label{sec:optimisation_in_deep_learning}
 
-% The optimisation principles discussed earlier are key, but applying them in deep learning brings unique challenges. Deep neural networks have vast parameter spaces and very complex, non-convex loss landscapes. This section examines these specific challenges and introduces the main classes of algorithms used to navigate them.
+% Nit: Is this actually necessary to include? I'm not sure if we'll use this notation in the thesis? [FIXED: I think this is good to have.]
+Deep learning introduces a new set of challenges to the optimisation landscape. In deep learning, we usually have a set of \textit{input data} $x \in \mathbb{R}^n$ and a \textit{target output} $y \in \mathbb{R}^m$. Our goal is to learn a mapping from $x$ to $y$. This is represented by a \textit{model}, which is a complex, highly parameterised function that is usually non-convex and can be thought of as a \textit{universal function approximator}. Through exposure to many examples in a \textit{training set}, the model makes \textit{predictions} $\hat{y}$ for inputs $x$, and is then evaluated on a \textit{test set} with new, unseen inputs. Ideally, we would like our model to make accurate predictions on the test set, as this is a good indicator of generalisation performance. We optimise the model's \textit{parameters}, $\theta$, by minimising a \textit{loss function} $L(\theta)$ that measures the model's performance. Typically, this is written as an average over the training set, such as
+\begin{align}
+    L(\theta) = \mathbb{E}_{(x, y) \sim \hat{p}_{data}} \mathcal{L}(f(x; \theta), y) = \mathbb{E}_{(x, y) \sim \hat{p}_{data}} \ell(\hat{y}, y),
+\end{align}
+where $\hat{p}_{data}$ is the empirical distribution of our training set. We limit our discussion of $\mathcal{L}$ to the \textit{supervised} learning case, where we have a fixed input $x$ and a corresponding target output $y$ and the inputs to $\mathcal{L}$ are $\hat{y}$ and $y$. It is easy to extend this development to the \textit{regularised} case, for example by including $\theta$ as an argument, or the \textit{unsupervised} case by removing $y$. 
 
-% \subsection{Challenges in High-Dimensional Landscapes}
-% \label{ssec:dl_challenges}
+In this section, we discuss the challenges of optimisation in deep learning. We start by discussing the behaviour of high-dimensional landscapes in \cref{ssec:dl_challenges}. This is followed by a discussion of first-order methods in \cref{ssec:first_order_methods} and second-order methods in \cref{ssec:second_order_methods}. 
 
-% The "curse of dimensionality" is especially evident in deep learning. Models can have millions or even billions of parameters, creating very complex loss landscapes. A key result is the increase in \textit{saddle points} rather than poor local minima. Important studies by \citet{dauphin2014sfn} and \citet{choromanska2015loss} showed that for the high-dimensional, non-convex functions common in neural networks, saddle points become exponentially more frequent than local minima as dimension increases. Additionally, many local minima found in deep learning often have loss values close to the global minimum, making saddle points a greater obstacle to training.
+\subsection{Challenges in High-Dimensional Landscapes}
+\label{ssec:dl_challenges}
 
-% Saddle points are a major challenge for optimisation algorithms:
-% \begin{itemize}
-%     \item \textbf{First-order methods}, using only gradient information, can slow down greatly or get stuck near saddle points. The gradient magnitude can be very small near a saddle point, making these methods see the region as flat and progress very little. They don't have curvature information to find escape routes.
-%     \item \textbf{Classical second-order methods}, like Newton's method, also face difficulties. If the Hessian at a saddle point has negative eigenvalues (showing negative curvature), the Newton step might move away from the saddle (possibly to areas of higher loss if not handled carefully) or even towards it if the gradient aligns with positive curvature directions.
-% \end{itemize}
-% Successfully handling these saddle points, not just avoiding bad local minima, is therefore key in deep learning optimisation.
+% TODO: Needs more rigorous citing - see 8.2 of the deep learning book and copy those references.
+% TODO: Add figure about critical points + distribution graph for some dims.
+High-dimensional landscapes are complex and difficult to navigate due to their inherent nature. The geometric intuition derived from low-dimensional spaces is often not applicable. We observe two key properties in high-dimensions.
+\begin{itemize}
+    \item \textit{Proliferation of saddle points}: Saddle points are \textit{exponentially} more likely than local minima as dimensionality $N$ increases \citep{dauphin2014sfn}.
+    \item \textit{Local minima are close to global minimum}: Local minima in high dimensions are likely to have values very close to the global minimum \citep{dauphin2014sfn, choromanska2015loss}.
+\end{itemize}
 
-% \subsection{First-Order Methods}
-% \label{ssec:first_order_methods}
+% TODO: Needs ref here for the Wigner bit.
+We can understand the first property by analysing $H$, where we now have that $H = \nabla^2 L(\theta)$ in the context of our loss function. As established in \cref{ssec:recognising_critical_points}, a local minimum requires all $H$ to be positive semidefinite, in which all eigenvalues are greater than or equal to zero. A saddle point however possesses both positive and negative eigenvalues. We note that for large random Gaussian matrices, the eigenvalue distribution follows \textit{Wigner's semicircle law}, which states that as $N$ increases, we observe the following.
+\begin{itemize}
+    \item An eigenvalue $\lambda_i$ has equal probability of $\frac{1}{2}$ to be positive or negative. 
+    \item Each eigenvalue's probability is approximately independent of others.
+\end{itemize}
 
-% First-order optimisation methods are widely used in deep learning because they are computationally efficient and scalable. These methods use the first derivative (gradient) of the objective function to find a minimum.
+% TODO: Forward ref this analysis. Need ref for the second last sentence. Also need the forward ref for the last sentence.
+Intuitively, we can consider the probability of each eigenvalue as akin to an independent fair coin toss. We see that the probability of obtaining $N$ non-negative eigenvalues diminishes exponentially with increasing $N$. The same goes for obtaining $N$ non-positive eigenvalues. Consequently, obtaining $N$ eigenvalues with mixed signs are far more probable, which explains the proliferation of saddle points. While we have derived this intuition in the case of large random Gaussian matrices, we note that this applies to deep learning tasks as well. Experimental evidence supports this intuition, with the landscapes of actual deep learning models displaying many more saddle points than local minima. We provide a more detailed analysis of the deep learning optimisation landscape in \cref{forward_ref}.
 
-% \subsubsection{Gradient Descent (GD)}
-% The simplest first-order algorithm is Gradient Descent (GD). It repeatedly updates parameters $\theta$ against the gradient of the objective function $f(\theta)$:
-% \begin{align}
-%     \theta_{t+1} = \theta_t - \alpha \nabla f(\theta_t)
-%     \label{eq:gd_update}
-% \end{align}
-% where $\alpha > 0$ is the \textit{learning rate}, a scalar controlling the step size. While simple, computing the full gradient $\nabla f(\theta_t)$ means evaluating the function over the entire training dataset, which is too computationally expensive for the large datasets often used in deep learning.
+% Nit: Deep Learning Book chapter 8 ref here.
+The second property follows as a direct consequence of the first property. Suppose we consider a local minima with a function value that is substantially higher than the global minimum. Given high dimensionality, it is very probable that there exists at least one eigenvalue that is negative which we can take to minimise the objective in some immediate neighbourhood. Such a point would then be a saddle point, offering a local escape direction. Given that local minima are so rare, we observe that they can only take a range of loss values, in which these are close to the global minimum. This suggests that the challenge in deep learning optimisation is less about getting trapped in poor local minima and more about efficiently navigating the numerous saddle points that dominate the landscape. 
 
-% \subsubsection{Stochastic Gradient Descent (SGD)}
-% To handle GD's computational cost, Stochastic Gradient Descent (SGD) is commonly used. Instead of the full dataset, SGD estimates the gradient using a small, random data sample called a \textit{mini-batch}. If $g_t(\theta_t)$ is this stochastic gradient estimate at iteration $t$, the update is:
-% \begin{align}
-%     \theta_{t+1} = \theta_t - \alpha g_t(\theta_t)
-%     \label{eq:sgd_update}
-% \end{align}
-% This greatly reduces the cost per iteration. The randomness adds noise to the gradient estimates, which can help the optimiser escape sharp local minima. But this noise can also slow convergence because updates aren't always in the true steepest descent direction. Mini-batch SGD (often just called SGD in deep learning) is standard practice.
+% TODO: Citations here
+The dominance of saddle points changes the optimisation landscape and impedes the progress of optimisation algorithms. First-order methods that rely on gradient information experience slowed convergence in these regions. Second-order methods also face problems, as in some cases they are actually attracted to saddle points, even though they have the benefit of having local curvature information. 
 
-% \subsubsection{Momentum}
-% To speed up SGD and reduce oscillations from noisy gradients, \textit{momentum} is often used. Inspired by physics, momentum methods build up an average of past gradients and keep moving in that direction. A common update is:
-% \begin{align}
-%     v_{t+1} &= \beta v_t + (1-\beta) g_t(\theta_t) \label{eq:momentum_velocity} \\
-%     \theta_{t+1} &= \theta_t - \alpha v_{t+1} \label{eq:momentum_update}
-% \end{align}
-% where $v_t$ is the momentum (or velocity) at iteration $t$, and $\beta \in [0,1)$ is the momentum coefficient. Often, $(1-\beta)$ is part of the learning rate for $g_t$, or a different formula like $v_{t+1} = \beta v_t + \alpha g_t(\theta_t)$ is used, followed by $\theta_{t+1} = \theta_t - v_{t+1}$. The main idea is that updates gain momentum in consistent gradient directions and reduce variations from different mini-batches.
+\subsection{First-Order Methods}
+\label{ssec:first_order_methods}
 
-% \subsection{Second-Order Methods}
-% \label{ssec:second_order_methods}
-
-% Second-order optimisation methods use curvature information from the objective function, usually with the Hessian matrix. This provides a more direct route to the minimum, especially for poorly shaped landscapes.
-
-% \subsubsection{Newton's Method}
-% Newton's method forms a second-order Taylor expansion (a quadratic model) of $f$ around the current point $\theta_t$:
-% \begin{align}
-%     f(\theta_t + p) \approx f(\theta_t) + \nabla f(\theta_t)^T p + \frac{1}{2} p^T H(\theta_t) p
-% \end{align}
-% where $H(\theta_t) = \nabla^2 f(\theta_t)$ is the Hessian. The next step $p_t$ comes from minimizing this quadratic model, giving the Newton step:
-% \begin{align}
-%     p_t = -[H(\theta_t)]^{-1} \nabla f(\theta_t)
-%     \label{eq:newton_step}
-% \end{align}
-% Parameters are updated: $\theta_{t+1} = \theta_t + p_t$. Newton's method can converge quickly (quadratically) near a minimum if the Hessian is positive definite. However, it has major drawbacks for deep learning:
-% \begin{itemize}
-%     \item \textbf{Computational Cost}: Storing the Hessian takes $O(N^2)$ memory, and inverting it takes $O(N^3)$ operations for $N$ parameters. This is not practical for typical neural networks.
-%     \item \textbf{Non-Positive Definite Hessian}: If $H(\theta_t)$ is not positive definite (like near saddle points or areas of negative curvature), the Newton step might not reduce the objective value and could even increase it.
-% \end{itemize}
-
-% \subsubsection{Saddle-Free Newton (SFN) Method}
-% To fix Newton's method's problems with non-positive definite Hessians, especially how it handles saddle points, changes like the Saddle-Free Newton (SFN) approach exist. The main idea is to change the Hessian matrix $H_t$ so the search direction always reduces the objective and can escape saddles. This is often done by changing its eigenvalues, for instance, by taking their absolute values:
-% \begin{align}
-%     H_t^{SFN} = V |\Lambda| V^T
-%     \label{eq:sfn_hessian}
-% \end{align}
-% where $H_t = V \Lambda V^T$ is the eigendecomposition of the Hessian, and $|\Lambda|$ is a diagonal matrix with the absolute values of the eigenvalues. The update is then:
-% \begin{align}
-%     p_t = -[H_t^{SFN}]^{-1} \nabla f(\theta_t)
-%     \label{eq:sfn_step}
-% \end{align}
-% This helps the optimiser treat saddle points like minima from the viewpoint of the changed Hessian, making it easier to escape them. Although SFN solves the saddle point issue for Newton-like methods, it still has the high computational costs of creating, decomposing, and inverting an $N \times N$ Hessian matrix if computed directly.
+\subsection{Second-Order Methods}
+\label{ssec:second_order_methods}
 
 \section{Methods for Tractable Curvature Exploitation}
 \label{sec:tractable_curvature_exploitation}
 
-% While second-order methods like Newton's method offer the promise of rapid convergence by leveraging curvature information, their direct application in deep learning is often crippled by the prohibitive computational cost of forming, storing, and inverting the Hessian matrix. This section introduces techniques that aim to harness curvature information in a more computationally feasible manner.
+\subsection{Hessian-Vector Products}
+\label{ssec:hessian_vector_products}
 
-% \subsection{Krylov Subspace Methods}
-% \label{ssec:krylov_methods}
+\subsection{Krylov Subspaces}
+\label{ssec:krylov_subspaces}
 
-% Krylov subspace methods provide a powerful framework for approximating the solutions to large linear systems or eigenvalue problems without explicitly forming the matrices involved. In the context of optimisation, particularly for approximating the Newton step $p_t = -[H(\theta_t)]^{-1} \nabla f(\theta_t)$, these methods allow us to work with a much smaller, carefully chosen subspace of the full parameter space.
-
-% Given an $N \times N$ matrix $A$ (in our case, often the Hessian $H$) and a vector $v$ (often the gradient $g = \nabla f(\theta_t)$ or the negative gradient), the $m$-th Krylov subspace, denoted $\mathcal{K}_m(A, v)$, is defined as the span of the vectors $\{v, Av, A^2v, \ldots, A^{m-1}v\}$:
-% \begin{align}
-%     \mathcal{K}_m(A, v) = \text{span}\{v, Av, A^2v, \ldots, A^{m-1}v\}
-%     \label{eq:krylov_subspace_definition}
-% \end{align}
-% Typically, $m \ll N$. The intuition is that this subspace contains rich information about the action of $A$ on $v$. Instead of solving the full $N$-dimensional Newton system $H p = -g$, one can seek an approximate solution $p_m$ that lies within this $m$-dimensional Krylov subspace. This effectively reduces the problem to solving a much smaller system.
-
-% The key to the computational efficiency of Krylov subspace methods is that the basis vectors $v, Av, \ldots, A^{m-1}v$ can be generated iteratively through repeated \textit{matrix-vector products} (in our context, Hessian-vector products, or HvPs, of the form $Hw$ for some vector $w$). Crucially, these HvPs can often be computed efficiently without explicitly forming the full Hessian matrix $H$. Techniques such as automatic differentiation (as used in backpropagation) can be extended to calculate HvPs at a cost that is only a small constant factor more than computing the gradient itself.
-
-% By restricting the search for a direction to a low-dimensional Krylov subspace, these methods can capture dominant curvature information and produce effective Newton-like steps or approximations thereof, while avoiding the $O(N^2)$ storage and $O(N^3)$ computation associated with the explicit Hessian. Algorithms like the Conjugate Gradient (CG) method, a prominent Krylov subspace method, iteratively build up such a subspace to solve linear systems like the Newton equations.
+\subsection{Trust Region Optimisation}
+\label{ssec:trust_region_optimisation}
