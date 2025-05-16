@@ -329,7 +329,7 @@ We see a significant change in how our function behaves, where it is now $2500$ 
     \end{align}
 \end{definition}
 
-In the Rosenbrock example, the condition number is $2508$ at the minimum, which explains the behaviour we observed. Ill-conditioning poses significant challenges for many optimisation algorithms, especially those relying on gradient information. In these landscapes, finding solutions that are robust to perturbations is difficult. Algorithms may get stuck and make excessively small steps to counteract the ill-conditioning, which slows convergence, or they become unstable due to taking overly aggressive steps. Efficient navigation of these landscapes require algorithms to be \textit{scale-invariant}. We discuss these algorithms in more detail in \cref{sec:optimisation_in_deep_learning}.
+In the Rosenbrock example, the condition number is $2508$ at the minimum, which explains the behaviour we observed. Ill-conditioning poses significant challenges for many optimisation algorithms, especially those relying on gradient information. In these landscapes, finding solutions that are robust to perturbations is difficult. Algorithms may get stuck and make excessively small steps to counteract the ill-conditioning, which slows convergence, or they become unstable due to taking overly aggressive steps. Efficient navigation of these landscapes require algorithms to be \textit{scale invariant}. We discuss these algorithms in more detail in \cref{sec:optimisation_in_deep_learning}.
 
 \subsubsection{Non-Smooth Problems}
 \label{sssec:non_smooth_problems}
@@ -386,11 +386,11 @@ In this section, we discuss the challenges of optimisation in deep learning. We 
 High-dimensional landscapes are complex and difficult to navigate due to their inherent nature. The geometric intuition derived from low-dimensional spaces is often not applicable. We observe two key properties in high-dimensions.
 \begin{itemize}
     \item \textit{Proliferation of saddle points}: Saddle points are \textit{exponentially} more likely than local minima as dimensionality $N$ increases \citep{dauphin2014sfn}.
-    \item \textit{Local minima are close to global minimum}: Local minima in high dimensions are likely to have values very close to the global minimum \citep{dauphin2014sfn, choromanska2015loss}.
+    \item \textit{Local minima are close to global minimum}: Local minima in high dimensions are likely to have values very close to the global minimum \citep{dauphin2014sfn,choromanska2015loss}.
 \end{itemize}
 
 % TODO: Needs ref here for the Wigner bit.
-We can understand the first property by analysing $H$, where we now have that $H = \nabla^2 L(\theta)$ in the context of our loss function. As established in \cref{ssec:recognising_critical_points}, a local minimum requires all $H$ to be positive semidefinite, in which all eigenvalues are greater than or equal to zero. A saddle point however possesses both positive and negative eigenvalues. We note that for large random Gaussian matrices, the eigenvalue distribution follows \textit{Wigner's semicircle law}, which states that as $N$ increases, we observe the following.
+We can understand the first property by analysing $H$ in the context of our loss function, where we now have that $H = \nabla^2 L(\theta)$. As established in \cref{ssec:recognising_critical_points}, a local minimum requires all $H$ to be positive semidefinite, in which all eigenvalues are greater than or equal to zero. A saddle point however possesses both positive and negative eigenvalues. We note that for large random Gaussian matrices, the eigenvalue distribution follows \textit{Wigner's semicircle law}, which states that as $N$ increases, we observe the following.
 \begin{itemize}
     \item An eigenvalue $\lambda_i$ has equal probability of $\frac{1}{2}$ to be positive or negative. 
     \item Each eigenvalue's probability is approximately independent of others.
@@ -399,14 +399,32 @@ We can understand the first property by analysing $H$, where we now have that $H
 % TODO: Forward ref this analysis. Need ref for the second last sentence. Also need the forward ref for the last sentence.
 Intuitively, we can consider the probability of each eigenvalue as akin to an independent fair coin toss. We see that the probability of obtaining $N$ non-negative eigenvalues diminishes exponentially with increasing $N$. The same goes for obtaining $N$ non-positive eigenvalues. Consequently, obtaining $N$ eigenvalues with mixed signs are far more probable, which explains the proliferation of saddle points. While we have derived this intuition in the case of large random Gaussian matrices, we note that this applies to deep learning tasks as well. Experimental evidence supports this intuition, with the landscapes of actual deep learning models displaying many more saddle points than local minima. We provide a more detailed analysis of the deep learning optimisation landscape in \cref{forward_ref}.
 
-% Nit: Deep Learning Book chapter 8 ref here.
+% TODO: Citations and Deep Learning Book chapter 8 ref here.
 The second property follows as a direct consequence of the first property. Suppose we consider a local minima with a function value that is substantially higher than the global minimum. Given high dimensionality, it is very probable that there exists at least one eigenvalue that is negative which we can take to minimise the objective in some immediate neighbourhood. Such a point would then be a saddle point, offering a local escape direction. Given that local minima are so rare, we observe that they can only take a range of loss values, in which these are close to the global minimum. This suggests that the challenge in deep learning optimisation is less about getting trapped in poor local minima and more about efficiently navigating the numerous saddle points that dominate the landscape. 
 
-% TODO: Citations here
-The dominance of saddle points changes the optimisation landscape and impedes the progress of optimisation algorithms. First-order methods that rely on gradient information experience slowed convergence in these regions. Second-order methods also face problems, as in some cases they are actually attracted to saddle points, even though they have the benefit of having local curvature information. 
+The dominance of saddle points changes the optimisation landscape and impedes the progress of optimisation algorithms. First-order methods that rely on gradient information, such as \textit{gradient descent}, experience slowed convergence in these regions. Second-order methods such as \textit{Newton's method} also face problems, as in some cases they are actually attracted to saddle points, even though they have the benefit of having local curvature information and are scale invariant. 
 
 \subsection{First-Order Methods}
 \label{ssec:first_order_methods}
+
+Most optimisation algorithms in deep learning are first-order methods. First-order optimisation involves using the \textit{gradient of the loss function}. In the deep learning setting, we define the gradient as the vector of partial derivatives of the loss function with respect to the model parameters $\theta$.
+\begin{align}
+    \nabla L(\theta) = \left(\frac{\partial L}{\partial \theta_1}, \frac{\partial L}{\partial \theta_2}, \ldots, \frac{\partial L}{\partial \theta_n}\right).
+\end{align}
+For a model with $N$ parameters, the gradient is of size $O(N)$. This makes first-order methods computationally efficient and scalable. First-order methods iteratively update the model parameters $\theta$ by moving in the direction of the \textit{negative gradient}. The general update rule for a first-order method can be expressed as:
+\begin{align}
+    \theta_{t+1} = \theta_t - \alpha_t \nabla L(\theta_t),
+\end{align}
+where $\theta_t$ represents the parameters at iteration $t$, $\nabla L(\theta_t)$ is the gradient of the loss function with respect to the parameters at that iteration, and $\alpha_t$ is a positive scalar known as the learning rate, which controls the step size.
+
+The core principle is to move the parameters in the direction opposite to the gradient, which is the direction of steepest descent for the loss function.
+
+While simple and effective in many scenarios, the reliance of first-order methods on the local gradient presents challenges in the complex landscapes typical of deep learning, as discussed in \cref{ssec:dl_challenges}.
+In regions of low curvature, such as plateaus or near saddle points where the gradient magnitude is small, these methods can experience very slow convergence as the update steps become diminutive.
+Conversely, in regions of high curvature or within narrow valleys, they might oscillate or take suboptimal paths if the learning rate is not carefully tuned.
+Despite these challenges, their relative simplicity and low per-iteration cost have made them indispensable.
+Numerous variations and enhancements, such as the use of stochastic gradients, momentum, and adaptive learning rates, have been developed to improve their performance and robustness.
+These specific algorithms, including foundational approaches like Stochastic Gradient Descent (SGD) and more advanced techniques like Adam, will be discussed in detail in \Cref{chap:lit_review}.
 
 \subsection{Second-Order Methods}
 \label{ssec:second_order_methods}
@@ -420,5 +438,5 @@ The dominance of saddle points changes the optimisation landscape and impedes th
 \subsection{Krylov Subspaces}
 \label{ssec:krylov_subspaces}
 
-\subsection{Trust Region Optimisation}
-\label{ssec:trust_region_optimisation}
+\subsection{Trust Region Methods}
+\label{ssec:trust_region_methods}
