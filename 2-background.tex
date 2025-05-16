@@ -370,11 +370,11 @@ Non-smoothness is common in machine learning, with terms such as ReLU and L1 reg
 \label{sec:optimisation_in_deep_learning}
 
 % Nit: Is this actually necessary to include? I'm not sure if we'll use this notation in the thesis? [FIXED: I think this is good to have.]
-Deep learning introduces a new set of challenges to the optimisation landscape. In deep learning, we usually have a set of \textit{input data} $x \in \mathbb{R}^n$ and a \textit{target output} $y \in \mathbb{R}^m$. Our goal is to learn a mapping from $x$ to $y$. This is represented by a \textit{model}, which is a complex, highly parameterised function that is usually non-convex and can be thought of as a \textit{universal function approximator}. Through exposure to many examples in a \textit{training set}, the model makes \textit{predictions} $\hat{y}$ for inputs $x$, and is then evaluated on a \textit{test set} with new, unseen inputs. Ideally, we would like our model to make accurate predictions on the test set, as this is a good indicator of generalisation performance. We optimise the model's \textit{parameters}, $\theta$, by minimising a \textit{loss function} $L(\theta)$ that measures the model's performance. Typically, this is written as an average over the training set, such as
+Deep learning introduces a new set of challenges to the optimisation landscape. In deep learning, we usually have a set of \textit{input data} $x \in \mathbb{R}^n$ and a \textit{target output} $y \in \mathbb{R}^m$. Our goal is to learn a mapping from $x$ to $y$. This is represented by a \textit{model}, which is a complex, highly parameterised function that is usually non-convex and can be thought of as a \textit{universal function approximator}. Through exposure to many examples in a \textit{training set}, the model makes \textit{predictions} $\hat{y}$ for inputs $x$, and is then evaluated on a \textit{test set} with new, unseen inputs. Ideally, we would like our model to make accurate predictions on the test set, as this is a good indicator of generalisation performance. We optimise the model's \textit{parameters}, $\theta \in \mathbb{R}^n$, by minimising a real-valued \textit{loss function} $L: \mathbb{R}^n \to \mathbb{R}$ that measures model's performance. Typically, this is written as an average over the training set, such as
 \begin{align}
     L(\theta) = \mathbb{E}_{(x, y) \sim \hat{p}_{data}} \mathcal{L}(f(x; \theta), y) = \mathbb{E}_{(x, y) \sim \hat{p}_{data}} \ell(\hat{y}, y),
 \end{align}
-where $\hat{p}_{data}$ is the empirical distribution of our training set. We limit our discussion of $\mathcal{L}$ to the \textit{supervised} learning case, where we have a fixed input $x$ and a corresponding target output $y$ and the inputs to $\mathcal{L}$ are $\hat{y}$ and $y$. It is easy to extend this development to the \textit{regularised} case, for example by including $\theta$ as an argument, or the \textit{unsupervised} case by removing $y$. 
+where $\hat{y} = f(x; \theta)$, $\mathcal{L}$ is the per-example loss (such as mean-squared error or cross-entropy), and $\hat{p}_{data}$ is the empirical distribution of our training set. We limit our discussion of $\mathcal{L}$ to the \textit{supervised} learning case, where we have a fixed input $x$ and a corresponding target output $y$ and the inputs to $\mathcal{L}$ are $\hat{y}$ and $y$. It is easy to extend this development to the \textit{regularised} case, for example by including $\theta$ as an argument, or the \textit{unsupervised} case by removing $y$. 
 
 In this section, we discuss the challenges of optimisation in deep learning. We start by discussing the behaviour of high-dimensional landscapes in \cref{ssec:dl_challenges}. This is followed by a discussion of first-order methods in \cref{ssec:first_order_methods} and second-order methods in \cref{ssec:second_order_methods}. 
 
@@ -383,7 +383,7 @@ In this section, we discuss the challenges of optimisation in deep learning. We 
 
 % TODO: Needs more rigorous citing - see 8.2 of the deep learning book and copy those references.
 % TODO: Add figure about critical points + distribution graph for some dims.
-High-dimensional landscapes are complex and difficult to navigate due to their inherent nature. The geometric intuition derived from low-dimensional spaces is often not applicable. We observe two key properties in high-dimensions.
+High-dimensional landscapes are complex and difficult to navigate. The geometric intuition derived from low-dimensional spaces is usually not applicable. We observe two key properties in high-dimensions.
 \begin{itemize}
     \item \textit{Proliferation of saddle points}: Saddle points are \textit{exponentially} more likely than local minima as dimensionality $N$ increases \citep{dauphin2014sfn}.
     \item \textit{Local minima are close to global minimum}: Local minima in high dimensions are likely to have values very close to the global minimum \citep{dauphin2014sfn,choromanska2015loss}.
@@ -392,25 +392,33 @@ High-dimensional landscapes are complex and difficult to navigate due to their i
 % TODO: Needs ref here for the Wigner bit.
 We can understand the first property by analysing $H$ in the context of our loss function, where we now have that $H = \nabla^2 L(\theta)$. As established in \cref{ssec:recognising_critical_points}, a local minimum requires all $H$ to be positive semidefinite, in which all eigenvalues are greater than or equal to zero. A saddle point however possesses both positive and negative eigenvalues. We note that for large random Gaussian matrices, the eigenvalue distribution follows \textit{Wigner's semicircle law}, which states that as $N$ increases, we observe the following.
 \begin{itemize}
-    \item An eigenvalue $\lambda_i$ has equal probability of $\frac{1}{2}$ to be positive or negative. 
+    \item An eigenvalue $\lambda_i$ has an equal probability of $\frac{1}{2}$ to be positive or negative. 
     \item Each eigenvalue's probability is approximately independent of others.
 \end{itemize}
 
 % TODO: Forward ref this analysis. Need ref for the second last sentence. Also need the forward ref for the last sentence.
-Intuitively, we can consider the probability of each eigenvalue as akin to an independent fair coin toss. We see that the probability of obtaining $N$ non-negative eigenvalues diminishes exponentially with increasing $N$. The same goes for obtaining $N$ non-positive eigenvalues. Consequently, obtaining $N$ eigenvalues with mixed signs are far more probable, which explains the proliferation of saddle points. While we have derived this intuition in the case of large random Gaussian matrices, we note that this applies to deep learning tasks as well. Experimental evidence supports this intuition, with the landscapes of actual deep learning models displaying many more saddle points than local minima. We provide a more detailed analysis of the deep learning optimisation landscape in \cref{forward_ref}.
+Intuitively, we can consider the probability of each eigenvalue as akin to an independent fair coin toss. The probability of obtaining $N$ non-negative eigenvalues diminishes exponentially with increasing $N$. The same goes for obtaining $N$ non-positive eigenvalues. Consequently, obtaining $N$ eigenvalues with mixed signs are far more probable, which explains the proliferation of saddle points. While we have this case for large random Gaussian matrices, we note that this applies to the deep learning setting as well. Experimental evidence shows that the landscapes of deep learning models display many more saddle points than local minima. We provide a more detailed analysis of the deep learning optimisation landscape in \cref{forward_ref}.
 
 % TODO: Citations and Deep Learning Book chapter 8 ref here.
-The second property follows as a direct consequence of the first property. Suppose we consider a local minima with a function value that is substantially higher than the global minimum. Given high dimensionality, it is very probable that there exists at least one eigenvalue that is negative which we can take to minimise the objective in some immediate neighbourhood. Such a point would then be a saddle point, offering a local escape direction. Given that local minima are so rare, we observe that they can only take a range of loss values, in which these are close to the global minimum. This suggests that the challenge in deep learning optimisation is less about getting trapped in poor local minima and more about efficiently navigating the numerous saddle points that dominate the landscape. 
+The second property follows as a direct consequence of the first. Suppose we consider a local minima with a function value that is substantially higher than the global minimum. Given high dimensionality, it is very probable that there exists at least one eigenvalue that is negative which we can take to minimise the objective in some immediate neighbourhood. Such a point would then be a saddle point, offering a local escape direction. Given that local minima are so rare, we observe that they can only take a range of loss values, in which these are close to the global minimum. This suggests that the challenge in deep learning optimisation is less about getting trapped in poor local minima and more about efficiently navigating the numerous saddle points that dominate the landscape. 
 
 The dominance of saddle points changes the optimisation landscape and impedes the progress of optimisation algorithms. First-order methods that rely on gradient information, such as \textit{gradient descent}, experience slowed convergence in these regions. Second-order methods such as \textit{Newton's method} also face problems, as in some cases they are actually attracted to saddle points, even though they have the benefit of having local curvature information and are scale invariant. 
 
 \subsection{First-Order Methods}
 \label{ssec:first_order_methods}
 
-Most optimisation algorithms in deep learning are first-order methods. First-order optimisation involves using the \textit{gradient of the loss function}. In the deep learning setting, we define the gradient as the vector of partial derivatives of the loss function with respect to the model parameters $\theta$.
+Most optimisation algorithms in deep learning are \textit{first-order methods}. First-order optimisation involves using the \textit{gradient of the loss function} to iteratively update the model parameters $\theta$ and result in strong model performance. In the deep learning setting, this is defined as the vector of partial derivatives of $L$ with respect to $\theta$:
 \begin{align}
     \nabla L(\theta) = \left(\frac{\partial L}{\partial \theta_1}, \frac{\partial L}{\partial \theta_2}, \ldots, \frac{\partial L}{\partial \theta_n}\right).
 \end{align}
+We abbreviate this as $g$ for brevity. The gradient vector points in the direction of steepest ascent of the loss function, and is thus the direction of most rapid change. We perform an optimisation step by moving in the \textit{negative gradient} direction, which is the direction of steepest descent. The general update rule is given by:
+\begin{align}
+    \theta_{t+1} = \theta_t - \alpha_t \nabla L(\theta_t),
+\end{align}
+where $\theta_t$ denotes the model parameters at iteration $t$, $\nabla L(\theta_t)$ is the gradient evaluated at that point, and $\alpha_t > 0$ is the \textit{learning rate}. The learning rate controls the step size of the optimisation 
+
+First order methods are computationally efficient and scalable 
+
 For a model with $N$ parameters, the gradient is of size $O(N)$. This makes first-order methods computationally efficient and scalable. First-order methods iteratively update the model parameters $\theta$ by moving in the direction of the \textit{negative gradient}. The general update rule for a first-order method can be expressed as:
 \begin{align}
     \theta_{t+1} = \theta_t - \alpha_t \nabla L(\theta_t),
