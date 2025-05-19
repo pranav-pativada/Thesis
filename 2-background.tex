@@ -33,8 +33,7 @@ where
     \item $f \in C^k$ s.t. $k \geq 1$ is smooth.
 
 \end{itemize}
-
-We only have a local perspective of $f$, since it is usually expensive to evaluate. We know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to iteratively search for an optimal point $x^*$ that minimises $f$. To do this, we must understand the landscape of $f$ and the scenarios that arise when traversing it.
+We only have a local perspective of $f$, since it is usually expensive to evaluate. We know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to iteratively search for an optimal point $x^*$ that minimises $f$. To do this, we must understand the landscape of $f$ and the scenarios that emerge when traversing it.
 
 
 
@@ -745,14 +744,10 @@ Non-smoothness is common in machine learning, with terms such as ReLU and L1 reg
 
 \label{sec:optimisation_in_deep_learning}
 
-
-
-% Nit: Is this actually necessary to include? I'm not sure if we'll use this notation in the thesis? [FIXED: I think this is good to have.]
-
-% Nit: Input data is R^n, and model parameters are R^n - clash?
-
-% Nit: Include the empirical risk minimisation sentence?
-
+% Nit: Is this actually necessary to include? I'm not sure if we'll use this notation in the thesis? [FIXED: I think this is necessary.]
+% Nit: Input data is R^n, and model parameters are R^n - clash? [FIXED]
+% Nit: Include minibatches or batches? 
+% TODO: Need a generic algorithm here?
 Deep learning introduces a new set of challenges to the optimisation landscape. In deep learning, we usually have a set of \textit{input data} $x \in \mathbb{R}^n$ and a \textit{target output} $y \in \mathbb{R}^m$. Our goal is to learn a mapping from $x$ to $y$. This is represented by a \textit{model}, which is a complex, highly parameterised function that is usually non-convex and can be thought of as a \textit{universal function approximator}. Through exposure to many examples in a \textit{training set}, the model makes \textit{predictions} $\hat{y}$ for inputs $x$, and is then evaluated on a \textit{test set} with new, unseen inputs. Ideally, we would like our model to make accurate predictions on the test set, as this is a good indicator of generalisation performance. We optimise the model's \textit{parameters}, $\theta \in \mathbb{R}^N$, by minimising a real-valued \textit{loss function} $L: \mathbb{R}^N \to \mathbb{R}$ that measures model's performance. Typically, this is written as an average over the training set, such as
 
 \begin{align}
@@ -848,14 +843,10 @@ Most optimisation algorithms in deep learning are \textit{first-order methods}. 
 We abbreviate this as $g$ for brevity. The gradient vector points in the direction of steepest ascent of the loss function, and is thus the direction of most rapid change. We perform an optimisation step by moving in the \textit{negative gradient} direction, which is the direction of \textit{steepest descent}. The general update rule is given by:
 
 \begin{align}
-
-    \theta_{t+1} = \theta_t - \alpha_t \nabla L(\theta_t),
-
+    \theta_{t+1} = \theta_t - \alpha_t g_t,
+    \label{equation:first_order_update}
 \end{align}
-
-\label{eq:first_order_update}
-
-where $\theta_t$ denotes the model parameters at iteration $t$, $\nabla L(\theta_t)$ is the gradient evaluated at that point. $\alpha_t > 0$ is the \textit{learning rate}. 
+where $\theta_t$ denotes the model parameters at iteration $t$, $g_t$ is the gradient evaluated at that point. $\alpha_t > 0$ is the \textit{learning rate}. 
 
 
 
@@ -869,7 +860,7 @@ However, while simple and effective in many scenarios, the reliance of first-ord
 
 % TODO: Needs ref for the last sentence.
 
-Additionally, first-order methods rely on a learning rate $\alpha$, or as expressed in \cref{eq:first_order_update}, $\alpha_t$ for an iteration $t$. We call this a \textit{hyperparameter}, as it is not directly a parameter that we want to optimise, such as the model parameters $\theta$, but influences the optimisation process. The learning rate controls the \textit{step size} of the optimisation step. A learning rate that is too small can lead to slow convergence, as we scale the gradient too little and cannot make sufficient progress when traversing the optimisation landscape. Conversely, a learning rate that is too large can cause our algorithm to overshoot or oscillate, leading to divergence. This is particularly the case for some ill-conditioned problems, such as the \textit{Rahimi and Recht function}, where the landscape becomes increasingly steep and majority of the eigenvalues $\lambda_i$ tend towards infinity as we approach the minimum. In this case, even a slight overshoot due to a mistuned $\alpha$ can result in divergence. We illustrate this in our evaluation in \textbf{TODO: EVALS SECTION}. 
+Additionally, first-order methods rely on a learning rate $\alpha$, or as expressed in \cref{equation:first_order_update}, $\alpha_t$ for an iteration $t$. We call this a \textit{hyperparameter}, as it is not directly a parameter that we want to optimise, such as the model parameters $\theta$, but influences the optimisation process. The learning rate controls the \textit{step size} of the optimisation step. A learning rate that is too small can lead to slow convergence, as we scale the gradient too little and cannot make sufficient progress when traversing the optimisation landscape. Conversely, a learning rate that is too large can cause our algorithm to overshoot or oscillate, leading to divergence. This is particularly the case for some ill-conditioned problems, such as the \textit{Rahimi and Recht function}, where the landscape becomes increasingly steep and majority of the eigenvalues $\lambda_i$ tend towards infinity as we approach the minimum. In this case, even a slight overshoot due to a mistuned $\alpha$ can result in divergence. We illustrate this in our evaluation in \textbf{TODO: EVALS SECTION}. 
 
 
 
@@ -993,7 +984,7 @@ This is known as the \textit{Newton step}. In the context of an optimisation alg
 
 \end{align}
 
-where $H_t$ is the Hessian evaluated at $\theta_t$ and $g_t$ is the gradient evaluated at $\theta_t$.
+where $H_t$ is the Hessian evaluated at $\theta_t$ and $g_t$ is as defined in \cref{equation:first_order_update}.
 
 
 
@@ -1068,8 +1059,7 @@ While it may seem like Newton's method and the quadratic model approximation are
 \label{sec:tractable_curvature_exploitation}
 
 
-
-In this section, we discuss strategies that can incorporate curvature information while being computationally tractable. We start by discussing \textit{Hessian-vector} products in \cref{ssec:hessian_vector_products}. This is followed by an introduction to \textit{Krylov subspaces} in \cref{ssec:krylov_subspaces} and then \textit{trust region methods} in \cref{ssec:trust_region_methods}.
+In this section, we discuss strategies that can incorporate curvature information while being computationally tractable. We start by discussing \textit{Hessian-vector} products in \cref{ssec:hessian_vector_products}. This is followed by an introduction to Krylov subspaces in \cref{ssec:krylov_subspaces} and then trust region methods in \cref{ssec:trust_region_methods}.
 
 
 
@@ -1078,93 +1068,141 @@ In this section, we discuss strategies that can incorporate curvature informatio
 \label{ssec:hessian_vector_products}
 
 
+We saw previously in \cref{ssec:second_order_methods} that storing the Hessian matrix $H$ or computing its inverse $H^{-1}$ is infeasible in deep learning due to computational constraints. However, many optimisation algorithms incorporate curvature information without explicitly forming the Hessian. One way to do this is through \textit{Hessian-vector} products.
 
-We saw previously in \cref{ssec:second_order_methods} that storing the Hessian matrix $H$ or computing its inverse $H^{-1}$ is infeasible in deep learning due to computational constraints. However, many optimisation algorithms incorporate curvature information without explicitly forming the Hessian. 
+\begin{definition}[Hessian-vector Product]
+    Given a loss function $L(\theta)$ with parameters $\theta \in \mathbb{R}^N$, the Hessian-vector product of $H = \nabla^2 L(\theta)$ with a vector $v \in \mathbb{R}^N$ is defined as:
+    \begin{align}
+        Hv = \nabla^2 L(\theta) \cdot v, 
+    \end{align}
+    where $Hv \in R^N$.
+\end{definition}
+We abbreviate Hessian-vector products as HVPs from here onwards. Intuitively, the HVP captures how $g$ changes when we move in a specific direction $v$. It captures the local curvature of the optimisation landscape in this direction. The key insight is that we can compute HVPs efficiently without explicitly forming $H$ by considering the directional derivative of $g$ with respect to $v$. Instead of requiring $O(N^2)$ time and space, HVPs can be computed with only two gradient evaluations. This is known as Pearlmutter's trick.
 
+\begin{definition}[Pearlmutter's Trick for Efficient HVPs] The HVP is the directional derivative of $g$ in the direction $v$,
+\begin{align}
+    Hv = \lim_{\epsilon \to 0} \frac{1}{\epsilon}[\nabla L(\theta + \epsilon v) - \nabla L(\theta)] = \nabla[\langle\nabla L(\cdot), v\rangle](\theta), 
+\end{align} 
+where $\langle \cdot, \cdot \rangle$ denotes the standard Euclidean inner product. See that this follows from the standard definition of the directional derivative for differentiable functions.
+\end{definition}
+Based on this identity, HVPs can be computed efficiently with automatic differentiation systems using only $O(N)$ computation and storage. This makes them comparable to standard gradient calculations. HVPs are valuable for deep learning optimisation as they provide access to curvature information while remaining computationally tractable. Modern deep learning frameworks implement HVPs efficiently using automatic differentiation modes such as \textit{forward-mode} and \textit{reverse-mode}. This allows for easy integration with deep learning tasks.
 
-
-% However, many optimisation algorithms that leverage curvature information do not actually require the explicit formation of the full Hessian matrix.
-
-
-
-% Instead, they only need to compute the product of the Hessian $H$ with some vector $v \in \mathbb{R}^N$, commonly denoted as $Hv$.
-
-
-
-% This Hessian-vector product $Hv$ effectively tells us how the gradient would change if we were to make an infinitesimal step in the direction $v$.
-
-
-
-% The key advantage of Hessian-vector products is that they can be computed efficiently without forming or storing the $N \times N$ Hessian matrix explicitly.
-
-
-
-% One common technique involves a finite difference approximation.
-
-
-
-% Given a small scalar $\epsilon > 0$, the product $Hv$ can be approximated as:
-
-
-
-% \begin{align}
-
-
-
-%     Hv = \nabla^2 L(\theta) v \approx \frac{\nabla L(\theta + \epsilon v) - \nabla L(\theta)}{\epsilon}.
-
-
-
-%     \label{eq:hvp_finite_diff}
-
-
-
-% \end{align}
-
-
-
-% This approximation requires two gradient evaluations (one at $\theta$ and one at $\theta + \epsilon v$).
-
-
-
-% If the gradient $\nabla L(\theta)$ is already available from a previous computation (as is often the case in optimisation iterations), then only one additional gradient evaluation is needed to compute $Hv$.
-
-
-
-% The computational cost of this operation is therefore roughly equivalent to that of computing the gradient itself, typically $O(N)$, which is significantly more tractable than the $O(N^2)$ cost of forming $H$.
-
-
-
-% Furthermore, modern automatic differentiation (AD) frameworks can often compute exact Hessian-vector products without resorting to finite difference approximations.
-
-
-
-% Techniques such as forward-over-reverse or reverse-over-forward accumulation in AD can directly evaluate $Hv$ with a computational cost comparable to a few gradient evaluations, and without the numerical precision issues that can sometimes arise with finite differences.
-
-
-
-% This ability to efficiently compute $Hv$ is a cornerstone for many scalable second-order and quasi-Newton optimisation methods.
-
-
-
-% For example, methods like Newton-CG (Conjugate Gradient) use $Hv$ products iteratively to solve the Newton system $H \delta = -g$ for the step $\delta_k$ without ever forming $H$ or $H^{-1}$.
-
-
-
-% Similarly, truncated Newton methods and some trust-region approaches rely on Hessian-vector products to probe the curvature of the loss landscape and determine effective search directions.
-
-
-
-% By enabling access to curvature information at a cost comparable to first-order methods, Hessian-vector products pave the way for algorithms that can converge faster and handle ill-conditioning more effectively than simple gradient descent, while remaining practical for large-scale deep learning problems.
-
-
-
-
+HVPs form the foundation of many iterative algorithms. We discuss these more generally in \cref{chap:lit_review}, and in the next section introduce the notion of Krylov subspaces, which leverages matrix-vector products like HVPs to allow for efficient optimisation.
 
 \subsection{Krylov Subspaces}
-
 \label{ssec:krylov_subspaces}
 
+In \cref{ssec:dl_challenges}, we discussed the challenges of the high-dimensional landscapes present in deep learning. In \cref{ssec:second_order_methods}, we followed this by discussing the problem of evaluating $H$ or $H^{-1}$. We now introduce \textit{Krylov subspaces}, which are a powerful iterative method that addresses these challenges.
 
+Consider a general linear system $Ax = b$ where $A \in R^{N \times N}$, and $x, b \in R^{N}$. In a high-dimensional system where $N \gg 1$, solving this is difficult and often intractable. An example of this is the Newton step, $\Delta \theta = H^{-1} g$, where we outlined this as a core limitation in the previous section. However, one way to approximate them is to replace the $N$-dimensional space with a much lower dimensional space $M$ where $M \ll N$. This is the essence of Krylov subspaces.
+
+\begin{definition}[Krylov Subspace]
+    Given an $N \times N$ matrix $A$ and a vector $u \in R^N$ where $u \neq 0$, we define the $M$-th \textit{Krylov matrix} $K_M \in R^{N \times M}$ as
+    \begin{align}
+        K_M(A, u) = \begin{bmatrix} u & A u & A^2 u & \cdots & A^{M-1} u \end{bmatrix}.
+        \label{eq:krylov_matrix}
+    \end{align}
+    Then, the subspace spanned by the columns of $K_M(A, u)$ is called the $M$-th \textit{Krylov subspace}, $\mathcal{K}_M(A, u)$:
+    \begin{align}
+        \mathcal{K}_M(A, u) = \text{span} \{u, A u, A^2 u, \ldots, A^{M-1} u \}.
+    \end{align}
+\end{definition}
+
+Generally, $\mathcal{K}_M$, which is the \textit{rank} of $K_M$, equals $M$, though it may be smaller. Krylov matrices and their subspaces possess the following mathematical properties.
+\begin{definition}[Properties of Krylov Matrices and Krylov Subspaces]
+    Given the $M$-th Krylov matrix $K_M(A, u)$ and the $M$-th Krylov subspace $\mathcal{K}_M(A, u)$ generated by $A \in \mathbb{R}^{N \times N}$ and $u \in \mathbb{R}^N$, if we have an $x \in \mathcal{K}_M$, then following properties hold:
+    \begin{itemize}
+        \item $x = K_M z$ for some $z \in \mathbb{R}^M$.
+        \item $x \in K_{M+1}$.
+        \item $A x \in \mathcal{K}_{M+1}$.
+        \item $\mathcal{K}_M \subseteq \mathcal{K}_{M+1}$, and so Krylov subspaces are nested.
+    \end{itemize}
+    \label{definition:krylov_properties}
+\end{definition}
+
+The appeal of generating $\mathcal{K}_M$ lies in its reliance on matrix-vector products $A v$, which can be computed efficiently. In general, the Krylov subspace can be stored with $O(M N)$ space for a Krylov dimension $M$. We can now solve our original problem $Ax = b$ by equivalently replacing $x$ with $K_M z$ as described above.
+\begin{align}
+    \min_{x \in \mathcal{K}_M} \| A x - b \| = \min_{z \in \mathbb{R}^M} \| A (K_M z) - b \| = \min_{z \in \mathbb{R}^M} \| (A K_M) z - b \|.
+    \label{equation:krylov_subspace_problem}
+\end{align}
+This is a much lower dimensional problem which we can solve efficiently.
+Note that the natural seed vector for this problem is $b$, and so we can equivalently solve this in the Krylov subspace $\mathcal{K}_M(A, b)$.
+
+While the columns of $K_M$ in \cref{eq:krylov_matrix} form a basis for $\mathcal{K}_M$, the basis is often ill-conditioned. This is especially the case as $M$ increases. This is because repeated matrix-vector products with matrix-powers $A^k$ tend to concentrate in the direction of the \textit{dominant eigenvector} of $A$.
+\begin{definition}[Dominant Eigenvector of Matrix-Powers]
+    Given a matrix $A \in \mathbb{R}^{N \times N}$, suppose we have eigenvalues $\lambda_1, \lambda_2, \lambda_3, \ldots, \lambda_N$ such that 
+    \begin{align}
+        |\lambda_1| \geq |\lambda_2| \geq |\lambda_3| \geq \cdots \geq |\lambda_N|.
+    \end{align}
+    Then, for any vector $u \in \mathbb{R}^N$, $A^k u$ is eventually a scalar multiple of the \textit{dominant eigenvector} of $A$ as $k \to \infty$. The dominant eigenvector is the vector associated with the largest magnitude eigenvalue, $\lambda_1$.
+\end{definition}
+
+As such, when $M$ is large, each basis vector $A^k u$ in our Krylov subspace $\mathcal{K}_M$ is increasingly parallel to the dominant eigenvector of $A$. The basis vectors are thus increasingly linearly dependent and the condition number of $K_M$ deteriorates. To overcome this, we instead construct the opposite of an ill-conditioned basis, an orthonormal basis for $\mathcal{K}_M$. 
+
+Consider \textit{QR factorisation}, which factorises a matrix $A$ into an orthogonal matrix $Q$ and an upper triangular matrix $R$. We can then write $K_M$ as:
+\begin{align}
+K_M = \text{QR}(K_M) = Q_M R_M = [q_1, q_2, \ldots, q_M] 
+\begin{bmatrix} 
+R_{11} & R_{12} & \cdots & R_{1M} \\ 
+0 & R_{22} & \cdots & R_{2M} \\ 
+\vdots & \vdots & \ddots & \vdots \\ 
+0 & 0 & \cdots & R_{MM}.
+\end{bmatrix}
+\end{align}
+
+The vectors $q_1, q_2, \ldots, q_M$ are the orthonormal basis for $\mathcal{K}_M$. By \cref{definition:krylov_properties}, we know that $A q_M \in \mathcal{K}_{M+1}$, and therefore,
+\begin{align}
+A q_M =c_{1M} q_1 + c_{2M} q_2 + \cdots + c_{M+1,M} q_{M+1}
+\label{equation:arnoldi_recurrence}
+\end{align}
+for some choice of the $c_{iM}$ coefficients. Using orthonormality, we have:
+\begin{align}
+q_i^T(A q_M) = c_{iM}, \quad i = 1,\ldots,M.
+\label{equation:cij_projection}
+\end{align}
+
+We can then solve for $c_{M+1,M}$ and $q_{M+1}$ as these are the only unknowns in \cref{equation:arnoldi_recurrence}, since we started by assuming that we know $q_1, \ldots, q_M$. Given they appear as a product, and we know that $q_{M+1}$ is a unit vector due to orthonormality, they must be uniquely defined by the other terms in the equation. This results in the \textit{Arnoldi iteration} algorithm, which computes $Q_M$. We outline this below in \cref{alg:arnoldi_iteration}.
+
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    \KwIn{Matrix $\mathbf{A}$, vector $\mathbf{u}$, Krylov dimension $M$}
+    \KwOut{Orthonormal basis $Q_M$ for $\mathcal{K}_M(A, u)$}
+    $\mathbf{q}_1 \leftarrow \mathbf{u} / \|\mathbf{u}\|$\; 
+    \For{$m=1, 2, \ldots, M$}{ 
+        {Find $c_{im}$ for $i = 1,\ldots,m$ using \cref{equation:cij_projection}} \label{line:arnoldi_c_find} \\
+        {Compute $\mathbf{v} = (A\mathbf{q}_m) - c_{1m} \mathbf{q}_1 - c_{2m} \mathbf{q}_2 - \cdots - c_{mm} \mathbf{q}_m$} via \cref{equation:arnoldi_recurrence} \label{line:arnoldi_v_def} \\
+        $c_{m+1,m} \leftarrow \|\mathbf{v}\|$\;
+        $\mathbf{q}_{m+1} \leftarrow \mathbf{v} / c_{m+1,m}$\;
+    } 
+    \caption{The Arnoldi Iteration}
+    \label{alg:arnoldi_iteration}
+\end{algorithm}
+
+The Arnoldi iteration iteratively constructs nested orthonormal bases for nested Krylov subspaces. Although we have focused on finding $Q_M$, the $c_{ij}$, the coefficient values $c_{ij}$ are key. For $j = 1,2,\ldots,M$ in \cref{equation:arnoldi_recurrence} we get that
+
+\begin{align}
+AQ_M &= [Aq_1 \ldots Aq_M] \nonumber \\
+&= [q_1 \ldots q_{M+1}]
+\begin{bmatrix} 
+c_{11} & c_{12} & \cdots & c_{1M} \\ 
+c_{21} & c_{22} & \cdots & c_{2M} \\ 
+       & c_{32} & \ddots & \vdots \\ 
+       &        & \ddots & c_{M,M} \\
+       &        &        & c_{M+1,M}
+\end{bmatrix} \nonumber \\
+&= Q_{M+1} C_M.
+\label{equation:arnoldi_identity}
+\end{align}
+
+This is known as the \textit{fundamental identity of Krylov subspaces}. The matrix $C_M$ is of size $M \times M+1$ and has a special structure where $c_{ij} = 0$ whenever $i > j + 1$\footnote{This is usually the definition of an upper Hessenberg matrix. However $C_M$ is not square in our case since it has an extra row. If we remove the last row, then it becomes an upper Hessenberg matrix.}.
+
+When we project $Q_M$ onto the original matrix $A$, we obtain a reduced system $Q_M^T A Q_M = H_M$ of size $M \times M$. This is crucial as this acts as an approximation to the original matrix $A$, and thus the eigenvalues of $H_M$ are approximations to the eigenvalues of $A$. If we consider the case when $A$ is the Hessian $H$, then we can use this to approximate the Hessian eigenvalue spectrum and obtain local curvature information. As the Krylov dimension $M$ becomes closer to $N$, $H_M$ becomes a better approximation of $A$. This property makes Krylov subspaces very powerful for optimisation, as we can work in this reduced subspace while still obtaining a good solution to our problem.
+
+
+Many optimisation algorithms and numerical solvers use Krylov subspaces. For example, the \textit{conjugate gradient} and \textit{GMRES} algorithms can solve linear systems using Arnoldi iterations. 
+This has been key in developing many successful deep learning optimisers. We discuss these further in \cref{chap:lit_review}.
 
 \subsection{Trust Region Methods}
+\label{ssec:trust_region_methods}
+
+% TODO: Content for Trust Region Methods
