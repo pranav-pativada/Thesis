@@ -7,59 +7,71 @@
 %% Compare to self
 % Give the impression that you understand the field thoroughly
 
-Optimisation methods for deep learning have gone through a variety of works that improve the ability to navigate through loss landscapes.
-The work in this thesis is heavily inspired by such advances. In this chapter, we explore the major academic works that have played a significant role in the field of optimisation. We provide an overview of key optimisation methods in two main parts: first-order methods and higher-order methods. We also look at other techniques in the field, namely derivative-free optimisation and meta-learning.
+The work in this thesis is heavily inspired by the advances in deep learning optimisation. In this chapter, we explore the major academic works that have played a significant role in the field of optimisation. In \cref{sec:first_order_methods}, we provide an overview of
+first-order methods and their categorisations. This is followed by a discussion of second-order methods and their categorisations in \cref{sec:second_order_methods}. We then look at other techniques in the field, namely non-smooth optimisation and meta-learning in \cref{sec:non_smooth_optimisation} and \cref{sec:meta_learning_discovery}. Following the discussion of each group of works in these respective sections, we will compare and contrast them to our own contributions at the end of the section, which are detailed in the next chapter.
 
 \section{First-Order Methods}
-In the previous chapter, we saw that the aim of an optimiser is to find $\theta^* = \arg\min_{\theta} F(\theta)$ where $F$ is our objective function to optimise and $\theta$ are the parameters of $F$. First-order methods are characterised under comptuing the first order derivative $\nabla_{\theta}F$ to use in optimisation. We refer to this as $g$, or otherwise $g_t$ if in a stochastic setting.
+\label{sec:first_order_methods}
+
+In the previous chapter, we saw that an optimisation algorithm in deep learning finds a set of model parameters $\theta^*$ that minimises the loss function $L(\theta)$ introduced in \cref{eq:loss_function}. We covered in \cref{ssec:first_order_methods} that first-order methods are characterised by computing the first order $\nabla_{\theta}L$, or $g$, to use in optimisation. We now look at the different types of first-order methods, including \textit{gradient-based} methods, \textit{momentum} methods, and \textit{adaptive} methods.
 
 \subsection{Gradient-Based Methods}
-\textbf{Gradient Descent}: One of the earliest methods deployed to solve such optimisation problems is gradient descent (GD), which iteratively updates the parameters with a scalar multiple of the negative gradient direction at each step, $\theta = \theta - \alpha g$. Here, the $\alpha$ parameter is the \textit{learning rate} which controls the step size of each iteration \citep{ruder2016overview}. GD gradually reaches the optimal value of $F$, and given appropriate $\alpha$, reaches the global optimum sub-linearly if $F$ is \textit{convex}, converging linearly if $F$ is \textit{strongly convex} \citep{NoceWrig06}. However, GD is expensive. In many machine learning tasks, $F$ is evaluated with $N$ samples, each with dimensionality $D$ - and so GD requires $O(ND)$ per iteration to evaluate. This becomes infeasible very quickly as $N$ and $D$ scale, and disallows online updates and limits model adaptability \citep{ruder2016overview}. While some parallelisation methods were proposed to combat this, the scalability issue still remains large at hand \citep{alspector1992parallel,NoceWrig06}.
+\label{ssec:gradient_based_methods}
 
-\textbf{Stochastic Gradient Descent}: To address the limitations of GD, stochastic gradient descent (SGD) was proposed. Instead of evaluating $g$ using all $N$, a random sample $n \in N$ is picked and the stochastic gradient $g_t$, which is an unbiased estimate of the real gradient, is computed to update $\theta$ \citep{robbins1951stochastic}. SGD achieves the same convergence rates as GD given $F$ satisfies the same convexity conditions \citep{johnson2013accelerating, nemirovski2009robust}. Each iteration reduces from $O(ND)$ to $O(D)$ given only one sample is used.
-This overcomes the disadvantage of GD in two ways: online updates can be performed, and convergence can be accelerated, as an optimal $\theta$ can be found using $n << N$ samples \citep{johnson2013accelerating, nemirovski2009robust}. However, the stochastic gradients used in SGD are inherently noisy and fluctuate. These fluctuations can be beneficial, as they allow SGD to jump from one place to another. This behavior is particularly useful in high-dimensional spaces, where most local minima are approximately equal to the global minimum as the number of parameters increases \citep{dauphin2014sfn, choromanska2015loss}.
+\textbf{Gradient Descent}: One of the earliest methods deployed to solve such optimisation problems is gradient descent (GD). We introduced the concept of steepest descent in \cref{ssec:first_order_methods}, where we saw the parameters being iteratively updated with a scalar multiple, the learning rate $\alpha_{t}$, of the steepest descent direction, the negative gradient $-g$ at each step given an iteration $t$. This gives $\theta_{t+1} = \theta_{t} - \alpha_{t} g_{t}$. Recall that the learning rate $\alpha$ controls the step size of each iteration \citep{ruder2016overview}. GD gradually approaches a local optimum of our loss function $L$, and given appropriate $\alpha$, reaches this sub-linearly if the loss function is \textit{convex}, converging linearly if it is \textit{strongly convex} \citep{NoceWrig06}. However, GD is expensive. In many machine learning tasks, the loss function is evaluated with $N$ samples, each with dimensionality $D$. Thus, GD requires $O(ND)$ per iteration to evaluate. This becomes infeasible very quickly as $N$ and $D$ scale, and disallows online updates and limits model adaptability \citep{ruder2016overview}. While some parallelisation methods were proposed to combat this, the scalability issue still remains \citep{alspector1992parallel,NoceWrig06}. 
 
-On the other hand, if SGD gets trapped in regions such as saddle points where it is hard to make progress, the fluctuations become less effective. These fluctuations can also lead to large variance in the gradient estimates \citep{sun2019survey}. This can make the optimization process unstable and slow convergence. Convergence is also affected by the learning rate, $\alpha$. Setting a too low $\alpha$ will slow convergence, and setting a too high $\alpha$ can hinder convergence all together, either overshooting or oscillating at the minimum. Choosing a good $\alpha$ usually requires manual tuning, which is arduous and compute heavy.
+\textbf{Stochastic Gradient Descent}: To address the limitations of GD, stochastic gradient descent (SGD) was proposed. Instead of evaluating $g$ using all $N$, a random sample $n \in N$ is picked and instead a stochastic gradient $\hat{g}$, an unbiased estimate of the real gradient, is computed to update $\theta$ \citep{robbins1951stochastic}. SGD achieves the same convergence rates as GD given $L$ satisfies the same convexity conditions \citep{johnson2013accelerating, nemirovski2009robust}. Each iteration reduces from $O(ND)$ to $O(D)$ given only one sample is used.
+This overcomes the disadvantage of GD in two ways: online updates can be performed, and convergence can be accelerated, as an optimal $\theta$ can be found using $n << N$ samples \citep{johnson2013accelerating, nemirovski2009robust}. However, the stochastic gradients used in SGD are inherently noisy and fluctuate. These fluctuations can be beneficial, as they allow SGD to jump from one place to another. This behavior is particularly useful in high-dimensional spaces, where we introduced in \cref{ssec:dl_challenges} that most local minima are approximately equal to global minima. If SGD gets trapped in regions such as saddle points where it is hard to make progress, the fluctuations can help escape them.
+
+
+On the other hand, these fluctuations can also lead to large variance in the gradient estimates \citep{sun2019survey}. This can make the optimisation process unstable and slow convergence. Convergence is also affected by the learning rate $\alpha$. Setting a too low $\alpha$ will slow convergence, and setting a too high $\alpha$ can hinder convergence all together, either overshooting or oscillating at the minimum. Choosing a good $\alpha$ usually requires manual tuning, which is arduous and compute heavy.
 
 \textbf{Mini-batch Stochastic Gradient Descent}: The compromise between SGD and GD resulted in mini-batch stochastic gradient descent (mini-batch SGD) \citep{robbins1951stochastic}. mini-batch SGD splits the $N$ samples into $m << N$ i.i.d \textit{batches} (usually ranging from 64 to 256). $\theta$ is updated each iteration by with the stochastic batch gradient based off one batch. Over time, all batches are processed. This reduces the variance in the gradients and makes convergence more stable, which helps optimisation speed, though we note that the $\alpha$ parameter is still needed. mini-batch SGD is now a mainstream technique used for optimising machine learning models. To align with the standard in the literature, we will refer to mini-batch SGD as SGD from now on.
 
-\subsection{Momentum Methods} \label{sec:momentum}
-\textbf{Momentum SGD}: Many works have been proposed to improve upon SGD, one of which is momentum (MSGD) \citep{polyak1964some}. The momentum method augments SGD with a \textit{momentum} variable $z$, a decaying average of past gradients controlled by a \textit{momentum factor} $\beta$ \citep{polyak1964some, henriques2019small}. The update is then performed using $z$. 
+Our work is different from pure gradient-based methods such as GD and SGD. In particular, our work does not only use the gradient direction, but incorporates this with second-order information. Our step direction is instead a linear combination of the gradient direction with other useful directions minimised in a trust-region framework. Our work also does not need a learning rate like these methods, as we calculate the coefficients from our trust-region framework. However, our work is similar to SGD in that we sample a mini-batch for each iteration to compute the relevant information.
+
+\subsection{Momentum Methods} 
+\label{ssec:momentum}
+
+\textbf{Momentum SGD}: Many works have been proposed to improve upon SGD, one of which is momentum (MSGD) \citep{polyak1964some}. The momentum method augments SGD with a \textit{momentum} variable $z$, a decaying average of past gradients controlled by a \textit{momentum factor} $\beta$ \citep{polyak1964some, henriques2019small}. The update is then performed using $z$ as,
 \begin{align}
     z_{t+1} &= \beta z_{t} - g_t \\
-    \theta_{t+1} &= \theta_t + \alpha z_{t+1}
+    \theta_{t+1} &= \theta_t + \alpha z_{t+1}.
 \end{align}
-This encourages progress along consistent, but small gradient directions. While this doubles the parameter space needed for updates (since we need $\alpha$ and $\beta$), MSGD yields faster convergence, remains more stable under changing $\alpha$, and is more resistant if $F$ scales poorly \citep{polyak1964some,henriques2019small}. However, this adds another parameter to tune, and the same problems as seen with $\alpha$ arise. Setting a $\beta$ too low won't result in improvements, and setting it too high can result in overshooting.
+This encourages progress along consistent, but small gradient directions. 
+MSGD can converge faster, remains more stable under changing $\alpha$, and is more resistant if our loss function is poorly scaled. However, this adds another hyperparameter to tune, and the same problems as seen with $\alpha$ arise. Setting a $\beta$ too low will not result in improvements, and setting it too high can result in overshooting.
 
-\textbf{Nesterov Accelerated SGD}: A small improvement over MSGD is Nesterov-Accelerated SGD (NAG). NAG first updates $\theta$ with $z$, and then calculates the gradient based on the updated $\theta$ \citep{nesterov1983method, sutskever2013importance}.
+\textbf{Nesterov Accelerated SGD}: A small improvement over MSGD is Nesterov-Accelerated SGD (NAG). NAG first updates $\theta$ with $z$, and then calculates the gradient based on the updated $\theta$ \citep{nesterov1983method, sutskever2013importance},
 \begin{align}
     \Tilde{\theta}_{t} &= \theta_{t} + \beta z_{t} \\
     z_{t+1} &= \beta z_t - \nabla_{\theta} F(\Tilde{\theta}_{t}) \\
-    \theta_{t+1} &= \theta_{t} + \alpha z_{t+1}
+    \theta_{t+1} &= \theta_{t} + \alpha z_{t+1}.
 \end{align}
 Updating based on the future position of $\theta$ includes more gradient information in comparison to traditional momentum, which can provide a better direction \citep{nesterov1983method, dozat2016nadam}. NAG can also result in superlinear convergence when there is no stochasticity \citep{nesterov1983method, sutskever2013importance}.
 
+Our work incorporates momentum, but it is different from pure momentum-based methods since we also incorporate second-order information. Additionally to emphasise again, we do not need a learning rate like these methods. Our work uses second-order information to complement the momentum and the gradient in a trust-region framework. As such, our work has the benefit of momentum methods, while also having faster convergence from the guarantees of second-order methods. 
+
 \subsection{Adaptive Methods}
+\label{ssec:adaptive_methods}
 
-\textbf{AdaGrad}: To tackle the problem of setting an appropriate $\alpha$, adaptive methods that adjust or scale $\alpha$ directly per parameter were proposed \cite{duchi2011adagrad}. The AdaGrad algorithm keeps a history of previous gradients and adjusts the learning rate dynamically \citep{duchi2011adagrad}. It accumulates the historical gradients via squaring, then scales the current gradient \citep{duchi2011adagrad}. Note that the $\epsilon$ term is added for numerical stability.
+\textbf{AdaGrad}: To tackle the problem of setting an appropriate $\alpha$, adaptive methods that adjust or scale $\alpha$ directly per parameter were proposed \cite{duchi2011adagrad}. The AdaGrad algorithm keeps a history of previous gradients and adjusts the learning rate dynamically \citep{duchi2011adagrad}. It accumulates the historical gradients via squaring, then scales the current gradient \citep{duchi2011adagrad},
 \begin{align}
-    V_t &= \sqrt{\sum_{i=1}^{t} g_i^2} \\
-    \theta_{t+1} &= \theta_{t} + \alpha \frac{g_t}{V_t + \epsilon}
+    V_t &= \sqrt{\sum_{i=1}^{t} g_i \odot g_i} \\
+    \theta_{t+1} &= \theta_{t} + \alpha \frac{g_t}{V_t + \epsilon},
 \end{align}
-This means only an initial $\alpha$ needs to be set, as during each update the learning rate will adapt due to scaling. Though, as $t \rightarrow \infty$, $V_{t} \rightarrow \infty$, and the learning rate is driven towards zero as the denominator in the update term becomes very large \citep{ruder2016overview,rmsprop2012,zeiler2012adadelta}.
-This makes the parameter updates ineffective. This is especially the case in non-convex settings and regions such as saddle points, as the learning rate will be very quickly driven to zero before making sufficient progress.
+where $\odot$ denotes element-wise multiplication and the division is also performed element-wise. Note that the $\epsilon$ term is added for numerical stability. The result of this is that only an initial $\alpha$ needs to be set, as during each update the learning rate will adapt due to scaling. Though, as $t \rightarrow \infty$, $V_{t} \rightarrow \infty$, and the learning rate is driven towards zero as the denominator in the update term becomes very large \citep{ruder2016overview,rmsprop2012,zeiler2012adadelta}. This makes the parameter updates ineffective. This is especially the case in non-convex settings and regions such as saddle points, as the learning rate will be very quickly driven to zero before making sufficient progress.
 
-\textbf{RMSProp and AdaDelta}: To address this, instead of accumulating all of the gradients, RMSProp takes inspiration from momentum \citep{ruder2016overview, rmsprop2012}. It uses an exponential decaying moving average to weight the past squared gradients using a decay parameter $p$ \citep{rmsprop2012, kingma2014adam}.
+\textbf{RMSProp and AdaDelta}: To address this, instead of accumulating all of the gradients, RMSProp takes inspiration from momentum \citep{ruder2016overview, rmsprop2012}. It uses an exponential decaying moving average to weight the past squared gradients using a decay parameter $p$ \citep{rmsprop2012, kingma2014adam}. The update rule is then,
 \begin{align}
-    V_t &= \sqrt{p V_{t-1} + (1 - p)g_t^2} 
+    V_t &= \sqrt{p V_{t-1} + (1 - p)g_t^2}.
 \end{align}
-This simulates having a window size $w$ - where gradients outside of this window are forgotten \citep{rmsprop2012, kingma2014adam}. It priorities more recent gradients and so the learning rate is more stable and doesn't diminish with time. AdaDelta improves upon this and also keeps track of the change in updates, $\Delta(\theta_t)$, performed \citep{zeiler2012adadelta}.
+This simulates having a window size $w$, where gradients outside of this window are forgotten \citep{rmsprop2012, kingma2014adam}. It priorities more recent gradients and so the learning rate is more stable and does not diminish with time. AdaDelta improves upon this and also keeps track of the change in updates, $\Delta(\theta_t)$, performed \citep{zeiler2012adadelta}. This results in
 \begin{align}
-    U_t = \sqrt{p U_{t-1} + (1 - p)(\Delta(\theta_t))^2}
+    U_t = \sqrt{p U_{t-1} + (1 - p)(\Delta(\theta_t))^2}.
 \end{align}
-It uses these accumulative updates at each iteration to perform the actual update which is 
+AdaDelta then uses these accumulative updates at each iteration to perform the actual update which is 
 \begin{align}
-    \theta_{t+1} = \theta_{t} - \frac{U_{t-1}}{V_{t} + \epsilon} g_t
+    \theta_{t+1} = \theta_{t} - \frac{U_{t-1}}{V_{t} + \epsilon} g_t.
 \end{align}
 The key observation here is the absence of $\alpha$. This is a step up from most SGD methods, which require the $\alpha$ parameter. The algorithm is also suitable in non-convex settings since there is no diminishing learning rate \citep{zeiler2012adadelta}. However, the absence of $\alpha$ is replaced with $p$ and $\epsilon$ which still need to be tuned, though these are much less sensitive.
 
@@ -67,90 +79,101 @@ The key observation here is the absence of $\alpha$. This is a step up from most
 \begin{align}
 m_t &= \beta_1 m_{t-1} + (1 - \beta_1) g_t \label{eq:m_t} \\
 V_t &= \sqrt{\beta_2 V_{t-1} + (1 - \beta_2) g_t^2} \\
-\hat{m_t} &= \frac{m_t}{1 - (\beta_1)^t} \\
-\hat{V_t} &= \frac{V_t}{1 - (\beta_2)^t} \\
+\hat{m_t} &= \frac{m_t}{1 - {\beta_1}^t} \\
+\hat{V_t} &= \frac{V_t}{1 - {\beta_2}^t} \\
 \theta_{t+1} &= \theta_t - \alpha \frac{\hat{m_t}}{{\hat{V_t}} + \epsilon} \label{eq:adam_update}
 \end{align}
-We call $m_t$ and $V_t$ the \textit{first} and \textit{second} moment estimates respectively, with $\beta_1$ and $\beta_2$ being the first and second moment hyper-parameters \citep{kingma2014adam}. Adam has a few key advantages. It uses momentum and exponential decay to smooth out gradients, which makes the optimisation process more stable. It also has bias correction applied to $\hat{m_t}$ and $\hat{V_t}$ to allow for proper initialisation \citep{kingma2014adam}. This ensures they are not biased towards their starting estimates. This is important during early stages of optimisation, as there is insufficient data to estimate the moments. Adam is stable and effective in practice, and works well with both convex and non-convex $F$ - and is the current SOTA optimisation method in deep learning. However, it lacks theoretical guarantees and convergence is not well understood \citep{reddi2019asmgrad}. Adam has been shown to fail in simple one dimensional convex settings \citep{reddi2019asmgrad}. It additionally needs two extra parameters, $\beta_1$ and $\beta_2$, in comparison to traditional SGD, which need to be tuned.
+We call $m_t$ and $V_t$ the \textit{first} and \textit{second} moment estimates respectively, with $\beta_1$ and $\beta_2$ being the first and second moment hyper-parameters \citep{kingma2014adam}. Adam has a few key advantages. It uses momentum and exponential decay to smooth out gradients, which makes the optimisation process more stable. It also has bias correction applied to $\hat{m_t}$ and $\hat{V_t}$ to allow for proper initialisation \citep{kingma2014adam}. This ensures they are not biased towards their starting estimates. This is important during early stages of optimisation, as there is insufficient data to estimate the moments. Adam is stable and effective in practice, and works well with both convex and non-convex loss functions. Adam is the current SOTA optimisation method in deep learning. However, it lacks theoretical guarantees and convergence is not well understood \citep{reddi2019asmgrad}. Adam has been shown to fail in simple one dimensional convex settings \citep{reddi2019asmgrad}. It additionally needs two extra parameters, $\beta_1$ and $\beta_2$, in comparison to traditional SGD, which need to be tuned.
+
+Our work is similar in concept to these adaptive methods. However, while these methods adjust the learning rates based on historical gradient information, we instead use a trust-region framework. The step sizes are determined by trust-region optimisation. We use second-order information, and do not need a learning rate, or first and second moment hyperparameters. We also have convergence guarantees. However, we note that our work functions as a hybrid with these methods as well. Our work can incorporate the first and second moments into our trust-region to find a step direction, in which we can then incorporate these adaptive learning rates with second-order information. 
 
 \subsection{Adam Variants}
-\textbf{AdaMax}: Several variants of Adam have been proposed to address it's limitations. The first variant is AdaMax. AdaMax replaces the $L_2$ norm in $V_t$ with the $L_{\infty}$ norm \citep{kingma2014adam}. Specifically, instead of maintaining the average of the squared gradients $V_t$, AdaMax keeps track of the maximum absolute value of the past gradients \citep{kingma2014adam}.
+\label{ssec:adam_variants}
+
+\textbf{AdaMax}: Several variants have been proposed to address Adam's limitations. The first variant is AdaMax. AdaMax replaces the $L_2$ norm in $V_t$ with the $L_{\infty}$ norm \citep{kingma2014adam}. Specifically, instead of maintaining the average of the squared gradients $V_t$, AdaMax keeps track of the maximum absolute value of the past gradients \citep{kingma2014adam}.
 \begin{align}
     u_t &= \max(\beta_2 \cdot u_{t-1}, |g_t|) \\ 
     \hat{m_t} &= \frac{m_t}{1 - \beta_1^t} \\
     \theta_{t+1} &= \theta_t - \alpha \cdot \frac{\hat{m_t}}{u_t}
-\end{align}
-Here, the second moment estimate $\hat{V_t}$ is replaced with $u_t$. This is done to make the algorithm more robust, as $u_1, u_2, \dots, u_t$ are influenced by fewer gradients and thus there is less noise. This is especially the case for when the gradients are large and can become numerically unstable \citep{kingma2014adam}. Note that no bias correction is also needed for $u_t$.
+\end{align}, 
+where we do a component wise max and component wise division. Here, the second moment estimate $\hat{V_t}$ is replaced with $u_t$. This is done to make the algorithm more robust, as $u_1, u_2, \dots, u_t$ are influenced by fewer gradients and thus there is less noise. This is especially the case for when the gradients are large and can become numerically unstable \citep{kingma2014adam}. Note that no bias correction is also needed for $u_t$.
 
-\textbf{NAdam}: Another variant of Adam is Nesterov Adam (NAdam), which extends Adam with the NAG method seen in \cref{sec:momentum} \citep{dozat2016nadam}. NAdam uses the NAG update by performing the \textit{Nesterov} trick - in which the previous first moment is replaced with the currently calculated first moment similar to NAG \citep{nesterov1983method,dozat2016nadam}. Condensing the Adam update equations from \cref{eq:m_t} to \cref{eq:adam_update} in \cref{eq:nadam_normal}, the following update is changed from 
+\textbf{NAdam}: Another variant of Adam is Nesterov Adam (NAdam), which extends Adam with the NAG method seen in \cref{ssec:momentum} \citep{dozat2016nadam}. NAdam uses the NAG update by performing the \textit{Nesterov} trick - in which the previous first moment is replaced with the currently calculated first moment similar to NAG \citep{nesterov1983method,dozat2016nadam}. Condensing the Adam update equations from \cref{eq:m_t} to \cref{eq:adam_update} in \cref{eq:nadam_normal}, the following update is changed from 
 \begin{align}
-    \theta_{t+1} = \theta_t - \frac{\alpha}{{\hat{V_t}} + \epsilon} (\beta_1 \mathbf{\hat{m}_{t-1}} + \frac{(1 - \beta_1)g_t}{1 - (\beta_1)^t}) \label{eq:nadam_normal}
+    \theta_{t+1} = \theta_t - \frac{\alpha}{{\hat{V_t}} + \epsilon} \left( \beta_1 \mathbf{\hat{m}_{t-1}} + \frac{(1 - \beta_1)g_t}{1 - (\beta_1)^t} \right) \label{eq:nadam_normal}
 \end{align}
 to 
 \begin{align}
-    \theta_{t+1} = \theta_t - \frac{\alpha}{{\hat{V_t}} + \epsilon} (\beta_1 \mathbf{\hat{m}_{t}} + \frac{(1 - \beta_1)g_t}{1 - (\beta_1)^t})
+    \theta_{t+1} = \theta_t - \frac{\alpha}{{\hat{V_t}} + \epsilon} \left( \beta_1 \mathbf{\hat{m}_{t}} + \frac{(1 - \beta_1)g_t}{1 - (\beta_1)^t} \right).
 \end{align}
 Like NAG, NAdam uses the future position of $\theta$ to calculate the gradient and incorporate more information in the update. NAdam has been shown to yield sizeable improvements in performance in comparison to Adam on MNIST and Word2Vec tasks \citep{dozat2016nadam}.
 
-\textbf{AdamW}: Decoupled weight decay regularisation, or AdamW, is a further variant of Adam \citep{loshchilov2017decoupled}. Normally, applying L2 regularisation in Adam involves appending the regularisation term to the gradient update.
+\textbf{AdamW}: Decoupled weight decay regularisation, or AdamW, is a further variant of Adam \citep{loshchilov2017decoupled}. Normally, applying L2 regularisation in Adam involves appending the regularisation term to the gradient update as follows,
 \begin{align}
-    g_t &= \nabla_{\theta} F(\theta_t) + \lambda \theta_{t-1}
+    g_t &= \nabla_{\theta} F(\theta_t) + \lambda \theta_{t-1}.
 \end{align}
 However, upon rescaling, the effect of the regularisation is not properly accounted for and large $g_t$ do not get regularised as much as they should \citep{loshchilov2017decoupled}. To address this, AdamW decouples the weight decay and applies it alongside the update.
 \begin{align}
-    \theta_{t+1} = \theta_t - \alpha \left( \frac{\hat{m_t}}{\hat{V_t} + \epsilon} + \lambda \theta_t \right)
+    \theta_{t+1} = \theta_t - \alpha \left( \frac{\hat{m_t}}{\hat{V_t} + \epsilon} + \lambda \theta_t \right).
 \end{align}
 This is because in adaptive gradient methods, L2 regularisation in the gradient update is \textit{not} the same as weight decay - unlike SGD \citep{loshchilov2017decoupled}. Adam is not effective with L2 regularisation, and so AdamW substantially benefits from this decoupling, improving in performance on CIFAR10 and ImageNet-32 tasks \citep{loshchilov2017decoupled}. AdamW is widely used in practice and is also a current SOTA optimisation method.
 
-\textbf{AMSGrad}: A particularly well-known issue with Adam is it's lack of convergence guarantees. One limitation is that in certain scenarios, Adam aggressively increases the learning rate - even when the algorithm is close to the optimum \citep{reddi2019asmgrad}. This is because the second moment term $V_t$ can grow indefinitely, and there is a very high dependence on $\beta_2$. For particular $\beta_2$, highly suboptimal solutions can be reached in the case of simple convex settings \citep{reddi2019asmgrad}.
+\textbf{AMSGrad}: A particularly well-known issue with Adam is the lack of convergence guarantees. One limitation is that in certain scenarios, Adam aggressively increases the learning rate, even when the algorithm is close to the optimum \citep{reddi2019asmgrad}. This is because the second moment term $V_t$ can grow indefinitely, and there is a very high dependence on $\beta_2$. For particular $\beta_2$, highly suboptimal solutions can be reached in the case of simple convex settings \citep{reddi2019asmgrad}.
 
-AMSGrad modifies this by keeping a bound on $\hat{V_t}$ by taking the maximum and using that for it's update rule \citep{reddi2019asmgrad}.
+AMSGrad modifies this by keeping a bound on $\hat{V_t}$ by taking the maximum for the update rule \citep{reddi2019asmgrad}.
 \begin{align}
     \hat{V_{t}} &= \max(\hat{V}_{t-1}, V_t)
 \end{align}
 This guarantees that the learning rate is not increased indefinitely, as each $V_t$ is guaranteed to be non decreasing and at least as large as the previous $V_t$'s \citep{reddi2019asmgrad}. By ensuring this, drastic and aggressive learning rate increases are prevented, and the algorithm convergences better and is more stable. However, AMSGrad is still dependent on $\beta_2$, and cannot show convergence guarantees on any arbitrary $\beta_2$ \citep{taniguchi2024adopt}. Some works have demonstrated that problem dependent tuning of $\beta_2$ can lead to convergence, but this still requires manual tuning \citep{taniguchi2024adopt}.
 
 \textbf{ADOPT}: To address the dependency of convergence on $\beta_2$, ADaptive Gradient Method with the OPTimal Convergence Rate (ADOPT) was most recently proposed \citep{taniguchi2024adopt}. ADOPT shows that by modifying the update rules of Adam, convergence can be attained for any $\beta_2 \in [0, 1]$. The non-convergence of Adam can be attributed to the $V_t$ needing to be conditionally independent of the current gradient $g_t$ \citep{taniguchi2024adopt}. In a normal Adam update as in \cref{eq:adam_update}, the conditional independence criteria is not satisfied. This is because $\hat{V}_t$ contains information about $g_t$, and so convergence breaks. 
-ADOPT fixes this by modifying the order of the update and the normalisation \citep{taniguchi2024adopt}. Specifically, the normalisation is applied to the current gradient in a modified update rule of $m_t$.
+ADOPT fixes this by modifying the order of the update and the normalisation \citep{taniguchi2024adopt}. Specifically, the normalisation is applied to the current gradient in a modified update rule of $m_t$, 
 \begin{align}
-    m_t = \beta_1 m_{t-1} + (1 - \beta_1) \frac{g_t}{\hat{V}_{t-1} + \epsilon^2}
+    m_t = \beta_1 m_{t-1} + (1 - \beta_1) \frac{g_t}{\hat{V}_{t-1} + \epsilon^2}.
 \end{align}
-Here, the previous second moment, $V_{t-1}$ is used to ensure this conditional independence with $g_t$ when scaling and so convergence is guaranteed. In practice, ADOPT uses $\max(\hat{V}_{t-1}, \epsilon)$ instead of $\hat{V}_{t-1} + \epsilon^2$ for the normalisation for performance benefits \citep{taniguchi2024adopt}. The parameter update is shortly applied after.
+Here, the previous second moment, $V_{t-1}$ is used to ensure this conditional independence with $g_t$ when scaling and so convergence is guaranteed. In practice, ADOPT uses $\max(\hat{V}_{t-1}, \epsilon)$ instead of $\hat{V}_{t-1} + \epsilon^2$ for the normalisation for performance benefits \citep{taniguchi2024adopt}. The parameter update is shortly applied after as
 \begin{align}
-    \theta_{t+1} = \theta_{t} - \alpha \cdot m_{t+1}
+    \theta_{t+1} = \theta_{t} - \alpha \cdot m_{t+1}.
 \end{align}
 ADOPT outperforms Adam, AdamW, and AMSGrad on MNIST and CIFAR10 image classification tasks \citep{taniguchi2024adopt}.
-It achieves substantial improvements in LLM pretraining and finetuning tasks over Adam and it's aforementioned variants as well \citep{taniguchi2024adopt}. 
+It achieves substantial improvements in LLM pretraining and finetuning tasks over Adam and the rest of the variants as well \citep{taniguchi2024adopt}. 
 
-\section{Higher-Order Methods}
-First-order methods are effective for many optimisation problems for being simple, yet efficient. However, they fall short when encountering ill-conditioned or non-linear objective functions, and flat regions and saddle points. Higher-order methods address these issues by making use of additional curvature information. They find or approximate at least the second-order derivative, $\nabla_{\theta}^{2}F$. For brevity, we will refer to this as $H$, or $H_t$ if used stochastically. 
+Our work presents a different paradigm from these Adam variants. While these variants focus on the convergence and reliance on tuning, as we mentioned in the previous section, our work does not need explicit learning rate and moment hyperparameters. Our work has theoretical convergence guarantees due to our trust-region framework, whereas these works address the problem of Adam's convergence rather than exhibiting these guarantees. However, as mentioned previously, we do note that our work can work as a hybrid with these variants, as we can incorporate all of this information into our trust-region framework.
 
-\subsection{Newton Methods} \label{sec:newton_methods}
-\textbf{The Newton Method}: Newton's method is the simplest way to incorporate curvature information. It approximates $F$ by using a second-order Taylor expansion and updates $\theta$ by computing the search direction $d_t$, to which the solution is the gradient preconditioned with the inverse Hessian \citep{NoceWrig06}. We also note that $\alpha = 1$ usually, and learning rates are optional, but usually unused in the update step for Newton methods unlike that of first order methods.
+\section{Second-Order Methods}
+\label{sec:second_order_methods}
+
+As discussed in \cref{chap:background}, first-order methods are effective for many optimisation problems, but fall short when the optimisation landscape is ill-conditioned or challenging. We saw that second-order methods address these problems in \cref{ssec:second_order_methods}, as they find or approximate the Hessian $H$. We now discuss the different types of second order methods. 
+
+\subsection{Newton and Quasi-Newton Methods} 
+\label{sec:newton_methods}
+
+\textbf{Damped and Regularised Newton Methods}:
+We saw in \cref{ssec:second_order_methods} that while Newton's method offers rapid quadratic convergence, it may not produce a descent direction, when the Hessian $H$ is not positive definite or when far from a solution. Damped and regularised Newton methods improve the robustness and global convergence properties of the standard Newton step. One approach is \textit{step-size damping}. This method introduces the learning rate $\alpha_t \in (0, 1]$ to scale the Newton direction, similar to first-order methods we saw in \cref{sec:first_order_methods} \citep{sun2019survey}:
 \begin{align}
-    d_t &= H_t^{-1} g_t \\
-    \theta_{t+1} &= \theta_t - \alpha d_t
+    \theta_{t+1} = \theta_t - \alpha_t H_t^{-1} g_t.
 \end{align}
-This adjusts the step size for each parameter based on the curvature, which results in a key improvement over first-order methods. Newton steps make large progress in flat regions, and are more conservative in steep directions. The method has quadratic convergence given $F \in C^{2}$, and has strong local convergence properties if initialised near a critical point \citep{NoceWrig06}. Though this solves the slowness problem, it can result in moving in the wrong direction. Given a negative eigenvalue, it moves opposite to the gradient step which increases the error \citep{dauphin2014sfn}. Since it also moves towards optimal $\theta$ along directions with positive eigenvalue, it becomes attracted to saddle points \citep{dauphin2014sfn}.
-Newton's method is also expensive, required $O(N^2)$ memory to store the Hessian and $O(N^3)$ time to compute the inverse Hessian \citep{NoceWrig06}.
-
-\textbf{Saddle-Free Newton}: To address the saddle point concern, the saddle-free newton (SFN) approach was proposed \citep{dauphin2014sfn}. The SFN applies the $|\cdot|$ (abs) function onto the Hessian, where the absolute value of each eigenvalue is taken and reconstructed \citep{dauphin2014sfn}.
+The step length $\alpha_t$ is typically chosen using a line search at each iteration to ensure sufficient decrease. This prevents overly aggressive steps and improves stability. Another approach is \textit{regularisation damping}. Instead of scaling the step, this method modifies the Hessian matrix $H_t$ directly to ensure it is sufficiently positive definite. A common technique is to add a constant $\lambda$ to the eigenvalues of $H_t$ before inversion. This yields the update:
 \begin{align}
-    |H_t| &= V_{t} |\Sigma|^{-1} V_{t}^T \\
-    \theta_{t+1} &= \theta_t - |H_t|^{-1} g_t
+    H_t &= V^T \Lambda V \\
+    B_t &= (V^T (\Lambda + \lambda I) V)^{-1} \\
+    \theta_{t+1} &= \theta_t - B_t g_t.
 \end{align}
-This allows us to escape saddle points and still keep the advantage of taking large steps in low curvature regions \citep{dauphin2014sfn}. Because of the reconstruction based on strictly positive eigenvalues, the issue of moving towards the wrong direction is addressed. However, this solution is still infeasible. It has the same memory limitations as the Newton method, and adds extra time given we need to reconstruct the Hessian by applying the abs function. Solutions to this issue involve using subspace optimisation methods, which solves the optimisation problem in a lower dimensional subspace \citep{dauphin2014sfn}. We will look at these in \Cref{sec:subspace_opt}.
+This damps the eigenvalues of $H_t$, ensuring the modified Hessian is well-conditioned. The parameter $\lambda_t$ can be adjusted adaptively,and instead of adding, we can scale the eigenvalues of $H_t$. As we noted in \cref{ssec:trust_region_methods}, this formulation is closer to the solution of the trust-region subproblem. Both damping strategies enhance the reliability of Newton's method, making it more applicable to the non-convex landscapes. However, we note that the computational cost is still a problem. With regularisation damping, we need to explicitly perform an eigendecomposition of $H_t$ and then reconstruct our modified Hessian. This is intractable for large $H_t$ as the eigendecomposition is $O(N^3)$. Thus, while these methods increase the stability of Newton's method while maintaining the convergence properties, the computation intractability still remains.
 
-\subsection{Quasi-Newton Methods}
-\textbf{BFGS}: The computational infeasibility of Newton methods is tackled with Quasi-Newton methods. These aim to approximate the Hessian instead of computing it directly. The Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm generates a sequence of matrices to estimate the Hessian \citep{NoceWrig06}. It iteratively refines the estimate using gradient information and rank-two updates at each iteration \citep{NoceWrig06}. The estimate is always positive-definite. Through experimental testing and analysis, these estimates are quite good. BFGS also has effective self-correcting properties - if an estimate become poor at one iteration, within the next few it will correct itself \citep{NoceWrig06}. BFGS reduces the complexity to $O(N^2)$ for computation time \citep{NoceWrig06, sun2019survey}.  
+\textbf{BFGS}: We address the computational infeasibility of Newton methods with Quasi-Newton methods. Quasi-Newton methods compute an explicit approximation of the Hessian, rather than computing it directly. The Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm generates a sequence of matrices to estimate the Hessian \citep{NoceWrig06}. It iteratively refines the estimate using gradient information and rank-two updates at each iteration \citep{NoceWrig06}. The estimate is always positive-definite. Through experimental testing and analysis, these estimates are quite good. BFGS also has effective self-correcting properties. If an estimate becomes poor at one iteration, within the next few it will correct itself \citep{NoceWrig06}. BFGS reduces the complexity to $O(N^2)$ for computation time \citep{NoceWrig06, sun2019survey}.  
 
 A common variant of BFGS, Limited BFGS (L-BFGS), reduces the memory requirement by storing $k$ vectors instead of retaining the full $n\times n$ approximations \citep{NoceWrig06, sun2019survey}.
 
 \textbf{SR1}: The Symmetric Rank-One (SR1) method further tackles the infeasibility problem. It approximates the inverse Hessian using the difference between a history of gradients and positions, while ensuring symmetry in the update \citep{NoceWrig06}. The key advantage of SR1 is that it uses only rank-updates, but also does not guarantee positive definiteness \citep{NoceWrig06}. This makes it beneficial in non-convex settings, where positive definiteness guarantee is hard to maintain. Albeit at the cost of stability, it helps the algorithm capture more curvature information.
 
-\textbf{Stochastic Quasi-Newton with Trust Region}: BFGS and SR1 methods can be adapted into a stochastic setting with a trust region framework. sL-BFGS-TR and sL-SR1-TR were proposed as methods following this setting. These methods compute the Hessian approximation $D_k$ at each iteration using either L-BFGS or SR1. This $D_k$ is then used in the second-order approximation of $F$ to solve the trust region subproblem. Results for sL-BFGS-TR and sL-SR1-TR show that they are efficient and are able to keep up with Adam on MNIST and CIFAR10 tasks \citep{yousefi2023deep}. Specifically, as batch size increases, these algorithms are faster than Adam on models such as LeNet, ResNet and a 3C3L (3 Convolution 3 Linear) ConvNet \citep{yousefi2023deep}. Together with an effective mini-batch sampling strategy, sL-BFGS-TR and sL-SR1-TR converge faster than Adam \citep{yousefi2023deep}. This shows that Quasi-Newton methods can be effective in deep learning, and can be used in a stochastic setting, even if contrary to popular belief.
+\textbf{Stochastic Quasi-Newton with Trust Region}: BFGS and SR1 methods can be adapted into a stochastic setting with a trust-region framework. sL-BFGS-TR and sL-SR1-TR were proposed as methods following this setting. These methods compute the Hessian approximation $D_t$ at each iteration using either L-BFGS or SR1. This $D_t$ is then used in the second-order approximation of $L$ to solve the trust-region subproblem. Results for sL-BFGS-TR and sL-SR1-TR show that they are efficient and are able to keep up with Adam on MNIST and CIFAR10 tasks \citep{yousefi2023deep}. Specifically, as batch size increases, these algorithms are faster than Adam on models such as LeNet, ResNet and a 3C3L (3 Convolution 3 Linear) ConvNet \citep{yousefi2023deep}. Together with an effective mini-batch sampling strategy, sL-BFGS-TR and sL-SR1-TR converge faster than Adam \citep{yousefi2023deep}. This shows that Quasi-Newton methods can be effective in deep learning, and can be used in a stochastic setting, even if contrary to popular belief.
 
-\subsection{Diagonal Hessian Estimation} \label{sec:diag_hessian}
+Our work differs from traditional Quasi-Newton methods like BFGS, L-BFGS, and SR1 in its approach to curvature information. Our work instead directly utilises HVPs to build an approximation instead of using rank-one or rank-two updates. Our work also incorporates momentum and the gradient in a trust-region framework to get our step direction, instead of relying purely on the second-order approximation. Additionally, while the sL-BFGS-TR and sL-SR1-TR methods use a trust-region, our approach is different. We use subspace optimisation to solve the trust-region subproblem and to find a linear combination of useful directions, whereas these methods instead use other methods to solve the subproblem and instead maintain an explicit Hessian approximation matrix. 
+
+\subsection{Diagonal Hessian Estimation} 
+\label{ssec:diag_hessian}
+
 \textbf{AdaHessian}: As Quasi-Newton methods aim to estimate the inverse Hessian, improvements have been made to use diagonal hessian estimates as well. AdaHessian modifies the second moment from Adam to use the squared diagonal estimate of the Hessian \citep{yao2021adahessian}.
 \begin{align}
     \hat{D}_t &\approx \text{diag}(H_t) \\
@@ -158,7 +181,7 @@ A common variant of BFGS, Limited BFGS (L-BFGS), reduces the memory requirement 
 \end{align}
 This brings down the space complexity to $O(D)$, and makes it more feasible to use incorporate second order information \citep{yao2021adahessian}. Though, as a trade-off, an extra backward pass is required per iteration. AdaHessian performs well in image classification, NLP, and recommender system tasks \citep{yao2021adahessian}.
 
-\textbf{Sophia} : A more effective approach to using diagonal estimates was proposed by Second-order Clipped Stochastic Optimisation (Sophia) \citep{liu2023sophia}. Sophia uses a diagonal estimate of the Hessian as a preconditioner to the first moment in it's update alongside a clipping mechanism. This was motivated by heterogenous curvature in deep learning models, in which traditional optimisers struggle with \citep{liu2023sophia}. 
+\textbf{Sophia}: A more effective approach to using diagonal estimates was proposed by Second-order Clipped Stochastic Optimisation (Sophia) \citep{liu2023sophia}. Sophia uses a diagonal estimate of the Hessian as a preconditioner to the first moment in the update rule alongside a clipping mechanism. This was motivated by heterogenous curvature in deep learning models, in which traditional optimisers struggle with \citep{liu2023sophia}. 
 
 Sophia first computes the diagonal estimate of the Hessian, $\bar{D}_t$, every $k$ iterations using either the Hutchinson or Gauss-Newton-Bartlett estimation methods via an estimator $E$ \citep{liu2023sophia}. 
 \begin{align}
@@ -173,42 +196,57 @@ This is then put into a clipping function that controls the worst case size upda
 \begin{align}
     \theta_{t+1} = \theta_t - \alpha \cdot \text{clip}(\frac{m_t}{\max(\gamma \cdot \bar{D}_t, \epsilon)}, \rho)
 \end{align}
-where $\text{clip}(z, p) = \max(\min(z, p), -p)$ and $\gamma$, $\rho$ are hyper-parameters that function as a scaling factor and a clipping threshold respectively \citep{liu2023sophia}. As mentioned in \cref{sec:newton_methods}, incorporating second order information can result in moving in the wrong direction. To counter this, Sophia considers only the positive entries of $\bar{D}_t$, like the SFN, and clips each coordinate to a maximum step size of $p$ (where $p = 1$ usually) \citep{liu2023sophia}. If any entry of $\bar{D}_t$ is negative, Sophia falls back to momentum signSGD - a method in which the update is scaled by the sign of the gradient for each component, ignoring the magnitude. This ensures that in the worst case, the update is controlled with a size of $p$, improving stability. On language modelling tasks, Sophia converges quicker and achieves better performance in comparison to AdamW \cite{liu2023sophia}.
+where $\text{clip}(z, p) = \max(\min(z, p), -p)$ and $\gamma$, $\rho$ are hyper-parameters that function as a scaling factor and a clipping threshold respectively \citep{liu2023sophia}. We saw in \cref{ssec:second_order_methods} that incorporating second-order information through the Newton step can result in moving in the wrong direction. To counter this, Sophia considers only the positive entries of $\bar{D}_t$, and clips each coordinate to a maximum step size of $p$ (where $p = 1$ usually) \citep{liu2023sophia}. If any entry of $\bar{D}_t$ is negative, Sophia falls back to momentum signSGD. This is a method in which the update is scaled by the sign of the gradient for each component, ignoring the magnitude. This ensures that in the worst case, the update is controlled with a size of $p$, improving stability. On language modelling tasks, Sophia converges quicker and achieves better performance in comparison to AdamW \cite{liu2023sophia}.
 
-\subsection{HvP-based Methods}
-\textbf{Hessian-Free Optimisation}: Incorporating second order information can be done without explicitly computing the Hessian or it's approximations. Hessian-free optimisation (HF) aims to do this by directly computing \textit{Hessian-vector products} (HvP) \citep{NoceWrig06, martens2010hessianfree}. Similar to Newton's method, a search direction is computed by solving the following linear system, where $\alpha_t$ is a step size computed to guarantee sufficient decrease \citep{martens2010hessianfree}.
+Our work is different since it utilises curvature information from Hessian-vector products, instead of relying on diagonal Hessian estimates. 
+However, our work is similar in that we use a clipping threshold to clip the eigenvalues of our Hessian approximation. We also can optionally use diagonal estimates to precondition the vector used for the HVPs when building our approximation. Our work is more stable than Sophia, as it offers a richer representation of the local curvature. We also use a trust-region framework which these works do not employ. 
+
+\subsection{HVP-based Methods}
+\label{ssec:hvp_based_methods}
+
+\textbf{Hessian-Free Optimisation}: Hessian-free optimisation (HF) uses HVPs to incorporate second-order information \citep{NoceWrig06, martens2010hessianfree}. Similar to Newton's method, a search direction is computed by solving the following linear system, where $\alpha_t$ is a step size computed to guarantee sufficient decrease \citep{martens2010hessianfree}.
 \begin{align}
-    H_t d_t &= - g_t \\ \label{eq:hf_lin_sys}
-    \theta_{t+1} &= \theta_t - \alpha_t d_t
+    H_t d_t &= - g_t \\
+    \theta_{t+1} &= \theta_t - \alpha_t d_t.
+    \label{equation:hessian_free_lin_sys}
 \end{align}
-The system in \cref{eq:hf_lin_sys} is solved with the conjugate-gradient solver (CG), an iterative method that solves linear systems. This computes the HvP without using the Hessian, which reduces the space to $O(N)$ and results in $O(KN)$ time, where $K << N$ controls the number of iterations used for CG \citep{martens2010hessianfree}. However, the CG solver can be very unstable when $H_t$ isn't positive definite. Thus, it breaks down when dealing with noise and stochasticity. Ill-conditioned and non-convex problems also add to these issues.
+The system in \cref{equation:hessian_free_lin_sys} is solved with the conjugate-gradient solver (CG), an iterative method that solves linear systems. This computes the HVP without using the Hessian, which reduces the space to $O(N)$ and results in $O(KN)$ time, where $K << N$ controls the number of iterations used for CG \citep{martens2010hessianfree}. However, the CG solver can be very unstable when $H_t$ is not positive definite. Thus, it breaks down when dealing with noise and stochasticity. Ill-conditioned and non-convex problems also add to these issues.
 
-\textbf{CurveBall}: Combining fast HvP's and curvature information with the heavy-ball framework was introduced with CurveBall, hence it's name. CurveBall uses a quadratic approximation around $F$ like the Newton method, and solves the optimisation problem by solving the same linear system as in \cref{eq:hf_lin_sys}. Instead of using CG or matrix inversion, it uses GD to optimise on $d_t$ and finds $\Delta d_t$ \cite{henriques2019small}. 
+\textbf{CurveBall}: Combining fast HVP's and curvature information with the heavy-ball framework was introduced with CurveBall, hence it's name. CurveBall uses a quadratic approximation like the Newton method, and solves the optimisation problem by solving the same linear system as in \cref{equation:hessian_free_lin_sys}. Instead of using CG or matrix inversion, it uses GD to optimise on $d_t$ and finds $\Delta d_t$ \cite{henriques2019small}. 
 \begin{align}
-\Delta d_{t+1} &= H_t d_t + g_t \\
-z_{t+1} &= \beta z_{t} - \alpha_2 \Delta d_{t+1} \\
-\theta_{t+1} &\leftarrow \theta_t + \alpha_1 z_{t+1}
+    \Delta d_{t+1} &= H_t d_t + g_t \\
+    z_{t+1} &= \beta z_{t} - \alpha_2 \Delta d_{t+1} \\
+    \theta_{t+1} &\leftarrow \theta_t + \alpha_1 z_{t+1}
 \end{align}
-The advantage to this is that there is no restriction on $H$. The algorithm can work in non-convex and ill-conditioned problems too, as demonstrated by it's performance on Rosenbrock and the Rahimi-Recht function \citep{henriques2019small}. The $\Delta d_{t}$ variable keeps track of how $H_t$ and $g_t$ change as $\theta$ evolves, which incorporates the curvature. To amortize cost, it interleaves updates between $\theta$ and $\Delta d_{t+1}$ \citep{henriques2019small}. With the use of fast HvP's through forward-mode (FMAD) and backward-mode automatic differentiation (RMAD), it requires only two passes of back-propagation \citep{henriques2019small}. This makes it highly efficient and scalable, in which it demonstrates better performance on MNIST and CIFAR10 classification tasks \citep{henriques2019small}.  
+The advantage to this is that there is no restriction on $H$. The algorithm can work in non-convex and ill-conditioned problems too, as demonstrated by it's performance on Rosenbrock and the Rahimi-Recht function \citep{henriques2019small}. The $\Delta d_{t}$ variable keeps track of how $H_t$ and $g_t$ change as $\theta$ evolves, which incorporates the curvature. To amortize cost, it interleaves updates between $\theta$ and $\Delta d_{t+1}$ \citep{henriques2019small}. With the use of fast HVP's through forward-mode (FMAD) and backward-mode automatic differentiation (RMAD), it requires only two passes of back-propagation \citep{henriques2019small}, as we discussed in \cref{ssec:hessian_vector_products}. This makes it highly efficient and scalable, in which it demonstrates better performance on MNIST and CIFAR10 classification tasks \citep{henriques2019small}.  
 
-\subsection{Subspace Optimisation Methods}\label{sec:subspace_opt}
+Our method is similar to these works since the core of it is using HVPs. However, we do not use CG or GD to optimise and solve the linear system present in \cref{equation:hf_lin_sys}. The problem we solve is similar, but not the same as \cref{equation:hf_lin_sys}, as ours is a regularised/damped version of it. We also solve this problem in a low dimensional subspace generated through Krylov subspaces, and then compute useful search directions from this and embed them in a trust-region framework.
+
+\subsection{Subspace Optimisation Methods}
+\label{ssec:subspace_opt_methods}
 
 \textbf{Krylov Subspace Descent}: Approximate solutions to optimisation problems in low dimensional subspaces are also a popular strategy to involve curvature information. Krylov Subspace Descent (KSD) constructs a basis of vectors $\mathcal{K}_m$ and then finds a search direction in $\mathcal{K}_m$ using BFGS \citep{vinyals2012krylov}. The Krylov basis is constructed with diagonal Hessian estimate preconditioning \citep{vinyals2012krylov}.
 \begin{align}
     \mathcal{K}_m = \{(D^{-1}H)^{k}D^{-1}g | \quad 0 \leq k \leq m \}
 \end{align}
-During optimisation, this subspace is converted into a new non-orthogonal subspace $\hat{\mathcal{K}_m}$, where BFGS is run to find to ${\hat{K}v}$ as the search direction, where $\hat{K} \in \hat{\mathcal{K}_m}$ \citep{vinyals2012krylov}. KSD exhibits lower training error and faster running time in comparison to HF on MNIST \citep{vinyals2012krylov}. It also has no assumptions on $H$, unlike HF which has stability issues if $H$ is not positive semidefinite. We note that the SFN method was initially done with KSD. 
+During optimisation, this subspace is converted into a new non-orthogonal subspace $\hat{\mathcal{K}_m}$, where BFGS is run to find to ${\hat{K}v}$ as the search direction, where $\hat{K} \in \hat{\mathcal{K}_m}$ \citep{vinyals2012krylov}. KSD exhibits lower training error and faster running time in comparison to HF on MNIST \citep{vinyals2012krylov}. It also has no assumptions on $H$, unlike HF which has stability issues if $H$ is not positive semidefinite.
 
-\section{Derivative-Free Optimisation}
-For some problems, there may be conditions on $F$ such that $F \notin C^1$, or $g$ is intractable to calculate. Whilst there exist approximations for $g$, derivative-free optimisation aims to find optimal $\theta$ without it.
+Our method is quite similar to Krylov Subspace Descent. Both approaches construct a low-dimensional subspace using HVPs. However, the subsequent utilisation of this subspace differs. KSD applies an optimiser like BFGS within the generated Krylov subspace to find a search direction. In contrast, our method instead embeds search directions found within this subspace alongside the gradient and the momentum in a trust-region. We thus derive our update from the trust-region rather than directly optimising within the initial Krylov subspace.  
 
-\textbf{Coordinate Descent}: Coordinate Descent (CD) aims to perform one dimensional search across along each axis direction of $\theta$, till all directions are chosen properly to find optimal $\theta$. Naively, a set of bases $E = \{e_1, ..., e_D \}$ are chosen where $D = \dim(\theta)$. The parameter space is broken down into individual dimensions or coordinates, and optimization proceeds along each direction sequentially \citep{conn2009derivfree}. As such, the update at the $j$th dimension is given by
+\section{Non-smooth Optimisation}
+\label{sec:non_smooth_optimisation}
+
+For some problems, there may be conditions on the loss function such that it is non-smooth and that $g$ is intractable to calculate. We now look at optimisation methods that address this case.
+
+\textbf{Coordinate Descent}: Coordinate Descent (CD) aims to perform one dimensional search across along each axis direction of $\theta$, till all directions are chosen properly to find optimal $\theta$. Naively, a set of bases $E = {e_1, ..., e_D }$ are chosen where $D = \dim(\theta)$. The parameter space is broken down into individual dimensions or coordinates, and optimization proceeds along each direction sequentially \citep{conn2009derivfree}. As such, the update at the $j$th dimension is given by
 \begin{align}
-\theta^{t+1}_j = \arg\min_{\theta_j \in \mathbb{R}} F(\theta^{t+1}_1, \dots, \theta^{t+1}_{j-1}, \theta_j, \theta^t_{j+1}, \dots, \theta^t_D).
+    \theta^{t+1}_j = \arg\min_{\theta_j \in \mathbb{R}} L(\theta^{t+1}_1, \dots, \theta^{t+1}_{j-1}, \theta_j, \theta^t_{j+1}, \dots, \theta^t_D).
 \end{align}
-This guarantees convergence, as $F$ is set to decrease or stay the same at each iteration, and the convergence of CD is similar to that of GD \citep{conn2009derivfree}. The main difference to GD is that each update is always axis aligned, whereas the $g$ in GD may not be aligned with any $e \in E$. Given the algorithm focuses on one dimension at a time, the update is simple, even for complex problems. It is useful for in settings where there is low $D$ or sparse structures. While highly impractical for deep learning settings, as $D$ is high and we are not given the sparsity structure, setting a coordinate basis may be beneficial to accelerate convergence.
+This guarantees convergence, as $L$ is set to decrease or stay the same at each iteration, and the convergence of CD is similar to that of GD \citep{conn2009derivfree}. The main difference to GD is that each update is always axis aligned, whereas the $g$ in GD may not be aligned with any $e \in E$. Given the algorithm focuses on one dimension at a time, the update is simple, even for complex problems. It is useful for in settings where there is low $D$ or sparse structures. While highly impractical for deep learning settings, as $D$ is high and we are not given the sparsity structure, setting a coordinate basis may be beneficial to accelerate convergence.
 
 \section{Meta-Learning Discovery}
+\label{sec:meta_learning_discovery}
+
 A new way to solve optimisation problems is to consider abstracting away the problem. Meta-learning discovery aim to formulate algorithm search such that optimisation methods are found as a result.
 
 \textbf{Lion}: Evo\textbf{L}ved S\textbf{i}gn M\textbf{o}me\textbf{n}tum (Lion) was discovered via a meta-learning approach \citep{chen2024symbolic}. It uses momentum and the sign operation to update parameters.
@@ -217,4 +255,6 @@ A new way to solve optimisation problems is to consider abstracting away the pro
     \theta_{t+1} &= \theta_t - \alpha \cdot \text{update} \\ 
     m_t &= \beta_2 m_{t-1} + (1 - \beta_2)g_t
 \end{align}
-Unlike adaptive methods, there is no second moment $V_t$, and so no normalisation on the first moment is performed. Thus, Lion contributes a fixed size update to $\theta$ at each iteration, only scaling by the output of the $\text{sign}$ function. This is similar to signSGD, mentioned in \cref{sec:diag_hessian} under Sophia. Lion is advantageous given that it is simple and only tracks the momentum. This halves the memory requirement, making it more efficient. Lion gains up to a 2.3x speedup on AdamW \citep{chen2024symbolic}. It outperforms AdamW on image classification, vision-language contrastive learning, diffusion modelling and language modelling and pre-training tasks \citep{chen2024symbolic}. However, we note that this is the case only on transformer models that Lion is very effective. Further evaluations proving Lion's effectiveness on non-transformer based models are needed to confirm it's effectiveness.
+Unlike adaptive methods, there is no second moment $V_t$, and so no normalisation on the first moment is performed. Thus, Lion contributes a fixed size update to $\theta$ at each iteration, only scaling by the output of the $\text{sign}$ function. This is similar to signSGD, mentioned in \cref{ssec:diag_hessian} under Sophia. Lion is advantageous given that it is simple and only tracks the momentum. This halves the memory requirement, making it more efficient. Lion gains up to a 2.3x speedup on AdamW \citep{chen2024symbolic}. It outperforms AdamW on image classification, vision-language contrastive learning, diffusion modelling and language modelling and pre-training tasks \citep{chen2024symbolic}. However, we note that this is the case only on transformer models that Lion is very effective. Further evaluations proving Lion's effectiveness on non-transformer based models are needed to confirm its effectiveness.
+
+Our method is different entirely from the paradigm of meta-learning since we do not formulate optimisation as an algorithm search. Our method is similar to Lion since we use momentum, but we do not perform a signed update. We also do not use a learning rate or momentum hyperparameters, as previously mentioned. We use HVPs and a trust-region to approximate the local curvature, and our update step is a combination of the momentum, gradient, and other useful directions. 

@@ -361,7 +361,8 @@ So far, we have talked about optimisation problems where the objective function 
     \label{fig:non_smooth_functions}
 \end{figure}
 
-Non-smoothness is common in machine learning, with terms such as ReLU and L1 regularisation being used in many problem settings. At points of non-differentiability, classical optimisation concepts that we have been discussing break down. The optimisation of non-smooth functions requires alternative theoretical frameworks and algorithms. Prominent among these are subgradient methods, which extend the concept of a gradient to non-smooth convex functions by defining a set of subgradients at each point. Bundle methods are also popular, which collect information about previous function values and subgradients to form a more sophisticated model of the objective function. We provide a more detailed overview of such methods in \cref{sec:optimisation_in_deep_learning}. In specific instances, we can reformulate the non-smooth problem into a smooth approximation. For example, the ReLU function has an equivalent smooth approximation given by the Softplus function, $f(x) = \log(1 + e^x)$.
+Non-smoothness is common in machine learning, with terms such as ReLU and L1 regularisation being used in many problem settings. At points of non-differentiability, classical optimisation concepts that we have been discussing break down. The optimisation of non-smooth functions requires alternative theoretical frameworks and algorithms. While this is out of scope for this thesis, we briefly provide an overview of such methods in 
+\cref{chap:lit_review}. In specific instances, we can reformulate the non-smooth problem into a smooth approximation. For example, the ReLU function has an equivalent smooth approximation given by the Softplus function, $f(x) = \log(1 + e^x)$. While non-smooth optimisation is out of scope for this thesis, we provide an overview of such methods in \cref{chap:lit_review}.
 
 % Nit: I don't think this is relevant it's just showing both activation functions. [FIXED]
 % \begin{figure}[h]
@@ -380,8 +381,9 @@ Non-smoothness is common in machine learning, with terms such as ReLU and L1 reg
 Deep learning introduces a new set of challenges to the optimisation landscape. In deep learning, we usually have a set of \textit{input data} $x \in \mathbb{R}^n$ and a \textit{target output} $y \in \mathbb{R}^m$. Our goal is to learn a mapping from $x$ to $y$. This is represented by a \textit{model}, which is a complex, highly parameterised function that is usually non-convex and can be thought of as a \textit{universal function approximator}. Through exposure to many examples in a \textit{training set}, the model makes \textit{predictions} $\hat{y}$ for inputs $x$, and is then evaluated on a \textit{test set} with new, unseen inputs. Ideally, we would like our model to make accurate predictions on the test set, as this is a good indicator of generalisation performance. We optimise the model's \textit{parameters}, $\theta \in \mathbb{R}^N$, by minimising a real-valued \textit{loss function} $L: \mathbb{R}^N \to \mathbb{R}$ that measures model's performance. Typically, this is written as an average over the training set, such as
 \begin{align}
     L(\theta) = \mathbb{E}_{(x, y) \sim \hat{p}_{data}} \mathcal{L}(f(x; \theta), y) = \mathbb{E}_{(x, y) \sim \hat{p}_{data}} \ell(\hat{y}, y),
+    \label{eq:loss_function}
 \end{align}
-where $\hat{y} = f(x; \theta)$, $\mathcal{L}$ is the per-example loss (such as mean-squared error or cross-entropy), and $\hat{p}_{data}$ is the empirical distribution of our training set. In practice, we usually sample a \textit{mini-batch} of examples $X_i, Y_i$ from the training set to compute $\hat{y_i}$ and $L$. We provide a general algorithm for deep learning optimisation in \cref{alg:general_deep_learning_algo}.
+where $\hat{y} = f(x; \theta)$, $\mathcal{L}$ is the per-example loss (such as mean-squared error or cross-entropy), and $\hat{p}_{data}$ is the empirical distribution of our training set. In practice, we usually sample a set of examples $X_i, Y_i$ from the training set to compute $\hat{y_i}$ and $L$. We provide a general algorithm for deep learning optimisation in \cref{alg:general_deep_learning_algo}.
 
 \begin{algorithm}[H]
     \DontPrintSemicolon
@@ -389,7 +391,7 @@ where $\hat{y} = f(x; \theta)$, $\mathcal{L}$ is the per-example loss (such as m
     \KwOut{Optimised parameters $\theta$}
     $\theta \leftarrow \theta_0$\;
     \For{$t = 1, 2, \ldots, T$}{
-        Sample a mini-batch $(X_t, Y_t)$ from training data\;
+        Sample a set of examples $(X_t, Y_t)$ from training data\;
         Compute loss $L_t(\theta) = \mathcal{L}(f(X_t; \theta), Y_t)$\;
         Find an update direction $\Delta\theta$\;
         $\theta \leftarrow \theta + \Delta\theta$\;
@@ -445,7 +447,7 @@ Intuitively, we can consider the probability of each eigenvalue as akin to an in
 % TODO: Citations and Deep Learning Book chapter 8 ref here.
 The second property follows as a direct consequence of the first. Suppose we consider a local minima with a function value that is substantially higher than the global minimum. Given high dimensionality, it is very probable that there exists at least one eigenvalue that is negative which we can take to minimise the objective in some immediate neighbourhood. Such a point would then be a saddle point, offering a local escape direction. Given that local minima are so rare, we observe that they can only take a range of loss values, in which these are close to the global minimum. This suggests that the challenge in deep learning optimisation is less about getting trapped in poor local minima and more about efficiently navigating the numerous saddle points that dominate the landscape. 
 
-The dominance of saddle points changes the optimisation landscape and impedes the progress of optimisation algorithms. First-order methods that rely on gradient information, such as \textit{gradient descent}, experience slowed convergence in these regions. Second-order methods such as \textit{Newton's method} also face problems, as in some cases they are actually attracted to saddle points, even though they have the benefit of having local curvature information and are scale invariant. 
+The dominance of saddle points changes the optimisation landscape and impedes the progress of optimisation algorithms. First-order methods that rely on gradient information, such as \textit{gradient descent}, experience slowed convergence in these regions. Second-order methods such as \textit{Newton's method} also face problems, as in some cases they are actually attracted to saddle points, even though they have the benefit of having local curvature information and are scale invariant. We cover these in the next two sections \cref{ssec:first_order_methods} and \cref{ssec:second_order_methods}.
 
 % Nit: Both these sections need a generic algorithm showing the update rules being applied. [FIXED - has a general update before]
 \subsection{First-Order Methods}
@@ -465,15 +467,15 @@ We abbreviate this as $g$ for brevity. The gradient vector points in the directi
     \theta_{t+1} &= \theta_t + \Delta \theta,
     \label{equation:first_order_update}
 \end{align}
-where $\theta_t$ denotes the model parameters at iteration $t$, $g_t$ is the gradient evaluated at that point, and $\alpha_t > 0$ is the \textit{learning rate}. 
+where $\theta_t$ denotes the model parameters at iteration $t$, $g_t$ is the gradient evaluated at that point, and $\alpha_t > 0$ is the \textit{learning rate}. The learning rate controls the step size of the steepest descent step.
 
-First-order methods are computationally efficient and scalable. This is because the update can be performed with $O(N)$ space for a model with $N$ parameters. This makes them extremely appealing for deep learning, where models have millions or even billions of parameters and we have constraints on computational resources. These methods are also highly parallelisable. Modern GPU hardware and distributed computing with efficient low-level kernels enable gradient computations to be executed across multiple processing units, making them even more appealing.
+First-order methods are computationally efficient and scalable. This is because the update can be performed with $O(N)$ space for a model with $N$ parameters for a single sample of data. This makes them extremely appealing for deep learning, where models have millions or even billions of parameters and we have constraints on computational resources. These methods are also highly parallelisable. Modern GPU hardware and distributed computing with efficient low-level kernels enable gradient computations to be executed across multiple processing units, making them even more appealing.
 
 However, while simple and effective in many scenarios, the reliance of first-order methods on the gradient becomes problematic in high-dimensional landscapes that are characterised by a proliferation of saddle points, as briefly mentioned in \cref{ssec:dl_challenges}. In these regions of low curvature, the gradient magnitude is small. This leads to small, incremental updates to our parameters that result in slowed convergence. Conversely, in ill-conditioned landscapes as discussed in \cref{ssec:ill_conditioning_nonsmooth}, the gradient can be noisy and unstable. This results in slowed convergence and suboptimal solutions being found, and we see this in the next section in \cref{fig:scale_invariance}. In the worst case, the possibility of divergence is also present. 
 
-Additionally, first-order methods rely on a learning rate $\alpha$, or as expressed in \cref{equation:first_order_update}, $\alpha_t$ for an iteration $t$. We call this a \textit{hyperparameter}, as it is not directly a parameter that we want to optimise, such as the model parameters $\theta$, but influences the optimisation process. The learning rate controls the \textit{step size} of the optimisation step. A learning rate that is too small can lead to slow convergence, as we scale the gradient too little and cannot make sufficient progress when traversing the optimisation landscape. Conversely, a learning rate that is too large can cause our algorithm to overshoot or oscillate, leading to divergence. This is particularly the case for some ill-conditioned problems, such as the \textit{Rahimi and Recht function}, where the landscape becomes increasingly steep and majority of the eigenvalues $\lambda_i$ tend towards infinity as we approach the minimum. In this case, even a slight overshoot due to a mistuned $\alpha$ can result in divergence. We illustrate this in our evaluation in \cref{chap:evaluation}. 
+% Additionally, first-order methods rely on a learning rate $\alpha$, or as expressed in \cref{equation:first_order_update}, $\alpha_t$ for an iteration $t$. We call this a \textit{hyperparameter}, as it is not directly a parameter that we want to optimise, such as the model parameters $\theta$, but influences the optimisation process. The learning rate controls the \textit{step size} of the optimisation step. A learning rate that is too small can lead to slow convergence, as we scale the gradient too little and cannot make sufficient progress when traversing the optimisation landscape. Conversely, a learning rate that is too large can cause our algorithm to overshoot or oscillate, leading to divergence. This is particularly the case for some ill-conditioned problems, such as the \textit{Rahimi and Recht function}, where the landscape becomes increasingly steep and majority of the eigenvalues $\lambda_i$ tend towards infinity as we approach the minimum. In this case, even a slight overshoot due to a mistuned $\alpha$ can result in divergence. We illustrate this in our evaluation in \cref{chap:evaluation}. 
 
-Numerous variations of first-order methods, despite these challenges, have made them successful in deep learning and cemented them as the current state-of-the-art. These include the use of \textit{stochastic gradients}, \textit{momentum}, and \textit{adaptive learning rates}. We provide a comprehensive overview of these optimisation algorithms in \Cref{chap:lit_review}.
+Numerous variations of first-order methods, despite these challenges, have made them successful in deep learning and cemented them as the current state-of-the-art. These include the use of \textit{stochastic gradients}, \textit{momentum}, and \textit{adaptive} methods. We provide a comprehensive overview of these optimisation algorithms in \Cref{chap:lit_review}.
 
 \subsection{Second-Order Methods}
 \label{ssec:second_order_methods}
@@ -541,7 +543,8 @@ where $H_t$ is the Hessian evaluated at $\theta_t$ and $g_t$ is as defined in \c
 The quadratic model and Newton's method are central to second-order optimisation methods. In particular, they offer a few key advantages over first-order methods. 
 \begin{itemize}
     \item \textit{Local Curvature}: The quadratic model incorporates a more sophisticated understanding of the local curvature of the optimisation landscape compared to the gradient used by first-order methods, allowing for more informed steps.
-    \item \textit{Analytical Solution}: The quadratic model can be minimised analytically with respect to $\Delta \theta$. This gives a candidate for the optimal step. In its pure form, this removes the need for tuning a learning rate hyperparameter that was needed in first-order methods. We note that there exists variants such as \textit{damped Newton} methods that re-introduce a learning rate hyperparameter. We cover this in \cref{chap:lit_review}.
+    \item \textit{Analytical Solution}: The quadratic model can be minimised analytically with respect to $\Delta \theta$. This gives a candidate for the optimal step. 
+    % In its pure form, this removes the need for tuning a learning rate hyperparameter that was needed in first-order methods. We note that there exists variants such as \textit{damped Newton} methods that re-introduce a learning rate hyperparameter. We cover this in \cref{chap:lit_review}.
     \item \textit{Scale Invariance}: The Newton step is \textit{scale-invariant}. This means its performance is not adversely affected by linear rescaling of the parameters $\theta$. This is because it rescales the problem space through the use of $H^{-1}$, which naturally adapts to the local curvature of the objective function. We show an example of this with the Rosenbrock function in \cref{fig:scale_invariance}.
     This property makes Newton's method very effective for ill-conditioned problems, as mentioned before in \cref{ssec:ill_conditioning_nonsmooth}. It can navigate elongated valleys or surfaces with disparate scaling across more effectively than first-order methods.
     \item \textit{Quadratic Convergence}: The Newton step exhibits \textit{quadratic convergence}. Given that $H$ is positive definite, this means we can converge quadratically to a local minimum if we are sufficiently close to it. This is much faster than first-order methods which have linear or sub-linear convergence rates.
@@ -551,7 +554,7 @@ The quadratic model and Newton's method are central to second-order optimisation
     \begin{subfigure}[b]{0.48\linewidth}
         \centering
         \includegraphics[width=\linewidth]{figures/2background/rosenbrock_gd.png}
-        \caption{Trajectory of gradient descent on the Rosenbrock function with $\alpha = 0.01$.}
+        \caption{Trajectory of steepest descent on the Rosenbrock function with $\alpha = 0.01$.}
         \label{fig:rosenbrock_gd}
     \end{subfigure}
     \hfill
@@ -561,7 +564,7 @@ The quadratic model and Newton's method are central to second-order optimisation
         \caption{Trajectory of Newton's method on the Rosenbrock function.}
         \label{fig:rosenbrock_newton}
     \end{subfigure}
-    \caption{Gradient descent and Newton's method on the Rosenbrock function for 10 steps. We see that gradient descent makes slow progress, while Newton's method converges quickly in the first few steps.}
+    \caption{Steepest descent and Newton's method on the Rosenbrock function for 10 steps. We see that the optimising using steepest descent direction makes slow progress, while Newton's method converges quickly in the first few steps.}
     \label{fig:scale_invariance}
 \end{figure}
 
@@ -751,7 +754,7 @@ This is known as the \textit{fundamental identity of Krylov subspaces}. The matr
 
 When we project $Q_M$ onto the original matrix $A$, we obtain a reduced system $Q_M^T A Q_M = H_M$ of size $M \times M$. This is crucial as this acts as an approximation to the original matrix $A$, and thus the eigenvalues of $H_M$ are approximations to the eigenvalues of $A$. If we consider the case when $A$ is the Hessian $H$, then we can use this to approximate the Hessian eigenvalue spectrum and obtain local curvature information. As the Krylov dimension $M$ becomes closer to $N$, $H_M$ becomes a better approximation of $A$. This property makes Krylov subspaces very powerful for optimisation, as we can work in this reduced subspace while still obtaining a good solution to our problem.
 
-Many optimisation algorithms and numerical solvers use Krylov subspaces. For example, the \textit{conjugate gradient} and \textit{GMRES} algorithms can solve linear systems using Arnoldi iterations. This has been key in developing many successful numerical solvers and deep learning optimisers. We discuss these further in \cref{chap:lit_review}.
+Krylov subspaces have been key in developing many successful numerical solvers and deep learning optimisers. For example, the \textit{Krylov Subspace Descent} algorithm can construct sound approximations and incorporate local curvature to perform well in deep learning tasks.  discuss these further in \cref{chap:lit_review}.
 
 \subsection{Trust-Region Methods}
 \label{ssec:trust_region_methods}
@@ -793,7 +796,7 @@ For our step $p$, we want $\rho$ to be always non-negative, as this guarantees t
 
 To turn this into an optimisation algorithm, we iteratively solve the trust-region subproblem at the current iterate $x_t$ and update our trust-region radius $\Delta_t$. We illustrate the algorithm in \cref{alg:trust_region_algorithm}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[h]
     \DontPrintSemicolon
     \KwIn{Initial point $x_0$, initial trust-region radius $\Delta_0 > 0$, maximum radius $\hat{\Delta} > 0$, thresholds $0 < c_1 < c_2 < 1$, reduction factor $\gamma_1 \in (0,1)$, expansion factor $\gamma_2 > 1$, maximum iterations $T$}
     \KwOut{Approximate local minimiser $x_T$}
@@ -852,46 +855,48 @@ With appropriate choices of $B$, trust-region methods poses strong convergence g
     \item \textit{Superlinear or quadratic convergence}: Trust-region methods achieve superlinear or quadratic convergence rates near solutions satisfying second-order sufficient conditions as seen in \cref{definition:second_order_sufficient}, when using accurate Hessian approximations.
 \end{itemize}
 
-These properties make trust-region methods particularly useful in deep learning. By adjusting the radius based on our model, and computing approximate solutions to the subproblem, trust-region methods offer a good balance between rapid progress, stability, and computational efficiency. To finish, we provide an example of a trust-region method in action in \cref{fig:tr_example}.
+These properties make trust-region methods particularly useful in deep learning, as they offer a good balance between rapid progress, stability, and computational efficiency. 
 
-\begin{figure}[H]
-    \begin{subfigure}[b]{0.32\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/2background/tr1.png}
-        \caption{We initialise a trust region. The model approximation is good, so we accept and expand.}
-        \label{fig:tr_example_1}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.32\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/2background/tr2.png}
-        \caption{At our new point, the model approximation is still good, so we accept and expand once more.}
-        \label{fig:tr_example_2}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.32\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/2background/tr3.png}
-        \caption{The computed step does not reduce the objective function as the radius is too large, so we reject and shrink.}
-        \label{fig:tr_example_3}
-    \end{subfigure}
+% To summarise, we illustrate a trust-region method in action in \cref{fig:tr_example}.
+
+% \begin{figure}[h]
+%     \begin{subfigure}[b]{0.32\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/2background/tr1.png}
+%         \caption{We initialise a trust region. The model approximation is good, so we accept and expand.}
+%         \label{fig:tr_example_1}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[b]{0.32\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/2background/tr2.png}
+%         \caption{At our new point, the model approximation is still good, so we accept and expand once more.}
+%         \label{fig:tr_example_2}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[b]{0.32\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/2background/tr3.png}
+%         \caption{The computed step does not reduce the objective function as the radius is too large, so we reject and shrink.}
+%         \label{fig:tr_example_3}
+%     \end{subfigure}
     
-    \vspace{1em}
+%     \vspace{1em}
     
-    \begin{subfigure}[b]{0.33\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/2background/tr4.png}
-        \caption{Now, the model approximation is reasonable, so we accept and keep the radius.}
-        \label{fig:tr_example_4}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.33\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/2background/tr5.png}
-        \caption{We have now reached near a local minima. We can converge to it as the final step.}
-        \label{fig:tr_example_5}
-    \end{subfigure}
-    \caption{An example scenario of a trust-region method. We start at the red point and initialise a trust region, and adaptively expand and shrink the radius as we move along the contours of the objective function, evaluating our model approximation at each step until we reach a local minima.}
-    \label{fig:tr_example}
-\end{figure}
+%     \begin{subfigure}[b]{0.33\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/2background/tr4.png}
+%         \caption{Now, the model approximation is reasonable, so we accept and keep the radius.}
+%         \label{fig:tr_example_4}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.33\linewidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/2background/tr5.png}
+%         \caption{We have now reached near a local minima. We can converge to it as the final step.}
+%         \label{fig:tr_example_5}
+%     \end{subfigure}
+%     \caption{An example scenario of a trust-region method. We start at the red point and initialise a trust region, and adaptively expand and shrink the radius as we move along the contours of the objective function, evaluating our model approximation at each step until we reach a local minima.}
+%     \label{fig:tr_example}
+% \end{figure}
 
 In this chapter, we have covered a complete overview on the fundamentals of optimisation, optimisation in deep learning, and how to efficiently incorporate curvature information for optimisation algorithms. We now discuss these algorithms and perform a comprehensive literature review of the state-of-the-art and foundational methods.
