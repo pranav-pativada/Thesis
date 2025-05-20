@@ -147,6 +147,7 @@ These properties can now be used to formalise the \textit{necessary second-order
         \item $\nabla f(x^*) = 0$
         \item $H$ is positive semi-definite at $x^*$.
     \end{itemize}
+    \label{definition:second_order_necessary}
 \end{definition}
 Similarly, the above definition can be extended to a local maximum when $H$ is negative semi-definite.
 
@@ -174,6 +175,7 @@ Now, we can classify between local minima, local maxima, and saddle points based
 We can now guarantee something stricter about the nature of $x^*$, that it is a strict local minimum/maximum. This guarantees that we will optimise our objective without being trapped in a flat region. We write these as the \textit{sufficient second-order conditions} for optimisation. We formalise this for a strict local minimum as follows.
 \begin{definition}[Sufficient Second-Order Conditions]
     If $f$ is twice continuously differentiable, and $\nabla f(x^*) = 0$, and $H$ is positive definite at $x^*$, then $x^*$ is a strict local minimum.
+    \label{definition:second_order_sufficient}
 \end{definition}
 Similarly, we can write the sufficient second-order conditions for a strict local maximum when $H$ is negative definite at $x^*$.
 
@@ -515,9 +517,10 @@ Second-order methods, as said in their name, use a second-order Taylor expansion
     L(\theta + \Delta \theta) &\approx L(\theta) + \nabla L(\theta)^T (\theta + \Delta \theta - \theta) + \frac{1}{2} (\theta + \Delta \theta - \theta)^T \nabla^2 L(\theta) (\theta + \Delta \theta - \theta) \\
     &= L(\theta) + \nabla L(\theta)^T \Delta \theta + \frac{1}{2} \Delta \theta^T \nabla^2 L(\theta) \Delta \theta \\
     &= L(\theta) + g^T \Delta \theta + \frac{1}{2} \Delta \theta^T H \Delta \theta.
+    \label{equation:quadratic_model_w_loss}
 \end{align}
 
-This gives our quadratic model in $\Delta \theta$. We refer to this as $M(\Delta \theta)$ for a given $\theta$. If $H$ is positive definite, we then have a strictly convex quadratic function that we easily find the minimum of and thus solve for $\Delta \theta$. We do this by taking the derivative of the quadratic approximation with respect to $\Delta \theta$ and setting it to zero as follows.
+This gives our quadratic model $m$ in terms of $\Delta \theta$. We refer to this as $m(\Delta \theta)$ in this case as $\Delta \theta$ is our step here that we want to find, though we note that this can be generalised to any step $p$, as we will see in \cref{ssec:trust_region_methods}. If $H$ is positive definite, we then have a strictly convex quadratic function that we easily find the minimum of and thus solve for $\Delta \theta$. We do this by taking the derivative of the quadratic model with respect to $\Delta \theta$ and setting it to zero.
 \begin{align}
     0 &= \nabla_{\Delta \theta} \left( L(\theta) + g^T \Delta \theta + \frac{1}{2} \Delta \theta^T H \Delta \theta \right) \\
     &= g + H \Delta \theta.
@@ -526,18 +529,19 @@ Now, we solve for $\Delta \theta$, in which we get that:
 \begin{align}
     \Delta \theta = - H^{-1} g.
 \end{align} 
-This is known as the \textit{Newton step}. In the context of an optimisation algorithm, we calculate this step at iteration $t$ with our current parameters $\theta_t$ to update them. We call this iterative optimisation process \textit{Newton's method},
+This is known as the \textit{Newton step}. In the context of an optimisation algorithm, we iteratively solve for $\Delta \theta_t$ by considering our model $m_t(\Delta \theta_t)$ at an iteration $t$ with our current parameters $\theta_t$. This gives us \textit{Newton's method}.
 \begin{align}
-    \theta_{t+1} &= \theta_t + \Delta \theta_t \\
-    &= \theta_t - H_t^{-1} g_t,
+    \text{Solve } m_t(\Delta \theta_t) \text{ for } \Delta \theta_t \\
+    \Delta \theta_t = -H_t^{-1} g_t, \\
+    \theta_{t+1} = \theta_t + \Delta \theta_t.
 \end{align}
 where $H_t$ is the Hessian evaluated at $\theta_t$ and $g_t$ is as defined in \cref{equation:first_order_update}.
 
-% TODO: Scale invariance diagram here.
-The quadratic model $M(\Delta \theta)$ and Newton's method are central to second-order optimisation methods. In particular, they offer a few key advantages over first-order methods. 
+% TODO: Scale invariance diagram here. [FIXED]
+The quadratic model and Newton's method are central to second-order optimisation methods. In particular, they offer a few key advantages over first-order methods. 
 \begin{itemize}
     \item \textit{Local Curvature}: The quadratic model incorporates a more sophisticated understanding of the local curvature of the optimisation landscape compared to the gradient used by first-order methods, allowing for more informed steps.
-    \item \textit{Analytical Solution}: The quadratic model can be minimised analytically with respect to $\Delta \theta$ given $H$ is invertible. This gives a candidate for the optimal step. In its pure form, this removes the need for tuning a learning rate hyperparameter that was needed in first-order methods. We note that there exists variants such as \textit{damped Newton} methods that re-introduce a learning rate hyperparameter. We cover this in \cref{chap:lit_review}.
+    \item \textit{Analytical Solution}: The quadratic model can be minimised analytically with respect to $\Delta \theta$. This gives a candidate for the optimal step. In its pure form, this removes the need for tuning a learning rate hyperparameter that was needed in first-order methods. We note that there exists variants such as \textit{damped Newton} methods that re-introduce a learning rate hyperparameter. We cover this in \cref{chap:lit_review}.
     \item \textit{Scale Invariance}: The Newton step is \textit{scale-invariant}. This means its performance is not adversely affected by linear rescaling of the parameters $\theta$. This is because it rescales the problem space through the use of $H^{-1}$, which naturally adapts to the local curvature of the objective function. We show an example of this with the Rosenbrock function in \cref{fig:scale_invariance}.
     This property makes Newton's method very effective for ill-conditioned problems, as mentioned before in \cref{ssec:ill_conditioning_nonsmooth}. It can navigate elongated valleys or surfaces with disparate scaling across more effectively than first-order methods.
     \item \textit{Quadratic Convergence}: The Newton step exhibits \textit{quadratic convergence}. Given that $H$ is positive definite, this means we can converge quadratically to a local minimum if we are sufficiently close to it. This is much faster than first-order methods which have linear or sub-linear convergence rates.
@@ -612,7 +616,7 @@ While it may seem like Newton's method and the quadratic model approximation are
 \section{Methods for Tractable Curvature Exploitation}
 \label{sec:tractable_curvature_exploitation}
 
-In this section, we discuss strategies that can incorporate curvature information while being computationally tractable. We start by discussing \textit{Hessian-vector} products in \cref{ssec:hessian_vector_products}. This is followed by an introduction to Krylov subspaces in \cref{ssec:krylov_subspaces} and then trust region methods in \cref{ssec:trust_region_methods}.
+In this section, we discuss strategies that can incorporate curvature information while being computationally tractable. We start by discussing \textit{Hessian-vector} products in \cref{ssec:hessian_vector_products}. This is followed by an introduction to Krylov subspaces in \cref{ssec:krylov_subspaces} and then trust-region methods in \cref{ssec:trust_region_methods}.
 
 \subsection{Hessian-vector Products}
 \label{ssec:hessian_vector_products}
@@ -749,55 +753,145 @@ When we project $Q_M$ onto the original matrix $A$, we obtain a reduced system $
 
 Many optimisation algorithms and numerical solvers use Krylov subspaces. For example, the \textit{conjugate gradient} and \textit{GMRES} algorithms can solve linear systems using Arnoldi iterations. This has been key in developing many successful numerical solvers and deep learning optimisers. We discuss these further in \cref{chap:lit_review}.
 
-\subsection{Trust Region Methods}
+\subsection{Trust-Region Methods}
 \label{ssec:trust_region_methods}
 
+We finish this chapter by introducing \textit{trust-region methods}, another class of second-order optimisation algorithms that can utilise curvature information. Trust-region methods use the quadratic model as we discussed in \cref{ssec:second_order_methods} to define a \textit{region} around the current iterate that they \textit{trust} to be a good approximation of the objective function, hence the name \textit{trust-region}. 
 
-% Trust region methods represent another class of powerful optimisation algorithms that, like Krylov subspace methods, can effectively utilise curvature information.
-% Unlike line search methods that first determine a search direction and then a step size, trust region methods define a \textit{trust region} around the current iterate $\theta_k$.
-% Within this region, a model function $m_k(\mathbf{p})$ is trusted to accurately approximate the true objective function $L(\theta_k + \mathbf{p})$.
-% The core idea is to find a step $\mathbf{p}$ that minimises $m_k(\mathbf{p})$ within this trust region.
+We discussed the quadratic model in \cref{ssec:second_order_methods} in the specific case of deep learning. We defined it with respect to a loss function $L(\theta)$ and the model parameters $\theta$ using the explicit Hessian $H$. We now define the quadratic model in the general case to use for trust-region methods.
 
-% The model $m_k(\mathbf{p})$ is typically a quadratic approximation of $L$ at $\theta_k$, similar to the one used in Newton's method:
-% \begin{align}
-%     m_k(\mathbf{p}) = L(\theta_k) + \mathbf{g}_k^T \mathbf{p} + \frac{1}{2} \mathbf{p}^T \mathbf{B}_k \mathbf{p},
-%     \label{eq:trust_region_model}
-% \end{align}
-% where $\mathbf{p} = \Delta \theta$ is the proposed step, $\mathbf{g}_k = \nabla L(\theta_k)$ is the gradient, and $\mathbf{B}_k$ is the Hessian $\nabla^2 L(\theta_k)$ or an approximation thereof.
-% The trust region itself is usually defined by a norm constraint, $\|\mathbf{p}\| \leq \Delta_k$, where $\Delta_k > 0$ is the \textit{trust region radius}.
-% Thus, at each iteration $k$, the trust region subproblem is to find $\mathbf{p}_k$ that solves:
-% \begin{align}
-%     \min_{\mathbf{p} \in \mathbb{R}^N} m_k(\mathbf{p}) \quad \text{subject to} \quad \|\mathbf{p}\| \leq \Delta_k.
-%     \label{eq:trust_region_subproblem}
-% \end{align}
+\begin{definition}[General Quadratic Model]
+    Given an objective function $f: \mathbb{R}^N \to \mathbb{R}$, the quadratic model is the second-order Taylor expansion of $f$ around a point $x \in \mathbb{R}^N$,
+    \begin{align}
+    m(p) = f(x) + g^T p + \frac{1}{2} p^T B p,
+    \label{eq:tr_quadratic_model}
+    \end{align}
+    where $g = \nabla f(x)$ is the gradient, and $B$ is a symmetric matrix that usually approximates the Hessian $\nabla^2 f(x)$.
+\end{definition}
+If we consider $f$ as the loss function $L(\theta)$ and $p$ as $\Delta \theta$, then this is the same as \cref{equation:quadratic_model_w_loss} when $B = H$. Trust-region methods employ this quadratic model to iteratively solve a \textit{constrained optimisation problem} that is the \textit{trust-region subproblem}. A constrained optimisation problem is one where we must adhere to constraints on our parameters. Here, we optimise $f$ subject to the constraint that our step size $||p||$ is less then a given \textit{trust-region radius} $\Delta$.
 
-% A crucial aspect of trust region methods is the mechanism for updating the trust region radius $\Delta_k$.
-% This update is based on the agreement between the predicted reduction in the objective function by the model and the actual reduction achieved.
-% We define the ratio $\rho_k$ as:
-% \begin{align}
-%     \rho_k = \frac{L(\theta_k) - L(\theta_k + \mathbf{p}_k)}{m_k(\mathbf{0}) - m_k(\mathbf{p}_k)},
-%     \label{eq:trust_region_ratio}
-% \end{align}
-% where the numerator is the actual reduction and the denominator is the predicted reduction (note $m_k(\mathbf{0}) = L(\theta_k)$).
-% The step $\mathbf{p}_k$ is accepted ($\theta_{k+1} = \theta_k + \mathbf{p}_k$) if $\rho_k$ is sufficiently positive (e.g., $\rho_k > \eta_1$ for some small $\eta_1 > 0$).
-% The trust region radius $\Delta_{k+1}$ is then adjusted:
-% \begin{itemize}
-%     \item If $\rho_k$ is close to 1 (e.g., $\rho_k > \eta_2$, where $\eta_2 > \eta_1$), the model is a good approximation, so the trust region may be expanded (e.g., $\Delta_{k+1} = \gamma_{inc} \Delta_k$, $\gamma_{inc} > 1$).
-%     \item If $\rho_k$ is positive but not large (e.g., $\eta_1 < \rho_k \leq \eta_2$), the model is acceptable, so the trust region is typically kept the same ($\Delta_{k+1} = \Delta_k$) or slightly reduced.
-%     \item If $\rho_k \leq \eta_1$ (poor agreement or actual increase in $L$), the step is rejected ($\theta_{k+1} = \theta_k$), and the trust region is shrunk significantly (e.g., $\Delta_{k+1} = \gamma_{dec} \Delta_k$, $0 < \gamma_{dec} < 1$).
-% \end{itemize}
+\begin{definition}[The Trust-Region Subproblem]
+    Given a function $f: \mathbb{R}^N \to \mathbb{R}$ and a trust-region radius $\Delta > 0$, the trust-region subproblem is to find a step $p$ that solves
+    \begin{align}
+        \min_{p \in \mathbb{R}^N} m(p) \quad \text{subject to} \quad \|p\| \leq \Delta,
+        \label{eq:tr_subproblem}
+    \end{align}
+    where $\| \cdot \|$ is usually the Euclidean norm.
+\end{definition}
 
-% Solving the trust region subproblem (\cref{eq:trust_region_subproblem}) exactly can be computationally intensive.
-% However, several effective approximate solution strategies exist.
-% The \textit{Cauchy point} (the minimiser of $m_k(\mathbf{p})$ along the steepest descent direction within the trust region) provides a baseline for reduction.
-% More sophisticated methods include the \textit{dogleg method}, which is suitable when $\mathbf{B}_k$ is positive definite, and \textit{Steihaug's method} (also known as the Steihaug-Toint method or truncated Conjugate Gradient).
-% Steihaug's method uses the conjugate gradient algorithm (related to Krylov subspaces as discussed in \cref{ssec:krylov_subspaces}) to approximately solve the subproblem, terminating if the CG iterate goes outside the trust region or if negative curvature is detected.
-% This makes it particularly attractive as it can leverage efficient Hessian-vector products (\cref{ssec:hessian_vector_products}) instead of requiring the explicit Hessian $\mathbf{B}_k$.
+The trust-region radius $\Delta$ controls the maximum size of our step $p$. It represents the region in which we trust our quadratic model to be a good approximation of the objective function. If $\Delta$ is too small, then we make little progress. If $\Delta$ is too large, our quadratic model we may overshoot and take a poor step. When we take a step $p$, we consider the ratio between the actual and prediction reduction in the objective function. We denote this ratio as $\rho$.
+\begin{align}
+    \rho = \frac{f(x) - f(x + p)}{m(0) - m(p)} = \frac{\text{actual reduction}}{\text{predicted reduction}},
+    \label{eq:reduction_ratio}
+\end{align}
+For our step $p$, we want $\rho$ to be always non-negative, as this guarantees that $p$ is a descent direction. We can characterise the behaviour of the trust-region based on the value of $\rho$ as follows:
+\begin{itemize}
+    \item \textit{Rejection}: If $\rho$ is negative, then $f(x + p) > f(x)$ and so our step does not minimise the objective function. In this case, we \textit{reject} the step.
+    \item \textit{Acceptance and Expansion}: If $\rho$ is close to 1, then our model $m$ is a good approximation of $f$ and we can accept $p$. If we also have that $\|p\| = \Delta$, then we \textit{expand} our trust-region radius $\Delta$ as this indicates that the step has reached the boundary of our trust-region.
+    \item \textit{Acceptance and Shrinkage}: If $\rho$ is close to 0, then our model is a poor approximation of $f$ and we should \textit{shrink} our trust-region radius $\Delta$.
+\end{itemize}
 
-% Trust region methods offer several advantages, including strong global convergence properties, even for non-convex problems, and robustness when dealing with ill-conditioned Hessians or indefinite Hessians (where Newton's method might fail or be attracted to saddle points).
-% The primary challenge lies in the cost of forming $\mathbf{B}_k$ (if the exact Hessian is used) and solving or approximating the solution to the subproblem at each iteration.
+To turn this into an optimisation algorithm, we iteratively solve the trust-region subproblem at the current iterate $x_t$ and update our trust-region radius $\Delta_t$. We illustrate the algorithm in \cref{alg:trust_region_algorithm}.
 
-% In the context of deep learning, full-scale trust region methods with explicit Hessian approximations are often too expensive due to the high dimensionality ($N$) of $\theta$.
-% However, the principles underpinning trust region methods---adaptive step control based on model-function agreement and the careful handling of curvature information---are influential.
-% Techniques like Steihaug's method, which can operate with Hessian-vector products, allow for the incorporation of trust region ideas into more scalable algorithms.
-% These methods aim to capture the benefits of curvature information without the prohibitive costs of forming or inverting large Hessian matrices, and we will encounter related concepts in optimisers discussed in \cref{chap:lit_review}.
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    \KwIn{Initial point $x_0$, initial trust-region radius $\Delta_0 > 0$, maximum radius $\hat{\Delta} > 0$, thresholds $0 < c_1 < c_2 < 1$, reduction factor $\gamma_1 \in (0,1)$, expansion factor $\gamma_2 > 1$, maximum iterations $T$}
+    \KwOut{Approximate local minimiser $x_T$}
+    $x \leftarrow x_0$\;
+    $\Delta \leftarrow \Delta_0$\;
+    \For{$t = 0, 1, 2, \ldots, T$}{
+        Construct the quadratic model $m_t(p)$ in \cref{eq:tr_quadratic_model}\;
+        Obtain $p_t$ by solving the trust-region subproblem in \cref{eq:tr_subproblem}\;
+        Compute the ratio $\rho_t$ in \cref{eq:reduction_ratio}\;
+        \uIf{$\rho_t < 0$}{ 
+            $p_t \leftarrow 0$\; 
+            $\Delta \leftarrow \gamma_1 \Delta$\; 
+        }
+        \uElseIf{$\rho_t < c_1$}{ 
+            $\Delta \leftarrow \gamma_1 \Delta$\;
+        }
+        \uElseIf{$\rho_t > c_2$ \textbf{and} $\|p_t\| = \Delta$}{ 
+            $\Delta \leftarrow \min(\gamma_2 \Delta, \hat{\Delta})$\;
+        }
+        $x_{t+1} \leftarrow x_t + p_t$\;
+    }
+    \Return{$x_{T}$}
+    \caption{Trust-Region Method}
+    \label{alg:trust_region_algorithm}
+\end{algorithm}
+
+The core of this algorithm is the trust-region subproblem. We discussed the solution to this in the deep learning case in \cref{ssec:second_order_methods} when $B = H$ to compute the Newton step. We also made an important note that the Newton step as a result of the quadratic model is not always a descent direction when $H$ is not positive semidefinite. We now adapt this for the general case, in which we want to solve
+\begin{align}
+    (B + \lambda I) p^* = -g,
+    \label{eq:tr_subproblem_general}
+\end{align}
+where $\lambda \geq 0$ and $p^*$ is the solution. As a result the following conditions must be met if $p^*$ is the solution.
+
+\begin{definition}[Trust-Region Subproblem Conditions]
+    If $p^*$ is the solution to \cref{eq:tr_subproblem_general}, then the following\footnote{These are essentially the \textit{Karush-Kuhn-Tucker} (KKT) conditions for the trust-region subproblem.} must be satisfied:
+    \begin{itemize}
+        \item $\|p^*\| \leq \Delta$.
+        \item $B + \lambda I$ is positive semidefinite.
+        \item $\lambda (\Delta - \|p^*\|) = 0$.
+    \end{itemize}
+    \label{definition:tr_subproblem_conditions}
+\end{definition}
+
+These conditions characterise the exact solution, but solving this exactly is computationally expensive as discussed in \cref{ssec:second_order_methods}. In practice, we use approximation methods. A popular approach for approximately solving the trust-region subproblem is \textit{two-dimensional subspace optimisation}, where we restrict ourselves to a low dimensional subspace. We now have that 
+\begin{align}
+    \min_{p \in \mathcal{S}} m(p) \quad \text{subject to} \quad \|p\| \leq \Delta,
+    \label{eq:subspace_tr_subproblem}
+\end{align}
+where $\mathcal{S} = \text{span}\{-g, B^{-1}g\}$ is the two-dimensional subspace. The first direction, $-g$, is the steepest descent direction which guarantees reduction. The second direction $B^{-1}g$ is also a solution when $B$ is positive definite. In the case it is not, we can then change the subspace to be $\text{span}\{-g, (B + \alpha I)^{-1}g\}$ where $\alpha \geq \lambda_{min}(B)$. Intuitively, this searches for a solution that is a linear combination of the descent direction \textit{and} the approximate Newton direction. Since we operate in subspace of size $2$, this becomes extremely inexpensive to solve. Subspace optimisation often is close to the exact solution of \cref{eq:tr_subproblem_general}. We can also extend two-dimensional subspace optimisation to higher dimensions. For example, it may be beneficial to find a solution within the subspace $\text{span}\{-g, B^{-1}g, z\}$ where $z$ is an average of past gradients. 
+
+With appropriate choices of $B$, trust-region methods poses strong convergence guarantees. These include:
+\begin{itemize}
+    \item \textit{Global Convergence}: Trust-region methods converge globally to stationary points regardless of the starting point, given $B$ is uniformly bounded and $g$ is Lipschitz continuous \footnote{A function is Lipschitz continuous if there exists a constant $L$ such that the slope between any two points is bounded by $L$, meaning the function cannot change too rapidly anywhere in its domain}.
+    \item \textit{Protection against negative curvature}: Given we have a model approximation that we trust around a radius, we are protected against directions of negative curvature that might cause to diverge. This is since we will always stop at the boundary of the trust region.
+    \item \textit{Second-order necessary conditions}: When $B = H$, trust-region methods guarantee convergence to points satisfying the second-order necessary conditions as seen in \cref{definition:second_order_necessary}.
+    \item \textit{Superlinear or quadratic convergence}: Trust-region methods achieve superlinear or quadratic convergence rates near solutions satisfying second-order sufficient conditions as seen in \cref{definition:second_order_sufficient}, when using accurate Hessian approximations.
+\end{itemize}
+
+These properties make trust-region methods particularly useful in deep learning. By adjusting the radius based on our model, and computing approximate solutions to the subproblem, trust-region methods offer a good balance between rapid progress, stability, and computational efficiency. To finish, we provide an example of a trust-region method in action in \cref{fig:tr_example}.
+
+\begin{figure}[H]
+    \begin{subfigure}[b]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/tr1.png}
+        \caption{We initialise a trust region. The model approximation is good, so we accept and expand.}
+        \label{fig:tr_example_1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/tr2.png}
+        \caption{At our new point, the model approximation is still good, so we accept and expand once more.}
+        \label{fig:tr_example_2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/tr3.png}
+        \caption{The computed step does not reduce the objective function as the radius is too large, so we reject and shrink.}
+        \label{fig:tr_example_3}
+    \end{subfigure}
+    
+    \vspace{1em}
+    
+    \begin{subfigure}[b]{0.33\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/tr4.png}
+        \caption{Now, the model approximation is reasonable, so we accept and keep the radius.}
+        \label{fig:tr_example_4}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.33\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/2background/tr5.png}
+        \caption{We have now reached near a local minima. We can converge to it as the final step.}
+        \label{fig:tr_example_5}
+    \end{subfigure}
+    \caption{An example scenario of a trust-region method. We start at the red point and initialise a trust region, and adaptively expand and shrink the radius as we move along the contours of the objective function, evaluating our model approximation at each step until we reach a local minima.}
+    \label{fig:tr_example}
+\end{figure}
+
+In this chapter, we have covered a complete overview on the fundamentals of optimisation, optimisation in deep learning, and how to efficiently incorporate curvature information for optimisation algorithms. We now discuss these algorithms and perform a comprehensive literature review of the state-of-the-art and foundational methods.
