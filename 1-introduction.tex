@@ -50,7 +50,6 @@ The challenge is to therefore develop an optimisation algorithm that is computat
   \item We compute the \textit{Saddle-Free Newton} (SFN) direction as a result \citep{dauphin2014sfn}.
   \item We combine this with first-order information such as the gradient and momentum in a \textit{trust region} framework that uses a quadratic model approximation of the local landscape to get a combined, final search direction.
   \item We perform the optimisation step with this direction to optimise our objective.
-  \item Optionally, we embed KryBall as a hybrid approach with first-order optimisers such as SGD and Adam, allowing it to be cycled through.
 \end{enumerate}
 
 KryBall makes more informed steps than pure first-order methods, particularly in regions like saddle points, while remaining computationally tractable for deep learning. To motivate our method, we show an example in \cref{fig:toy_example}, where first-order methods such as Adam and SGD are hindered on a classic 2D horse saddle, but KryBall successfully escapes it quickly in fewer iterations.
@@ -85,7 +84,7 @@ To present our contributions, this thesis is organised in the following manner:
 \begin{itemize}
     \item \cref{chap:background} provides a comprehensive background on optimisation. We formalise the optimisation problem and discuss the optimisation landscape from a mathematical perspective. This is followed by optimisation in deep learning, where first-order and second-order methods are explained. We then introduce methods for incorporating curvature information, such as Hessian-vector products, Krylov subspaces and trust region algorithms.
     \item \cref{chap:lit_review} provides a comprehensive review of the relevant literature. This includes a survey of first-order and second-order optimisation algorithms used in deep learning. We compare these methods with our own.
-    \item \cref{chap:method} presents the KryBall algorithm. We formally describe its components. This includes the Krylov subspace construction, the SFN computation, and integration with the trust-region framework. We also discuss the assumptions made during the design and outline the hybrid approach.
+    \item \cref{chap:method} presents the KryBall algorithm. We formally describe its components. This includes the Krylov subspace construction, the SFN computation, and integration with the trust-region framework.
     \item \cref{chap:evaluation} presents our evaluations and analysis. We describe our experimental setup and benchmarking suite. This includes the datasets, model architectures, evaluation metrics, hyperparameter configurations, and comparison with SOTA optimisers. This is followed by sensitivity analysis and ablation studies of our method. We then interpret our findings, analyse potential failure cases and unexpected behaviours, and address current limitations. 
     \item \cref{chap:conclusion} finishes the thesis. We summarise our contributions, discuss the implications of our work, and suggest future work.
 \end{itemize}

@@ -1,0 +1,22 @@
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+% \usepackage[table,xcdraw]{xcolor}
+% Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+\begin{table}[!t]
+    \centering
+    \caption{Classification results for MNIST1D MLP, CIFAR10 CNN, and CIFAR10 ResNet-18 given Adam, MSGD and KryBall optimisers.}
+    \label{tab:classification_results}
+    \begin{tabular}{ccccc}
+    \hline
+                                                                                            & \textbf{Method} & \textbf{\begin{tabular}[c]{@{}c@{}}Final \\ Training \\ Loss $\downarrow$\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Peak \\ Test\\ Accuracy $\uparrow$\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Final \\ Test\\ Accuracy $\uparrow$\end{tabular}} \\ \hline
+                                                                                            & Adam            & \cellcolor[HTML]{FFFFFF}0.144                                              & \cellcolor[HTML]{FFFFFF}0.668                                            & \cellcolor[HTML]{FFFFFF}0.668                                             \\
+                                                                                            & MSGD            & \cellcolor[HTML]{FFFFFF}0.326                                              & \cellcolor[HTML]{FFFFFF}0.669                                            & \cellcolor[HTML]{FFFFFF}0.644                                             \\
+    \multirow{-3}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}MNIST1D\\ MLP\end{tabular}}}        & KryBall         & \cellcolor[HTML]{34FF34}\textbf{0.001}                                     & \cellcolor[HTML]{34FF34}\textbf{0.685}                                   & \cellcolor[HTML]{34FF34}\textbf{0.685}                                    \\ \hline
+                                                                                            & Adam            & \cellcolor[HTML]{34FF34}\textbf{0.099}                                     & 0.782                                                                    & \cellcolor[HTML]{34FF34}\textbf{0.777}                                    \\
+                                                                                            & MSGD            & 0.111                                                                      & 0.777                                                                    & 0.771                                                                     \\
+    \multirow{-3}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}CIFAR10 \\ CNN\end{tabular}}}       & KryBall         & 0.135                                                                      & \cellcolor[HTML]{34FF34}\textbf{0.783}                                   & 0.762                                                                     \\ \hline
+                                                                                            & Adam            & \cellcolor[HTML]{34FF34}\textbf{7.5e-5}                                    & \cellcolor[HTML]{34FF34}\textbf{0.843}                                   & \cellcolor[HTML]{34FF34}\textbf{0.842}                                    \\
+                                                                                            & MSGD            & 1e-4                                                                       & 0.832                                                                    & 0.829                                                                     \\
+    \multirow{-3}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}CIFAR10 \\ ResNet-18\end{tabular}}} & KryBall         & 0.002                                                                      & 0.832                                                                    & 0.822                                                                     \\ \hline
+    \end{tabular}
+    \end{table}

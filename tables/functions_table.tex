@@ -1,0 +1,19 @@
+\begin{table}[h]
+    \centering
+    \caption{Performance on ill-conditioned functions}\label{tab:ill-conditioned-functions}
+    \begin{tabular}{cccccc}
+        \toprule
+         & \multicolumn{3}{c}{Rosenbrock} & \multicolumn{2}{c}{Raihimi \& Recht} \\
+         & $\mathcal{U}[1,1]$ & $\mathcal{U}[0,1]$ & $\mathcal{U}[0,3]$ & $\kappa=100$ & $\kappa=1e5$ \\
+        \midrule
+        Momentum SGD & 370 & 846 & 4069 & 95 & 95 \\
+        Adam & 16 & 19 & \textbf{13}\cellcolor{green!50} & \textbf{9}\cellcolor{green!50} & \textbf{9}\cellcolor{green!50} \\
+        \midrule
+        LBFGS & \textbf{12}\cellcolor{green!50} & \textbf{12}\cellcolor{green!50} & 13 & 35 & 35 \\
+        Sophia & 13 & 12 & 13 & 35 & 35 \\
+        \midrule
+        KryBall (ours) & 13 & 12 & 13 & 35 & 35 \\
+        \bottomrule
+    \end{tabular}
+    
+\end{table}
