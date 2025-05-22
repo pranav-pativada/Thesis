@@ -420,7 +420,7 @@ In \cref{fig:act_results}, there is a stark distinction between the smooth activ
 
 \textbf{Are our directions meaningful and distinct?}
 
-\cite{tinysubspaces} show that gradients exhibit spurious alignment with the dominant eigenspace of the Hessian during training. Specifically, when the gradient appears to align with the top eigenspace, projecting it onto this subspace actually yields poor training progress \cite{tinysubspaces}. This finding suggests that our construction of distinct search directions is likely meaningful. Our method explicitly constructs directions from different sources. The SFN step, where we apply the $\abs{\cdot}$ function to the eigenvalues, alters the dominant subspace by ensuring positive definiteness. We hypothesis that this likely breaks the spurious alignment observed in standard training, making our dominant eigenspace directions genuinely useful rather than being correlated with the gradient. The strong empirical performance of KryBall on ill-conditioned problems, where eigenspace structure is critical, further supports. Our multi-directional search strategy captures meaningful aspects of the optimisation landscape that individual directions cannot provide alone.
+\cite{tinysubspaces} show that gradients exhibit spurious alignment with the dominant eigenspace of the Hessian during training. Specifically, when the gradient appears to align with the top eigenspace, projecting it onto this subspace actually yields poor training progress \cite{tinysubspaces}. This finding suggests that our construction of distinct search directions is likely meaningful. Our method explicitly constructs directions from different sources. The SFN step, where we apply the $\abs{\cdot}$ function to the eigenvalues, alters the dominant subspace by ensuring positive definiteness. We hypothesis that this likely breaks the spurious alignment observed in standard training, making our dominant eigenspace directions genuinely useful rather than being correlated with the gradient. The strong empirical performance of KryBall on ill-conditioned problems, where eigenspace structure is critical. This supports the hypothesis that our multi-directional search strategy captures meaningful aspects of the optimisation landscape that individual directions cannot provide alone.
 
 \textbf{How can we tell if our computed SFN step approximates the true SFN step?}
 
@@ -457,15 +457,29 @@ Solving this linear system for $\alpha$ and computing $||r||$ tells us how well 
 
 While KryBall demonstrates promising performance across several optimisation tasks, our evaluation reveals important limitations. We now discuss these limitations and how to address them.
 
-\begin{itemize}
-    \item \textbf{Late-Epoch Instability}: As demonstrated in our CIFAR-10 experiments, KryBall exhibits increased variance and instability in later training epochs. This occurs when the quadratic approximation becomes less accurate near local minima, where the loss landscape exhibits multiscale, subquadratic behaviour \citep{ma2022beyond}. We also saw empirical evidence of this when we sampled the optimiser trajectory in \cref{fig:ll_landscape}. One way to address this is to switch off the quadratic model and only use first-order information as we approach the local minima. 
-    
-    \item \textbf{Dependence on Smooth Activation Functions}: KryBall requires smooth activation functions to operate effectively. Our analysis in \cref{fig:act_results} shows that non-smooth activation functions such as ReLU significantly degrade performance, as points of non-differentiability violate the underlying assumptions of both the quadratic model and HVP computations.
-    
-    \item \textbf{Hyperparameter Sensitivity}: Our sensitivity analysis reveals that KryBall is reasonably sensitive and dependent on the Krylov dimension $M$ and refresh rate $r_{\text{refresh}}$. This requires careful tuning of these hyperparameters, where we saw that subptimal values can lead to poor performance.
-    
-    \item \textbf{Trust-Region Step Rejection}: Our trust-region framework can reject optimisation steps when the quadratic model poorly predicts actual function behavior. While this provides stability, frequent step rejections can slow convergence compared to first-order methods that always accept their steps. This is particularly the case when the Hessian approximation degrades or is in highly non-quadratic regions.
-    
-    \item \textbf{Computational Overhead}: KryBall requires computing HVPs and constructing Krylov subspaces, introducing additional computational cost compared to first-order methods. While HVPs can be computed efficiently using automatic differentiation, the overall cost per iteration remains higher than gradient-only approaches.
-\end{itemize}
+\subsection{Late-Epoch Instability}
+\label{ssec:late_epoch_instability}
 
+As demonstrated in our CIFAR-10 experiments, KryBall exhibits increased variance and instability in later training epochs. This occurs when the quadratic approximation becomes less accurate near local minima, where the loss landscape exhibits multiscale, subquadratic behaviour \citep{ma2022beyond}. We also saw empirical evidence of this when we sampled the optimiser trajectory in \cref{fig:ll_landscape}. One way to address this is to switch off the quadratic model and only use first-order information as we approach the local minima. This would likely require a heuristic where after a certain point in training, we switch off the quadratic model and only use either SGD or Adam. This is a hybrid approach, and we discuss this further in \cref{ssec:hybrid_approaches}.
+    
+\subsection{Dependence on Smooth Activation Functions}
+\label{ssec:dependence_on_smooth_activation_functions}
+
+A fundamental limitation of KryBall is that it requires smooth activation functions to operate effectively. Our analysis in \cref{fig:act_results} shows that non-smooth activation functions such as ReLU significantly degrade performance, as points of non-differentiability violate the underlying assumptions of the quadratic model. To address this, we require a way to approximate these points without using the quadratic model. Approximation by finite differences is one such method. This has been done by \cite{finite_diff} to approximate the Hessian cheaply, and has shown to be effective in CIFAR-10 classification tasks.
+
+\subsection{Hyperparameter Sensitivity}
+\label{ssec:hyperparameter_sensitivity}
+
+Our sensitivity analysis reveals that KryBall is reasonably sensitive and dependent on the Krylov dimension $M$ and refresh rate $r_{\text{refresh}}$. We note that while our hyperparameters are not as sensitive as Adam and MSGD, they still require careful tuning, where suboptimal values can lead to poor performance as we saw in \cref{fig:sensitivity_analysis}. One way to address this could be to use adaptive schemes that automatically adjust $M$ and $r_{\text{refresh}}$. This has been done by \cite{henriques2019small}, who automatically rescale hyperparameters by using an objective change heuristic.
+
+\subsection{Trust-Region Step Rejection}
+\label{ssec:trust_region_step_rejection}
+
+Our trust-region framework can reject optimisation steps when the quadratic model poorly predicts actual function behavior. While this provides stability, frequent step rejections can slow convergence compared to first-order methods that always accept their steps. This is particularly the case when the Hessian approximation degrades or is in highly non-quadratic regions. A good way to address this is to simply use the gradient or momentum as a fallback. Moreover, we can instead consider a hybrid approach where if our step is rejected, we proceed with a first-order optimiser such as Adam or MSGD.
+
+\subsection{Computational Overhead}
+\label{ssec:computational_overhead}
+
+KryBall requires computing HVPs and constructing Krylov subspaces, introducing additional computational cost compared to first-order methods. While HVPs can be computed efficiently using automatic differentiation, the overall cost per iteration remains higher than gradient-only approaches. The key limitation here is that the main computational cost comes from the construction of the Krylov subspace, as our Krylov dimension $M$ is fixed throughout training. This overhead could be mitigated by adaptively reducing the Krylov dimension $M$ in regions where high-quality approximations are not critical, or by increasing the refresh rate $r_{\text{refresh}}$ when the landscape is relatively stable.
+
+In this section, we presented the evaluations of our optimiser, KryBall, on a range of tasks. We evaluated KryBall's performance on ill-conditioned problems, simple binary classification, and more complex image classification tasks. We discussed KryBall's performance in comparison to the state-of-the-art optimisers Adam and MSGD. We then followed with a sensitivity analysis, a deeper discussion about key questions and finally the limitations of our method. We now move on to conclude this thesis.
