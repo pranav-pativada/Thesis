@@ -1,7 +1,7 @@
 \chapter{Evaluation and Analysis}
 \label{chap:evaluation}
 
-In this chapter, we present our evaluation, findings, and analysis of our method, the KryBall optimisation algorithm. We start by discussing the implementation of KryBall in \ref{sec:implementation}. We then present the experimental setup in \ref{sec:experimental_setup}, which includes the datasets, models, metrics, hyperparameter settings, and tasks to be evaluated. This is followed by our results in \ref{sec:results}, where we include our empirical evaluations, sensitivity analysis, and ablation studies. We then interpret our findings and do some further analysis in \ref{sec:discussion_and_further_analysis}. Finally, we discuss the limitations of our method in \ref{sec:limitations}.
+In this chapter, we present our evaluation, findings, and analysis of our method, the KryBall optimisation algorithm. We start by discussing the implementation of KryBall in \ref{sec:implementation}. We then present the experimental setup in \ref{sec:experimental_setup}, which includes the datasets, models, metrics, hyperparameter settings, and tasks to be evaluated. This is followed by our results in \ref{sec:results}, where we include our empirical evaluations and sensitivity analysis. We then interpret our findings and do some further analysis in \ref{sec:discussion_and_further_analysis}. Finally, we discuss the limitations of our method in \ref{sec:limitations}.
 
 \section{Implementation}
 \label{sec:implementation}
@@ -162,7 +162,7 @@ All of our experiments are tuned with Bayesian hyperparameter search combined wi
     \item \textbf{MSGD}: Learning rate $\alpha \in [1 \times 10^{-4}, 1]$ under a log uniform distribution, momentum $\beta \in [0.8, 0.99]$ under a uniform distribution.
     \item \textbf{Adam}: Learning rate $\alpha \in [1 \times 10^{-4}, 1]$ under a log uniform distribution, betas $\beta_1 \in [0.9, 0.999]$ and $\beta_2 \in [0.99, 0.99999]$ under a uniform distribution.
     \item \textbf{LBFGS}: Learning rate $\alpha \in [1 \times 10^{-4}, 1]$ under a log uniform distribution.
-    \item \textbf{KryBall}: Krylov subspace size $k \in [1, 10]$ under an integer uniform distribution, trust-region radius max $\Delta_{\mathit{max}} \in [1 \times 10^{-2}, 1]$ under a log uniform distribution, krylov refresh rate $r_{\mathit{refresh}} \in [1, 10]$ under an integer uniform distribution.
+    \item \textbf{KryBall}: Krylov subspace size $k \in [1, 10]$ under an integer uniform distribution, krylov refresh rate $r_{\mathit{refresh}} \in [1, 10]$ under an integer uniform distribution.
 \end{itemize}
 
 \subsection{Experimental Infrastructure}
@@ -171,7 +171,7 @@ We run our evaluations and experiments on a single machine that consists of an N
 
 \section{Results}
 \label{sec:results}
-In this section, we present our empirical evaluations of KryBall. We present our results and the comparisons of KryBall with other optimisers for each of the tasks we have defined in \cref{ssec:task_1_ill_conditioned_function_optimisation}, \cref{ssec:task_2_xor_classification}, and \cref{ssec:task_3_image_classification}. We then present our ablation studies and sensitivity analysis in \cref{ssec:ablation_studies} and \cref{ssec:second_order_methods}. For each task, we discuss the results and analyse our findings. 
+In this section, we present our empirical evaluations of KryBall. We present our results and the comparisons of KryBall with other optimisers for each of the tasks we have defined in \cref{ssec:task_1_ill_conditioned_function_optimisation}, \cref{ssec:task_2_xor_classification}, and \cref{ssec:task_3_image_classification}. We then present our sensitivity analysis in \cref{ssec:second_order_methods}. For each task, we discuss the results and analyse our findings. 
 
 \subsection{Task 1: Ill-Conditioned Function Optimisation}
 \label{ssec:results_ill_conditioned_function_optimisation}
@@ -326,9 +326,9 @@ We now move into the primary focus of our results, evaluating our optimiser on s
     \label{fig:image_classification_results}
 \end{figure}
 
-\textbf{MNIST-1D MLP}: KryBall demonstrates a clear advantage for the MNIST-1D MLP task. It is able to achieve the highest peak accuracy and the lowest final training loss. \cref{fig:mnist1d_mlp_loss} and \cref{fig:mnist1d_mlp_acc} show that KryBall converges quickly and makes a large improvement over Adam and MSGD, especially in 40 to 80 epoch range. As such, we outperform Adam and MSGD in all metrics. 
+\textbf{MNIST-1D MLP}: KryBall demonstrates a clear advantage for the MNIST-1D MLP task. It is able to achieve the highest peak accuracy and the lowest final training loss. \cref{fig:mnist1d_mlp_loss} and \cref{fig:mnist1d_mlp_acc} show that KryBall converges quickly and makes a large improvement over Adam and MSGD, especially in 40 to 80 epoch range. We note that while a peak accuracy of 0.685 may not sound high, this contends with the best result on this specific model for MNIST-1D \cite{greydanus_mnist1d}. As such, we outperform Adam and MSGD in all metrics.
 
-\textbf{CIFAR-10 CNN}: We see a more nuanced performance. Adam achieves the lowest final training loss, alongside the best final test accuracy. However, KryBall slightly outperforms Adam and records a higher peak test accuracy. The training loss curves in \cref{fig:cifar10_cnn_loss} show Adam and MSGD reaching a slightly lower loss plateau than KryBall. In terms of test accuracy curves in \cref{fig:cifar10_cnn_acc}, all three optimisers are competitive, with KryBall showing a strong peak but Adam and MSGD achieve slightly better peak test accuracy. A key observation here is that in \cref{fig:cifar10_cnn_acc}, KryBall originally has a lower training loss, but then is surpassed by Adam and MSGD as training continue. During epochs 10 to 25, KryBall is also quite variant before converging. This is unlike Adam and MSGD, who are consistent all the way. 
+\textbf{CIFAR-10 CNN}: Here, we see a more nuanced performance. Adam achieves the lowest final training loss, alongside the best final test accuracy. However, KryBall slightly outperforms Adam and records a higher peak test accuracy. The training loss curves in \cref{fig:cifar10_cnn_loss} show Adam and MSGD reaching a slightly lower loss plateau than KryBall. In terms of test accuracy curves in \cref{fig:cifar10_cnn_acc}, all three optimisers are competitive, with KryBall showing a strong peak but Adam and MSGD achieve slightly better peak test accuracy. A key observation here is that in \cref{fig:cifar10_cnn_acc}, KryBall originally has a lower training loss, but then is surpassed by Adam and MSGD as training continue. During epochs 10 to 25, KryBall is also quite variant before converging. This is unlike Adam and MSGD, who are consistent all the way. 
 
 \textbf{CIFAR-10 ResNet-18}: We see a similar comparison here. Adam has the best final training loss, and best peak test and final test accuracy. However, KryBall is generally competitive with Adam and MSGD. It achieves the same best test accuracy as MSGD, and only a slightly lower final test accuracy. Furthermore, \cref{fig:cifar10_resnet_loss} shows the same trend as in \cref{fig:cifar10_cnn_loss}, where KryBall is initially competitive and achieves a lower training loss, but then is surpassed by Adam and MSGD as training continues. In \cref{fig:cifar10_resnet_acc}, we see that KryBall is more stable than Adam and MSGD in the earlier epochs, but less stable in the later epochs and thus its performance suffers. The late epoch instability is also seen in \cref{fig:cifar10_cnn_acc}. 
 
@@ -337,23 +337,16 @@ To recap, KryBall outperforms the state-of-the art Adam and MSGD on the MNIST-1D
 \subsection{Sensitivity Analysis}
 \label{ssec:sensitivity_analysis}
 
-We now perform a sensitivity analysis of our method. Our choice of task is the MNIST-1D MLP task, since it is our best performing task. We first perform a sensitivity analysis of the Krylov subspace dimension $M$. We do this by varying $M$ from 1 to 10 and keeping all other hyperparameters constant. Our results are shown in \cref{fig:sens_krylov_dim}. This is followed by a sensitivity analysis of the maximum trust region radius $\Delta_{\mathit{max}}$ and then the krylov refresh rate $r_{\mathit{refresh}}$. We present the results in \cref{fig:sens_max_step} and \cref{fig:sens_r_refresh}.
+We now perform a sensitivity analysis of our method on the MNIST-1D MLP task. We choose this since it is our best performing task. Our sensitive analysis is on the Krylov subspace dimension $M$ and the krylov refresh rate $r_{\mathit{refresh}}$. This is done by varying $M$ and $r_{\mathit{refresh}}$ from their hyperparameter ranges and keeping all other hyperparameters constant. We present the results in \cref{fig:sensitivity_analysis}.
 
 \begin{figure}[!t]
     \begin{subfigure}[b]{0.49\linewidth}
         \centering
         \includegraphics[width=\linewidth]{figures/5evals/sens_krylov_dim.png}
-        \caption{The sensitivity analysis of the Krylov subspace size $M$ on MNIST-1D MLP.}
+        \caption{The sensitivity analysis of the Krylov subspace dimension $M$ on MNIST-1D MLP.}
         \label{fig:sens_krylov_dim}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/5evals/sens_max_step.png}
-        \caption{The sensitivity analysis of the maximum trust region radius $\Delta_{\mathit{max}}$ on MNIST-1D MLP.}
-        \label{fig:sens_max_step}
-    \end{subfigure}
-    \vspace{1em}
     \begin{subfigure}[b]{0.49\linewidth}
         \centering
         \includegraphics[width=\linewidth]{figures/5evals/sens_refresh.png}
@@ -365,30 +358,114 @@ We now perform a sensitivity analysis of our method. Our choice of task is the M
 \end{figure}
 
 \textbf{Krylov Subspace Size $(M)$}: We see that the Krylov subspace size $M$ is sensitive to the performance of KryBall. For low $M$, performance suffers since we are not able to approximate the Hessian well. As $M$ increases, we obtain good performance. However, as we continue to increase $M$ past a certain point (5), our performance plateaus. This is interesting, as usually a higher $M$ results in a better approximation. We suspect that for $M=5$ onwards, the dominant curvature information has already been captured. The new basis vectors that are generated are less relevant and do not add useful information, since we have already captured most of the curvature information previously. We present some further analysis about our approximation in \cref{sec:discussion_and_further_analysis}.
-
-\textbf{Maximum Trust Region Radius $(\Delta_{\mathit{max}})$}: The maximum trust region radius 
-
-We see that the maximum trust region radius $\Delta_{\mathit{max}}$ is also sensitive to the performance of KryBall. We see that $\Delta_{\mathit{max}} = 0.3$ is the optimal point, and that $\Delta_{\mathit{max}} = 0.1$ is the worst performing point. This is likely because $\Delta_{\mathit{max}} = 0.1$ is too small and does not provide a good approximation of the landscape, and $\Delta_{\mathit{max}} = 0.5$ is too large and becomes too expensive to compute.
-
+ 
 \textbf{Krylov Refresh Rate $(r_{\mathit{refresh}})$}: The Krylov refresh rate is best when $r_{\mathit{refresh}} = 1$. This is because when $r_{\mathit{refresh}} = 1$, we use compute the Krylov subspace at every single iteration and are always using the most information. As $r_{\mathit{refresh}}$ increases, we instead fall back to our approximation not at the current point in the optimisation landscape. This is fine if we our information is not too outdated, as is the case for $r_{\mathit{refresh}} = 2$ and $r_{\mathit{refresh}} = 3$. However, as $r_{\mathit{refresh}} \geq 4$ our information is outdated and thus our quadratic model approximation is no longer accurate. This results in KryBall performing worse. We choose $r_{\mathit{refresh}} = 3$ as our default value.
-
-\subsection{Ablation Studies}
-\label{ssec:ablation_studies}
 
 \section{Discussion and Further Analysis}
 \label{sec:discussion_and_further_analysis}
 
-In this section, we present critical questions about the results we have observed and the choices we have made in evaluating our algorithm. We then answer these questions with our hypothesis and present further analysis. 
+In this section, we present critical questions about the results we have observed and the choices we have made in evaluating our algorithm. We then answer these questions with hypotheses, experiments and further analysis. 
 
-\textbf{Why do we see late epoch instability but good early epoch performance?}We saw in \cref{ssec:results_image_classification} that KryBall achieves good early epoch performance, but late epoch instability. We suspect this has to do with our quadratic approximation. In the early epochs, our quadratic model is accurate and a good approximation of the landscape. However, as training progresses, the landscape changes and we suspect that a quadratic model is less accurate. 
+\textbf{Why do we see late epoch instability but good early epoch performance?}
 
-\cite{ma2022beyond} state that the loss landscape of neural networks is multiscale, and that the quadratic model is only a local approximation of the landscape. Specifically, they find that in a neighbourhood of the local minima, the loss mixes a continuum of scales and instead grows subquadratically. As dimensionality increases, they state that the loss landscape instead shows several separate scales. This means that our quadratic model is not accurate in the presence of local minima. Given that the loss landscape is multiscale, and more importantly subquadratic near the local minima, this means that a first-order approximation may be better. In \cref{fig:cifar10_cnn_acc} and \cref{fig:cifar10_resnet_acc}, it is plausible that the variance we see near the end of training is due to this. While we have discussed this in the context of the relevant literature, we also perform our own analysis in \cref{sec:discussion_and_further_analysis}.
+We saw in \cref{ssec:results_image_classification} that KryBall achieves good early epoch performance, but late epoch instability. We suspect this has to do with our quadratic approximation. In the early epochs, our quadratic model is accurate and a good approximation of the landscape. However, as training progresses, the landscape changes and we suspect that a quadratic model is less accurate. 
 
-\textbf{How good is our approximation of the Hessian?}
+\cite{ma2022beyond} state that the loss landscape of neural networks is multiscale, and that the quadratic model is only a local approximation of the landscape. Specifically, they find that in a neighbourhood of the local minima, the loss mixes a continuum of scales and instead grows subquadratically. As dimensionality increases, they state that the loss landscape instead shows several separate scales. This means that our quadratic model is not accurate in the presence of local minima. Given that the loss landscape is multiscale, and more importantly subquadratic near the local minima, this means that a first-order approximation may be better. In \cref{fig:cifar10_cnn_acc} and \cref{fig:cifar10_resnet_acc}, it is plausible that the variance we see near the end of training is due to this. 
 
-\textbf{Are our directions distinct?}
+To illustrate this, we perform a small experiment. We take the MNIST-1D MLP model with SGD and at distinct points in the training process, we sample the loss landscape. This is done through an exhaustive line search over $\lambda \in [-2, 2]$. We then plot what the loss landscape is at the start and end of training. This empirically shows a slice of the loss landscape from the perspective of SGD. 
+
+\begin{figure}[!t]
+    \begin{subfigure}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth, height=0.4\textheight]{figures/5evals/ll_sgd_start.png}
+        \caption{The loss landscape at the start of training (first epoch).}
+        \label{fig:ll_sgd_start}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth, height=0.4\textheight]{figures/5evals/ll_sgd_end.png}
+        \caption{The loss landscape near the end of training (last epoch).}
+        \label{fig:ll_sgd_end}
+    \end{subfigure}
+    \caption{The loss landscape of the MNIST-1D MLP model from the view of SGD.}
+    \label{fig:ll_landscape}
+\end{figure}
+
+At the start of training, we see that the landscape is shaped exactly like a quadratic bowl in \cref{fig:ll_sgd_start}. However, near the end of training, that the landscape is approximately quadratic instead as seen in \cref{fig:ll_sgd_end}. It no longer is shaped exactly like a quadratic, but instead is stretched inwards. This agrees with \cite{ma2022beyond}, and it is plausible that this shape is similar to that of a subquadratic landscape.
 
 \textbf{What is the effect of the activation function on our optimiser?}
 
+All classification tasks in \cref{ssec:results_xor_classification} and \cref{ssec:results_image_classification} are evaluated with the Softplus activation function. Now, we examine the effect of the activation function on our optimiser. We evaluate the MNIST-1D MLP task with the following different activation functions using KryBall: ReLU, Softplus, Tanh and GeLU.
+
+\begin{figure}[!t]
+    \begin{subfigure}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/5evals/mnist1d_activation_loss.png}
+        \caption{Loss curves of the MNIST-1D MLP task with different activation functions using KryBall.}
+        \label{fig:act_loss}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/5evals/mnist1d_activation_acc.png}
+        \caption{Test accuracy of the MNIST-1D MLP task with different activation functions using KryBall.}
+        \label{fig:act_acc}
+    \end{subfigure}
+    \caption{The loss curves and test accuracy of the MNIST-1D MLP task evaluated with KryBall and ReLU, Softplus, Tanh and GeLU activation functions.}
+    \label{fig:act_results}
+\end{figure}
+
+In \cref{fig:act_results}, there is a stark distinction between the smooth activations and the non-smooth activation function ReLU. When using smooth activation functions, we reach close to training loss and our test accuracy is much better. However, the loss is much higher and our accuracy is lower when using ReLU. We have a good reason for this, which is that the quadratic approximation suffers in the presence of non-smooth activation functions. ReLU introduces non-differentiability at zero. This means that our quadratic model and trust-region framework, whose underlying assumptions are that we operate in smooth regions, is violated. Our method relise on meaningful HVPs for the approximation, but these are not well-defined at the transition points of ReLU units. This leads to poor curvature approximations.At this point, if we try to approximate the Hessian and the surrounding region using a quadratic model, we ultimately will not be able to. As such, it is better to use first-order methods that do not have these assumptions when using non-smooth activation functions. 
+
+\textbf{Are our directions meaningful and distinct?}
+
+\cite{tinysubspaces} show that gradients exhibit spurious alignment with the dominant eigenspace of the Hessian during training. Specifically, when the gradient appears to align with the top eigenspace, projecting it onto this subspace actually yields poor training progress \cite{tinysubspaces}. This finding suggests that our construction of distinct search directions is likely meaningful. Our method explicitly constructs directions from different sources. The SFN step, where we apply the $\abs{\cdot}$ function to the eigenvalues, alters the dominant subspace by ensuring positive definiteness. We hypothesis that this likely breaks the spurious alignment observed in standard training, making our dominant eigenspace directions genuinely useful rather than being correlated with the gradient. The strong empirical performance of KryBall on ill-conditioned problems, where eigenspace structure is critical, further supports. Our multi-directional search strategy captures meaningful aspects of the optimisation landscape that individual directions cannot provide alone.
+
+\textbf{How can we tell if our computed SFN step approximates the true SFN step?}
+
+The crux of the Krylov subspace approach is to approximate the Hessian with a low-dimensional projected Hessian that lets us compute the SFN step. We now quantify how to analytically measure this approximation quality through the reconstruction error
+\begin{align}
+    ||r|| = ||z^* - \hat{z}||,
+\end{align}
+where $z^*$ is the true SFN direction and $\hat{z}$ is our Krylov approximation:
+\begin{align}
+    \hat{z} = \sum_{k=0}^{m-1} \alpha_k H^k \hat{g}.
+\end{align}
+Using the eigendecomposition $H = V \Lambda V^T$ and letting $c = V^T \hat{g}$, we can express both directions in terms of the eigenvalues. The true SFN direction becomes:
+\begin{align}
+    z^* = -V |\Lambda|^{-1} c,
+\end{align}
+while our Krylov approximation can be written as:
+\begin{align}
+    \hat{z} = V \left(\sum_{k=0}^{m-1} \alpha_k \Lambda^k\right) c.
+\end{align}
+We can then minimise the reconstruction error by formulating it as a linear system.
+\begin{align}
+    r &= z^* - \hat{z} = V(-|\Lambda|^{-1} - \sum_{k=0}^{m-1} \alpha_k \Lambda^k)c
+\end{align}
+We can minimise $r$ by setting the middle term to zero, in which we get,
+\begin{align}
+    &\Rightarrow -|\Lambda|^{-1} = \sum_{k=0}^{m-1} \alpha_k \Lambda^k \\
+    &\Rightarrow -|\lambda_i|^{-1} = \sum_{k=0}^{m-1} \alpha_k \lambda_i^k \quad \text{for each eigenvalue } \lambda_i \\
+    &\Rightarrow M\alpha = -1_r \quad \text{where } M_{i,k} = |\lambda_i| \lambda_i^k.
+\end{align}
+Solving this linear system for $\alpha$ and computing $||r||$ tells us how well our basis represents the ideal $|\Lambda|^{-1}$ operator. A small reconstruction error indicates that our limited Krylov subspace adequately spans the directions needed for an accurate SFN step. A large reconstruction error indicates that at the current point, our computed SFN step is not a good approximation of the true SFN step. Thus, we can use this to monitor the quality of our SFN step.
+
 \section{Limitations}
 \label{sec:limitations}
+
+While KryBall demonstrates promising performance across several optimisation tasks, our evaluation reveals important limitations. We now discuss these limitations and how to address them.
+
+\begin{itemize}
+    \item \textbf{Late-Epoch Instability}: As demonstrated in our CIFAR-10 experiments, KryBall exhibits increased variance and instability in later training epochs. This occurs when the quadratic approximation becomes less accurate near local minima, where the loss landscape exhibits multiscale, subquadratic behaviour \citep{ma2022beyond}. We also saw empirical evidence of this when we sampled the optimiser trajectory in \cref{fig:ll_landscape}. One way to address this is to switch off the quadratic model and only use first-order information as we approach the local minima. 
+    
+    \item \textbf{Dependence on Smooth Activation Functions}: KryBall requires smooth activation functions to operate effectively. Our analysis in \cref{fig:act_results} shows that non-smooth activation functions such as ReLU significantly degrade performance, as points of non-differentiability violate the underlying assumptions of both the quadratic model and HVP computations.
+    
+    \item \textbf{Hyperparameter Sensitivity}: Our sensitivity analysis reveals that KryBall is reasonably sensitive and dependent on the Krylov dimension $M$ and refresh rate $r_{\text{refresh}}$. This requires careful tuning of these hyperparameters, where we saw that subptimal values can lead to poor performance.
+    
+    \item \textbf{Trust-Region Step Rejection}: Our trust-region framework can reject optimisation steps when the quadratic model poorly predicts actual function behavior. While this provides stability, frequent step rejections can slow convergence compared to first-order methods that always accept their steps. This is particularly the case when the Hessian approximation degrades or is in highly non-quadratic regions.
+    
+    \item \textbf{Computational Overhead}: KryBall requires computing HVPs and constructing Krylov subspaces, introducing additional computational cost compared to first-order methods. While HVPs can be computed efficiently using automatic differentiation, the overall cost per iteration remains higher than gradient-only approaches.
+\end{itemize}
+
