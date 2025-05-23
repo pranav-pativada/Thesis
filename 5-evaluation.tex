@@ -176,11 +176,11 @@ In this section, we present our empirical evaluations of KryBall. We present our
 \subsection{Task 1: Ill-Conditioned Function Optimisation}
 \label{ssec:results_ill_conditioned_function_optimisation}
 
-\Cref{fig:task_1_convergence_table} summarsies our results of optimising ill-conditioned functions. Here, we present the epochs until convergence, where we defined our criteria earlier in \cref{ssec:task_1_ill_conditioned_function_optimisation}. We see in \cref{fig:task_1_convergence_table} that KryBall and LBFGS outclass MSGD and Adam when optimising the Rosenbrock function. Specifically, LBFGS converges the fastest regardless of the Rosenbrock variant. This is followed by KryBall, which is competitive with LBFGS. However, we note that LBFGS represents the \textit{ideal convergence} in practice, since for each iteration it evaluates the function multiple times and backtracks. This is contrast to our method, which only evaluates the function once. Thus, we see that our method is competitive in practice with the ideal case. 
+\Cref{tab:task_1_convergence_table} summarsies our results of optimising ill-conditioned functions. Here, we present the epochs until convergence, where we defined our criteria earlier in \cref{ssec:task_1_ill_conditioned_function_optimisation}. We see in \cref{tab:task_1_convergence_table} that KryBall and LBFGS outclass MSGD and Adam when optimising the Rosenbrock function. Specifically, LBFGS converges the fastest regardless of the Rosenbrock variant. This is followed by KryBall, which is competitive with LBFGS. However, we note that LBFGS represents the \textit{ideal convergence} in practice, since for each iteration it evaluates the function multiple times and backtracks. This is contrast to our method, which only evaluates the function once. Thus, we see that our method is competitive in practice with the ideal case. 
 
 \begin{table}[!t]
     \caption{Epochs until convergence for each optimiser on the Rosenbrock and Rahimi-Recht functions. The best values denote fastest convergence, and are bolded and highlighted in green. Divergence is represented by N/A and highlighted in red.}
-    \label{fig:task_1_convergence_table}
+    \label{tab:task_1_convergence_table}
     \begin{tabular}{cccccc}
     \hline
     \multicolumn{1}{l}{} & \multicolumn{5}{c}{\textbf{Epochs Until Convergence $\downarrow$}}                                                                                                                                   \\ \hline
@@ -197,7 +197,7 @@ This is further evidenced by the optimiser trajectories for the Rosenbrock varia
 
 On the other hand, we see that MSGD and Adam make little progress and can be unstable. In \cref{fig:deterministic}, both MSGD and Adam become unstable when trying to take large steps. In \cref{fig:stochastic_1} and \cref{fig:stochastic_2}, MSGD and Adam make very little progress per iteration. This shows that for ill-conditioned functions, MSGD and Adam are not able to take large steps and remain stable. This supports our hypothesis that ill-conditioned functions are a problem for first-order methods, as we discussed in \cref{chap:background}.
 
-For the Rahimi-Recht function, we see all optimisers being able to reach the minimum when the problem is slightly ill-conditioned. \Cref{fig:rr_losses_k_10} and \cref{fig:rr_losses_k_1e5} show the loss curves for the two instances of the Rahimi-Recht function. Our problem of interest is \cref{fig:rr_losses_k_1e5}, where the function is severely ill-conditioned. We see in \cref{fig:task_1_convergence_table} that only KryBall and Adam are able to converge, while MSGD and LBFGS diverge. Adam converges very slowly and exhibits instability as it approaches the minimum. However, it does not diverge like MSGD. We suspect that Adam's adaptive learning rate is advantageous for highly ill-conditioned functions, as it can adaptively scale each parameter. This is beneficial since, as we approach the minimum, the eigenvalues of the Hessian become increasingly large. MSGD's constant momentum scaling is thus insufficient to handle this eigenvalue spread, which explains why it diverges so rapidly.
+For the Rahimi-Recht function, we see all optimisers being able to reach the minimum when the problem is slightly ill-conditioned. \Cref{fig:rr_losses_k_10} and \cref{fig:rr_losses_k_1e5} show the loss curves for the two instances of the Rahimi-Recht function. Our problem of interest is \cref{fig:rr_losses_k_1e5}, where the function is severely ill-conditioned. We see in \cref{tab:task_1_convergence_table} that only KryBall and Adam are able to converge, while MSGD and LBFGS diverge. Adam converges very slowly and exhibits instability as it approaches the minimum. However, it does not diverge like MSGD. We suspect that Adam's adaptive learning rate is advantageous for highly ill-conditioned functions, as it can adaptively scale each parameter. This is beneficial since, as we approach the minimum, the eigenvalues of the Hessian become increasingly large. MSGD's constant momentum scaling is thus insufficient to handle this eigenvalue spread, which explains why it diverges so rapidly.
 
 We also suspect LBFGS diverges because its limited-memory Hessian approximation becomes increasingly inaccurate when the function is highly ill-conditioned, leading to poor search directions. This is unlike KryBall, which maintains reliable curvature information. This allows our method to adapt the approximation quality and step sizes dynamically, enabling rapid convergence even in these highly ill-conditioned settings.
 
@@ -353,7 +353,7 @@ We now perform a sensitivity analysis of our method on the MNIST-1D MLP task. We
         \caption{The sensitivity analysis of the krylov refresh rate $r_{\mathit{refresh}}$. on MNIST-1D MLP.}
         \label{fig:sens_r_refresh}
     \end{subfigure}
-    \caption{Sensitivity analysis of KryBall on the MNIST-1D MLP task. We vary the Krylov dimension $M$, the maximum trust region radius $\Delta_{\mathit{max}}$, and the krylov refresh rate $r_{\mathit{refresh}}$. The parameters are varied according to their hyperparameter ranges we defined in \cref{ssec:sensitivity_analysis}. The best performing point is marked in red.}
+    \caption{Sensitivity analysis of KryBall on the MNIST-1D MLP task. We vary the Krylov dimension $M$, the maximum trust region radius $\Delta_{\mathit{max}}$, and the Krylov refresh rate $r_{\mathit{refresh}}$. The parameters are varied according to their hyperparameter ranges we defined in \cref{ssec:sensitivity_analysis}. The best performing point is marked in red.}
     \label{fig:sensitivity_analysis}
 \end{figure}
 
@@ -452,7 +452,7 @@ We can minimise $r$ by setting the middle term to zero, in which we get,
 \end{align}
 Solving this linear system for $\alpha$ and computing $||r||$ tells us how well our basis represents the ideal $|\Lambda|^{-1}$ operator. A small reconstruction error indicates that our limited Krylov subspace adequately spans the directions needed for an accurate SFN step. A large reconstruction error indicates that at the current point, our computed SFN step is not a good approximation of the true SFN step. Thus, we can use this to monitor the quality of our SFN step.
 
-\section{Limitations}
+\section{Limitations and Improvements}
 \label{sec:limitations}
 
 While KryBall demonstrates promising performance across several optimisation tasks, our evaluation reveals important limitations. We now discuss these limitations and how to address them.
