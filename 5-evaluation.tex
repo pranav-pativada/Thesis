@@ -11,7 +11,7 @@ Most machine learning workflows and tasks are implemented entirely in Python, an
 \subsection{Adhering to the PyTorch Optimiser API}
 \label{ssec:adhering_to_the_pytorch_optimiser_api}
 
-Our implementation adheres to the PyTorch optimiser API while simplifying the standard training workflow. In a typical training setup in PyTorch, users must explicitly call the following functions \citep(pytorch):
+Our implementation adheres to the PyTorch optimiser API while simplifying the standard training workflow. In a typical training setup in PyTorch, users must explicitly call the following functions \citep{pytorch}:
 \begin{itemize}
     \item \verb|.backward()| to create the computation graph and the associated gradients.
     \item \verb|.zero_grad()| to clear previous gradients.

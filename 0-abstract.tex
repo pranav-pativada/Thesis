@@ -1,9 +1,6 @@
 \chapter*{Abstract}
 
-An abstract is a very short summary (around 15 lines) of your entire work (that doesn't use citations by convention). There are plenty of examples you can take a look at -- simply take a look at some papers published at top-tier venues, e.g., by your supervisor. Also no mathematical notation here.
+Substantial progress has been made in deep learning, with neural networks transforming our lives. However, optimisation in deep learning faces fundamental challenges as they are dominated by saddle points. Current first-order methods are efficient and scalable, but struggle in these regions and cannot converge quickly. Second-order methods are much more effective, but are computationally intractable. This presents a fundamental challenge---how do we achieve the 
+the benefits of second-order methods while maintaining the efficiency of first-order methods?
 
-% What the task is
-% Why is this important
-% What exists and what the limitations are
-% What you've done
-% What the results showed
+In this thesis, we present KryBall, a novel optimisation algorithm that combines the best of both first and second-order methods. We use a Krylov subspace approach, alongside the Saddle-Free-Newton and a trust-region framework to efficiently incorporate second-order information and address this challenge. Our results demonstrate that KryBall achieves rapid convergence on ill-conditioned problems and binary classification, outperforming the state-of-the-art, and is generally competitive on image classification. We also provide an analysis on the deep learning optimisation landscape and demonstrate key theoretical properties of our approach.
