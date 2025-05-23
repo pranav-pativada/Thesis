@@ -6,12 +6,12 @@ In this chapter, we present our evaluation, findings, and analysis of our method
 \section{Implementation}
 \label{sec:implementation}
 
-Most machine learning workflows and tasks are implemented entirely in Python, and leverage the PyTorch library. This is because PyTorch has efficient low-level kernels and bindings that allow for automatic differentation and tensor operations. We design our optimiser to be integrated seamlessly with PyTorch. As such, KryBall can act as a drop-in replacement for other PyTorch optimisers in deep learning tasks.
+Most machine learning workflows and tasks are implemented entirely in Python, and leverage the PyTorch library \citep{pytorch}. This is because PyTorch has efficient low-level kernels and bindings that allow for automatic differentation and tensor operations \citep{pytorch}. We design our optimiser to be integrated seamlessly with PyTorch. As such, KryBall can act as a drop-in replacement for other PyTorch optimisers in deep learning tasks.
 
 \subsection{Adhering to the PyTorch Optimiser API}
 \label{ssec:adhering_to_the_pytorch_optimiser_api}
 
-Our implementation adheres to the PyTorch optimiser API while simplifying the standard training workflow. In a typical training setup in PyTorch, users must explicitly call the following functions:
+Our implementation adheres to the PyTorch optimiser API while simplifying the standard training workflow. In a typical training setup in PyTorch, users must explicitly call the following functions \citep(pytorch):
 \begin{itemize}
     \item \verb|.backward()| to create the computation graph and the associated gradients.
     \item \verb|.zero_grad()| to clear previous gradients.
@@ -19,11 +19,12 @@ Our implementation adheres to the PyTorch optimiser API while simplifying the st
 \end{itemize}
 We instead consolidate these into just a single \verb|step| function. This makes it cleaner than the current workflow while maintaining full compatibility with the PyTorch ecosystem. This results in a more clean implementation for end users that reduces boilerplate code. 
 
-In addition, we provide an interpretable way to track necessary information. In PyTorch, optimiser parameters such as momentum and adaptive learning rates are associated with individual parameter blocks and buried within the optimiser's internal state dictionaries. This makes it difficult to understand how they behave during training. Our implementation exposes these quantities directly as accessible vectors, allowing researchers to easily inspect gradients, momentum terms, and other optimisation variables. This facilitates deeper insights into the optimisation process and enables more effective understanding and debugging.
+In addition, we provide an interpretable way to track necessary information. In PyTorch, optimiser parameters such as momentum and adaptive learning rates are associated with individual parameter blocks and buried within the optimiser's internal state dictionaries \citep{pytorch}. This makes it difficult to understand how they behave during training. Our implementation exposes these quantities directly as accessible vectors, allowing researchers to easily inspect gradients, momentum terms, and other optimisation variables. This facilitates deeper insights into the optimisation process and enables more effective understanding and debugging.
 
 \subsection{Function Integration with PyTorch}
 \label{ssec:function_integration_with_pytorch}
 
+% Nit: Cite the github repos
 We also introduce a novel test suite that integrates classic functions (Rosenbrock, 2D Saddle, Monkey Saddle etc.) with PyTorch. Currently, most existing implementations that offer direct optimisation of just functions do not integrate with PyTorch. Instead, they all use numerical solvers and approximate the first and second-order derivatives. This is because PyTorch workflows are primarily for deep learning, and simple function optimisation is not a focus. To our knowledge, there exists only a few libraries that try and integrate function optimisation with deep learning. However, these are outdated, lack maintainability, and do not use modern PyTorch techniques such as model JIT compilation to improve speed. We thus implement an easy way to optimise any function with PyTorch optimisers such as SGD, Adam and LBFGS that adheres to the standard training loop. We show an example in \cref{alg:optimise_function_with_pytorch}.
 
 \begin{algorithm}[h]
@@ -46,6 +47,7 @@ We also introduce a novel test suite that integrates classic functions (Rosenbro
 \subsection{The Trust-Region Framework}
 \label{ssec:the_trust_region_framework}
 
+% Nit: cite this
 A core contribution that we present is a novel implementation of $N$-dimensional subspace optimisation that solves the trust-region subproblem. To our knowledge, this is the first general-purpose implementation tailored for deep learning applications within the PyTorch ecosystem. Many trust-region frameworks either employ the dogleg method, or 2D subspace optimisation, but also are not integrated with PyTorch. We thus implement a general-purpose $N$-dimensional subspace optimiser that can be used with any PyTorch optimiser, and more generally any task that involves the trust-region subproblem. 
 
 \subsection{Loss Landscape Sampling}
@@ -69,7 +71,7 @@ The first set of tasks involves minimising ill-conditioned objective functions. 
 % TODO: Cite properly
 \subsubsection{Stochastic Rosenbrock Function}
 \label{sssec:task_1_rosenbrock_function}
-We implement a stochastic variant of the Rosenbrock function from \cite{NoceWrig06}. We have that $\mathcal{R}: \mathbb{R}^2 \rightarrow \mathbb{R}$:
+We implement a stochastic variant of the Rosenbrock function from \cite{henriques2019small}. We have that $\mathcal{R}: \mathbb{R}^2 \rightarrow \mathbb{R}$:
 \begin{equation}
 \mathcal{R}(x, y) = (1 - x)^2 + 100\epsilon_i(y - x^2)^2,
 \end{equation}
@@ -78,11 +80,11 @@ where at each evaluation of the function, a noise sample $\epsilon_i$ is drawn f
 % TODO: Cite Henriques and Rahimi and Recht
 \subsubsection{Rahimi-Recht Function}
 \label{sssec:task_1_rahimi_recht_function}
-The second function is an ill-conditioned linear regression problem introduced by Rahimi and Recht. This involves training a neural network with two linear layers to approximate a linear map with a high condition number. The objective function is
+The second function is an ill-conditioned linear regression problem introduced by Rahimi and Recht \citep{recht2017kitchen}. This involves training a neural network with two linear layers to approximate a linear map with a high condition number. The objective function is
 \begin{equation}
 \mathcal{L}(W) = \|\hat{y} - y_{true}\|^2 = \|W_L W_{L-1} \cdots W_1 x - Ax\|^2, 
 \end{equation}
-where $A$ is an ill-conditioned matrix with condition number $\kappa$, and $W_i$ are the weight matrices of the linear network. We construct the true linear map $A_{true} \in \mathbb{R}^{m \times d}$ with singular values linearly spaced between 1 and $\kappa$. We generate $n=1000$ random input samples and compute the corresponding outputs using this map. The behaviour of this function is that as we get closer to the minima, it becomes increasingly ill-conditioned. Specifically, the eigenvalues of the Hessian tend towards infinity.
+where $A$ is an ill-conditioned matrix with condition number $\kappa$, and $W_i$ are the weight matrices of the linear network. We construct the true linear map $A_{true} \in \mathbb{R}^{m \times d}$ with singular values linearly spaced between 1 and $\kappa$ \citep{recht2017kitchen}. We generate $n=1000$ random input samples and compute the corresponding outputs using this map. The behaviour of this function is that as we get closer to the minima, it becomes increasingly ill-conditioned. Specifically, the eigenvalues of the Hessian tend towards infinity.
 
 \subsubsection{Evaluation Setup and Metrics}
 \label{sssec:task_1_evaluation_setup_and_metrics}
@@ -104,11 +106,11 @@ The next task we consider is a simple case of binary classification with the XOR
 \subsubsection{Evaluation Setup and Metrics}
 \label{sssec:task_2_evaluation_setup_and_metrics}
 % TODO: Reference BCE
-For this task, we use a simple MLP with 3 layers, consisting of one input layer, a hidden layer with a hidden dimension of size 8, and an output layer. Our activation function is the Softplus function, and our loss function is the Binary Cross Entropy (BCE) loss. The BCE loss is defined as
+For this task, we use a simple MLP with 3 layers, consisting of one input layer, a hidden layer with a hidden dimension of size 8, and an output layer. Our activation function is the Softplus function, and our loss function is the Binary Cross Entropy (BCE) loss \citep{mao2023cross}. The BCE loss is defined as
 \begin{equation}
 \mathcal{L}(y, \hat{y}) = -\frac{1}{N} \sum_{i=1}^N \left[ y_i \log \hat{y}_i + (1 - y_i) \log (1 - \hat{y}_i) \right],
 \end{equation}
-and measures the difference between the predicted probability distribution and the actual distribution which consists of the ground truth labels for a binary classification task. This is useful for the XOR case since our output is binary.
+and measures the difference between the predicted probability distribution and the actual distribution which consists of the ground truth labels for a binary classification task \citep{mao2023cross}. This is useful for the XOR case since our output is binary.
 
 We test MSGD, Adam, LBFGS, and KryBall on this task. Each optimiser is tuned for 20 sweeps, each with 100 epochs like the previous task. We use the best performing parameters, and then run each optimiser on the XOR task with a budget of 100 epochs. Given this task is quite simple, and our chosen model is more than capable, we measure the number of epochs it takes to converge. Our convergence criteria here is to reach perfect accuracy, that is an accuracy of 1.0, and completely minimise the loss function (reach 0 loss). This means we have perfectly predicted the XOR problem. In practice, most models and most optimisers are capable of this, and thus we instead focus on convergence speed. 
 
@@ -135,7 +137,7 @@ We evaluate our optimisers on the MNIST-1D and CIFAR-10 datasets. We categorise 
 \end{itemize}
 For each model, we use the Softplus activation as done previously. 
 
-For this image classification task, we employ the Categorical Cross Entropy (CCE) loss function. This generalises the BCE loss to multi-class classification problems, extending it to handle $C$ classes. This is done by comparing the predicted probability distribution over all classes with the true one-hot encoded label distribution. The CCE loss is defined as
+For this image classification task, we employ the Categorical Cross Entropy (CCE) loss function \citep{mao2023cross}. This generalises the BCE loss to multi-class classification problems, extending it to handle $C$ classes \citep{mao2023cross}. This is done by comparing the predicted probability distribution over all classes with the true one-hot encoded label distribution. The CCE loss is defined as
 \begin{equation}
 \mathcal{L}(y, \hat{y}) = -\frac{1}{N} \sum_{i=1}^N \sum_{c=1}^C y_{i,c} \log \hat{y}_{i,c}.
 \end{equation}
@@ -156,7 +158,7 @@ Our training setup is distinct from other tasks. Here, we sample mini-batches du
 \subsection{Hyperparameter Tuning Setup}
 \label{ssec:hyperparameter_tuning_setup}
 
-All of our experiments are tuned with Bayesian hyperparameter search combined with the Hyperband early stopping algorithm. Hyperband is a bandit-based algorithm that allocates resources to promising configurations while eliminating poorly performing ones early in training. We choose a halving factor $\eta = 3$, which eliminates the worst-performing configurations, retaining only the top $\frac{1}{3}$ of candidates at each successive halving round. This significantly reduces computational cost by avoiding full training of suboptimal hyperparameter combinations. We set a minimum iteration threshold of 10 epochs before any configuration can be terminated, ensuring sufficient training time for meaningful performance evaluation.
+All of our experiments are tuned with Bayesian hyperparameter search combined with the Hyperband early stopping algorithm \citep{li2018hyperband}. Hyperband is a bandit-based algorithm that allocates resources to promising configurations while eliminating poorly performing ones early in training \citep{li2018hyperband}. We choose a halving factor $\eta = 3$, which eliminates the worst-performing configurations, retaining only the top $\frac{1}{3}$ of candidates at each successive halving round. This significantly reduces computational cost by avoiding full training of suboptimal hyperparameter combinations. We set a minimum iteration threshold of 10 epochs before any configuration can be terminated, ensuring sufficient training time for meaningful performance evaluation.
 
 \begin{itemize}
     \item \textbf{MSGD}: Learning rate $\alpha \in [1 \times 10^{-4}, 1]$ under a log uniform distribution, momentum $\beta \in [0.8, 0.99]$ under a uniform distribution.
