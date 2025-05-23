@@ -6,7 +6,7 @@ In this chapter, we present our evaluation, findings, and analysis of our method
 \section{Implementation}
 \label{sec:implementation}
 
-Most machine learning workflows and tasks are implemented entirely in Python, and leverage the PyTorch library \citep{pytorch}. This is because PyTorch has efficient low-level kernels and bindings that allow for automatic differentation and tensor operations \citep{pytorch}. We design our optimiser to be integrated seamlessly with PyTorch. As such, KryBall can act as a drop-in replacement for other PyTorch optimisers in deep learning tasks.
+Most machine learning workflows and tasks are implemented entirely in Python, and leverage the PyTorch library \citep{pytorch}. This is because PyTorch has efficient low-level kernels that allow for automatic differentation and tensor operations \citep{pytorch}. We design our optimiser to be integrated seamlessly with PyTorch. As such, KryBall can act as a drop-in replacement for other PyTorch optimisers in deep learning tasks.
 
 \subsection{Adhering to the PyTorch Optimiser API}
 \label{ssec:adhering_to_the_pytorch_optimiser_api}
@@ -17,9 +17,9 @@ Our implementation adheres to the PyTorch optimiser API while simplifying the st
     \item \verb|.zero_grad()| to clear previous gradients.
     \item \verb|.step()| to perform the optimisation step and update the model parameters.
 \end{itemize}
-We instead consolidate these into just a single \verb|step| function. This makes it cleaner than the current workflow while maintaining full compatibility with the PyTorch ecosystem. This results in a more clean implementation for end users that reduces boilerplate code. 
+We instead consolidate these into just a single \verb|step| function. This makes it cleaner than the current workflow while maintaining full compatibility with the PyTorch ecosystem.
 
-In addition, we provide an interpretable way to track necessary information. In PyTorch, optimiser parameters such as momentum and adaptive learning rates are associated with individual parameter blocks and buried within the optimiser's internal state dictionaries \citep{pytorch}. This makes it difficult to understand how they behave during training. Our implementation exposes these quantities directly as accessible vectors, allowing researchers to easily inspect gradients, momentum terms, and other optimisation variables. This facilitates deeper insights into the optimisation process and enables more effective understanding and debugging.
+In addition, we provide an interpretable way to track necessary information. In PyTorch, optimiser parameters such as the momentum and adaptive learning rates are associated with individual parameter blocks and buried within the optimiser's internal state dictionaries \citep{pytorch}. This makes it difficult to understand how they behave during training. Our implementation exposes these quantities directly as accessible vectors, allowing researchers to easily inspect gradients, momentum terms, and other optimisation variables. This facilitates deeper insights into the optimisation process and enables more effective understanding and debugging.
 
 \subsection{Function Integration with PyTorch}
 \label{ssec:function_integration_with_pytorch}
@@ -53,12 +53,12 @@ A core contribution that we present is a novel implementation of $N$-dimensional
 \subsection{Loss Landscape Sampling}
 \label{ssec:loss_landscape_sampling}
 
-The final part of our contributions that we implement is the ability to inspect the loss landscape of deep learning training tasks. We implement a sampler that can be used to sample trajectories from the loss landscape of a deep learning model. Given a particular point in training, our sampler can investigate the local geometry by performing an exhaustive line search along the optimiser's step direction. This allows researchers to visualise and analyse the characteristics of the loss landscape in the vicinity of the optimisation trajectory for a particular optimiser. To our knowledge, this has not been done before, and we use this to analyse the trajectory of optimisers for different deep learning tasks in \cref{sec:discussion_and_further_analysis}. This inspection tool enables deeper insights into optimisation dynamics, and can help explain why certain optimisers perform better on specific tasks, and at which points in training they suffer.
+The final part of our contributions that we implement is the ability to inspect the loss landscape of deep learning training tasks. We implement a sampler that can be used to sample trajectories from the loss landscape of a deep learning model. Given a particular point in training, our sampler can investigate the local geometry by performing an exhaustive line search along the optimiser's step direction. This allows researchers to visualise and analyse the characteristics of the loss landscape in the vicinity of the optimisation trajectory for a particular optimiser. We use this to analyse the trajectory of optimisers for different deep learning tasks in \cref{sec:discussion_and_further_analysis}. 
 
 \section{Experimental Setup}
 \label{sec:experimental_setup}
 % Introduction to this section
-To evaluate KryBall, we must first define a diverse range of tasks that accurately reflect the challenges faced by deep learning models. In this section, we define these tasks with respect to the datasets, models, metrics, and hyperparameter tuning setups. We consider the following tasks as our suite: ill-conditioned functions, binary classification, and image classification. Our optimiser suite primarily consists of the MSGD and Adam, which were introduced in \cref{chap:lit_review}, and our KryBall optimiser. 
+To evaluate KryBall, we must first define a range of tasks that accurately reflect the challenges faced by deep learning models. In this section, we define these tasks with respect to the datasets, models, metrics, and hyperparameter tuning setups. We consider the following tasks as our suite: ill-conditioned functions, binary classification, and image classification.
 
 \subsection{Baselines}
 \label{ssec:baselines}
@@ -68,7 +68,6 @@ Before we introduce our tasks, we first define our baselines. We select MSGD and
 \label{ssec:task_1_ill_conditioned_function_optimisation}
 The first set of tasks involves minimising ill-conditioned objective functions. We choose the Rosenbrock function and implement a noisy, stochastic variant of it, and the Rahimi-Recht function, which we briefly mentioned in \cref{sssec:ill_conditioning} of \cref{chap:background}.
 
-% TODO: Cite properly
 \subsubsection{Stochastic Rosenbrock Function}
 \label{sssec:task_1_rosenbrock_function}
 We implement a stochastic variant of the Rosenbrock function from \cite{henriques2019small}. We have that $\mathcal{R}: \mathbb{R}^2 \rightarrow \mathbb{R}$:
@@ -77,7 +76,6 @@ We implement a stochastic variant of the Rosenbrock function from \cite{henrique
 \end{equation}
 where at each evaluation of the function, a noise sample $\epsilon_i$ is drawn from a uniform distribution $\mathcal{U}[\lambda_1, \lambda_2]$ with $\lambda_1 \leq \lambda_2$. When $\lambda_1 = \lambda_2 = 1$, we can recover the deterministic Rosenbrock function with its well-known minimum at $(x, y) = (1, 1)$. To assess robustness to noise, we compare each optimiser on both the deterministic formulation and two stochastic variants with different noise regimes.
 
-% TODO: Cite Henriques and Rahimi and Recht
 \subsubsection{Rahimi-Recht Function}
 \label{sssec:task_1_rahimi_recht_function}
 The second function is an ill-conditioned linear regression problem introduced by Rahimi and Recht \citep{recht2017kitchen}. This involves training a neural network with two linear layers to approximate a linear map with a high condition number. The objective function is
@@ -96,7 +94,7 @@ We evaluate MSGD, Adam, LBFGS, and KryBall on the Rosenbrock and the Rahimi-Rech
     \item \textbf{Slightly Ill-Conditioned Rahimi-Recht}: $\kappa = 10$.
     \item \textbf{Highly Ill-Conditioned Rahimi-Recht}: $\kappa = 1e5$.
 \end{itemize}
-Each optimiser is tuned using Hyperband on each function for 20 sweeps, where each sweep has 100 epochs. We describe in detail our hyperparameter tuning setup in \cref{ssec:hyperparameter_tuning_setup}. We then use the best performing configuration for each optimiser, and then run all optimisers with a budget of 2000 epochs until they converge within an $\epsilon$ of the solution or use up the computational budget. For Rosenbrock, we choose $\epsilon = 1 \times 10^{-4}$ and for Rahimi-Recht we choose $\epsilon = 1 \times 10^{-2}$. Here, we are measuring the optimisers ability to converge to the solution while handling noise and ill-conditioning.
+Each optimiser is tuned on each function for 20 sweeps, where each sweep has 100 epochs. We describe in detail our hyperparameter tuning setup in \cref{ssec:hyperparameter_tuning_setup}. We then use the best performing configuration for each optimiser, and then run all optimisers with a budget of 2000 epochs until they converge within an $\epsilon$ of the solution or use up the computational budget. For Rosenbrock, we choose $\epsilon = 1 \times 10^{-4}$ and for Rahimi-Recht we choose $\epsilon = 1 \times 10^{-2}$. Here, we are measuring the optimisers ability to converge to the solution while handling noise and ill-conditioning.
 
 \subsection{Task 2: XOR Classification}
 \label{ssec:task_2_xor_classification}
@@ -173,12 +171,12 @@ We run our evaluations and experiments on a single machine that consists of an N
 
 \section{Results}
 \label{sec:results}
-In this section, we present our empirical evaluations of KryBall. We present our results and the comparisons of KryBall with other optimisers for each of the tasks we have defined in \cref{ssec:task_1_ill_conditioned_function_optimisation}, \cref{ssec:task_2_xor_classification}, and \cref{ssec:task_3_image_classification}. We then present our sensitivity analysis in \cref{ssec:second_order_methods}. For each task, we discuss the results and analyse our findings. 
+In this section, we present our empirical evaluations of KryBall. We present the comparisons of KryBall with other optimisers for each of the tasks we have defined in \cref{ssec:task_1_ill_conditioned_function_optimisation}, \cref{ssec:task_2_xor_classification}, and \cref{ssec:task_3_image_classification}. We then present our sensitivity analysis in \cref{ssec:second_order_methods}. For each task, we discuss the results and analyse our findings. 
 
 \subsection{Task 1: Ill-Conditioned Function Optimisation}
 \label{ssec:results_ill_conditioned_function_optimisation}
 
-\Cref{tab:task_1_convergence_table} summarsies our results of optimising ill-conditioned functions. Here, we present the epochs until convergence, where we defined our criteria earlier in \cref{ssec:task_1_ill_conditioned_function_optimisation}. We see in \cref{tab:task_1_convergence_table} that KryBall and LBFGS outclass MSGD and Adam when optimising the Rosenbrock function. Specifically, LBFGS converges the fastest regardless of the Rosenbrock variant. This is followed by KryBall, which is competitive with LBFGS. However, we note that LBFGS represents the \textit{ideal convergence} in practice, since for each iteration it evaluates the function multiple times and backtracks. This is contrast to our method, which only evaluates the function once. Thus, we see that our method is competitive in practice with the ideal case. 
+\Cref{tab:task_1_convergence_table} summarises our results of optimising ill-conditioned functions. Here, we present the epochs until convergence, where we defined our criteria earlier in \cref{ssec:task_1_ill_conditioned_function_optimisation}. We see that KryBall and LBFGS outclass MSGD and Adam when optimising the Rosenbrock function. Specifically, LBFGS converges the fastest regardless of the Rosenbrock variant. This is followed by KryBall, which is competitive with LBFGS. However, we note that LBFGS represents the \textit{ideal convergence} in practice, since for each iteration it evaluates the function multiple times and backtracks. This is contrast to our method, which only evaluates the function once. Thus, we see that our method is competitive in practice with the ideal case. 
 
 \begin{table}[!t]
     \caption{Epochs until convergence for each optimiser on the Rosenbrock and Rahimi-Recht functions. The best values denote fastest convergence, and are bolded and highlighted in green. Divergence is represented by N/A and highlighted in red.}
@@ -195,11 +193,11 @@ In this section, we present our empirical evaluations of KryBall. We present our
     \end{tabular}
 \end{table}
 
-This is further evidenced by the optimiser trajectories for the Rosenbrock variants in \cref{fig:rosenbrock_results}. KryBall and LBFGS are impacted little by the ill-conditioning and are able to converge. LBFGS is able to converge very quickly as it takes very large steps in the optimisation landscape. It also takes a near perfect path, and can correct itself. We see this in \cref{fig:deterministic} as it overshoots the solution, but then re-evaluates and reaches the solution. This is a testament to LBFGS's backtracking and ability to evaluate the function multiple times. Our method also demonsrates this ability, and as it gets closer to the solution takes a path similar to LBFGS.
+This is further evidenced by the optimiser trajectories for the Rosenbrock variants in \cref{fig:rosenbrock_results}. KryBall and LBFGS are impacted little by the ill-conditioning and are able to converge. LBFGS is able to converge very quickly as it takes very large steps in the optimisation landscape. It also takes a near perfect straight line path and can correct itself. We see this in \cref{fig:deterministic} as it overshoots the solution, but then re-evaluates and reaches the solution. This is a testament to LBFGS's backtracking and ability to evaluate the function multiple times. Our method also demonsrates this ability, and as it gets closer to the solution takes a path similar to LBFGS.
 
 On the other hand, we see that MSGD and Adam make little progress and can be unstable. In \cref{fig:deterministic}, both MSGD and Adam become unstable when trying to take large steps. In \cref{fig:stochastic_1} and \cref{fig:stochastic_2}, MSGD and Adam make very little progress per iteration. This shows that for ill-conditioned functions, MSGD and Adam are not able to take large steps and remain stable. This supports our hypothesis that ill-conditioned functions are a problem for first-order methods, as we discussed in \cref{chap:background}.
 
-For the Rahimi-Recht function, we see all optimisers being able to reach the minimum when the problem is slightly ill-conditioned. \Cref{fig:rr_losses_k_10} and \cref{fig:rr_losses_k_1e5} show the loss curves for the two instances of the Rahimi-Recht function. Our problem of interest is \cref{fig:rr_losses_k_1e5}, where the function is severely ill-conditioned. We see in \cref{tab:task_1_convergence_table} that only KryBall and Adam are able to converge, while MSGD and LBFGS diverge. Adam converges very slowly and exhibits instability as it approaches the minimum. However, it does not diverge like MSGD. We suspect that Adam's adaptive learning rate is advantageous for highly ill-conditioned functions, as it can adaptively scale each parameter. This is beneficial since, as we approach the minimum, the eigenvalues of the Hessian become increasingly large. MSGD's constant momentum scaling is thus insufficient to handle this eigenvalue spread, which explains why it diverges so rapidly.
+For the Rahimi-Recht function, all optimisers are able to reach the minimum when the problem is slightly ill-conditioned. \cref{fig:rr_losses_k_10} and \cref{fig:rr_losses_k_1e5} show the loss curves for the two instances of the Rahimi-Recht function. Our problem of interest is \cref{fig:rr_losses_k_1e5}, where the function is severely ill-conditioned. We see in \Cref{tab:task_1_convergence_table} that only KryBall and Adam are able to converge, while MSGD and LBFGS diverge. Adam converges very slowly and exhibits instability as it approaches the minimum. However, it does not diverge like MSGD. We suspect that Adam's adaptive learning rate is advantageous for highly ill-conditioned functions, as it can adaptively scale each parameter. This is beneficial since, as we approach the minimum, the eigenvalues of the Hessian become increasingly large. MSGD's constant momentum scaling is thus insufficient to handle this eigenvalue spread, which explains why it diverges so rapidly.
 
 We also suspect LBFGS diverges because its limited-memory Hessian approximation becomes increasingly inaccurate when the function is highly ill-conditioned, leading to poor search directions. This is unlike KryBall, which maintains reliable curvature information. This allows our method to adapt the approximation quality and step sizes dynamically, enabling rapid convergence even in these highly ill-conditioned settings.
 
@@ -254,7 +252,7 @@ In summary, our method exhibits rapid convergence. It is competitive with the pr
 \subsection{Task 2: XOR Classification}
 \label{ssec:results_xor_classification}
 
-We now move onto our second task, XOR classification. Here, we evaluate the performance of our optimisers based on how quickly the converge to zero loss. We note that here, LBFGS is limited to one evaluation per epoch to make it fair for all optimisers. This is because for many deep learning tasks, we no longer have a best case pratical scenario or upper bound and need to ensure a fair comparison.
+We now move onto our second task, XOR classification. Here, we evaluate the performance of our optimisers based on how quickly the converge to zero loss. We note that LBFGS is limited to one evaluation per epoch to make it fair for all optimisers. This is because for many deep learning tasks, we no longer have a best case pratical scenario or upper bound and need to ensure a fair comparison.
 
 \begin{figure}[!t]
     \centering
@@ -263,14 +261,14 @@ We now move onto our second task, XOR classification. Here, we evaluate the perf
     \label{fig:xor_results}
 \end{figure}
 
-\cref{fig:xor_results} shows the loss curves. We see that KryBall and LBFGS converge the quickest, in less than 25 epochs. MSGD and Adam are also able to converge, but take longer. This shows that KryBall is able to generalise very quickly, and that the second-order approximation is helpful in identifying the optimal solution. As such, this shows in the simplest setting that our approximation is useful in tasks where there are non-linearities involved. As we now transition into harder tasks that are highly parameterised and likely non-linear, we hypothesise that our quadratic model will be able to generalise and add more insight into the optimisation landscape.
+\cref{fig:xor_results} shows the loss curves. We see that KryBall and LBFGS converge the quickest, in less than 25 epochs. MSGD and Adam are also able to converge, but take longer. This shows that KryBall is able to generalise very quickly, and that the second-order approximation is helpful in identifying the optimal solution. As such, this shows in the simplest setting that our approximation is useful in tasks where there are non-linearities involved. As we transition into harder tasks, we hypothesise that our quadratic model will be able to generalise and add more insight into the optimisation landscape.
 
 We note that while this task is simple and may seem trivial, it is a good baseline and a bridge to more complex tasks in the next section. We now move onto these tasks in the next section.
 
 \subsection{Task 3: Image Classification}
 \label{ssec:results_image_classification}
 
-We now move into the primary focus of our results, evaluating our optimiser on standard deep-learning tasks that are the benchmark for optimisers. We evaluate our optimisers on three image classification tasks: MNIST-1D, CIFAR-10 CNN, and CIFAR-10 ResNet-18, which we described in \cref{ssec:task_3_image_classification}. We note that from here onwards, we do not use LBFGS since it becomes too expensive and compute heavy to evaluate. Thus, our optimiser suite is now Adam, MSGD and KryBall. We present a summary of our results in \Cref{tab:classification_results}. Our loss curves and accuracies are provided in \cref{fig:image_classification_results}. 
+We now move into the primary focus of our results, evaluating our optimiser on standard  learning tasks that are the benchmark for optimisers. We evaluate our optimisers on three image classification tasks: MNIST-1D, CIFAR-10 CNN, and CIFAR-10 ResNet-18, which we described in \cref{ssec:task_3_image_classification}. From here onwards, we do not use LBFGS since it becomes too expensive. Thus, our optimiser suite is now Adam, MSGD and KryBall. We present a summary of our results in \Cref{tab:classification_results}. Our loss curves and accuracies are provided in \cref{fig:image_classification_results}. 
 
 \input{tables/classification_table.tex}
 
@@ -328,11 +326,11 @@ We now move into the primary focus of our results, evaluating our optimiser on s
     \label{fig:image_classification_results}
 \end{figure}
 
-\textbf{MNIST-1D MLP}: KryBall demonstrates a clear advantage for the MNIST-1D MLP task. It is able to achieve the highest peak accuracy and the lowest final training loss. \cref{fig:mnist1d_mlp_loss} and \cref{fig:mnist1d_mlp_acc} show that KryBall converges quickly and makes a large improvement over Adam and MSGD, especially in 40 to 80 epoch range. We note that while a peak accuracy of 0.685 may not sound high, this contends with the best result on this specific model for MNIST-1D \cite{greydanus_mnist1d}. As such, we outperform Adam and MSGD in all metrics.
+\textbf{MNIST-1D MLP}: KryBall demonstrates a clear advantage for the MNIST-1D MLP task. It is able to achieve the highest peak accuracy and the lowest final training loss. \cref{fig:mnist1d_mlp_loss} and \cref{fig:mnist1d_mlp_acc} show that KryBall converges quickly and makes a large improvement over Adam and MSGD, especially in 40 to 80 epoch range. We note that while a peak accuracy of 0.685 may not sound high, this contends with the best result on this specific model for MNIST-1D \citep{greydanus_mnist1d}. As such, we outperform Adam and MSGD in all metrics.
 
-\textbf{CIFAR-10 CNN}: Here, we see a more nuanced performance. Adam achieves the lowest final training loss, alongside the best final test accuracy. However, KryBall slightly outperforms Adam and records a higher peak test accuracy. The training loss curves in \cref{fig:cifar10_cnn_loss} show Adam and MSGD reaching a slightly lower loss plateau than KryBall. In terms of test accuracy curves in \cref{fig:cifar10_cnn_acc}, all three optimisers are competitive, with KryBall showing a strong peak but Adam and MSGD achieve slightly better peak test accuracy. A key observation here is that in \cref{fig:cifar10_cnn_acc}, KryBall originally has a lower training loss, but then is surpassed by Adam and MSGD as training continue. During epochs 10 to 25, KryBall is also quite variant before converging. This is unlike Adam and MSGD, who are consistent all the way. 
+\textbf{CIFAR-10 CNN}: Here, we see a more nuanced performance. Adam achieves the lowest final training loss, alongside the best final test accuracy. However, KryBall slightly outperforms Adam and records a higher peak test accuracy. The training loss curves in \cref{fig:cifar10_cnn_loss} show Adam and MSGD reaching a slightly lower loss plateau than KryBall. In terms of test accuracy curves in \cref{fig:cifar10_cnn_acc}, all three optimisers are competitive, with KryBall showing a strong peak but Adam and MSGD achieve slightly better peak test accuracy. A key observation here is that in \cref{fig:cifar10_cnn_acc}, KryBall originally has a lower training loss, but then is surpassed by Adam and MSGD as training continue. During epochs 10 to 25, KryBall is also quite variant before converging in terms of test accuracy. This is unlike Adam and MSGD, who are consistent all the way. 
 
-\textbf{CIFAR-10 ResNet-18}: We see a similar comparison here. Adam has the best final training loss, and best peak test and final test accuracy. However, KryBall is generally competitive with Adam and MSGD. It achieves the same best test accuracy as MSGD, and only a slightly lower final test accuracy. Furthermore, \cref{fig:cifar10_resnet_loss} shows the same trend as in \cref{fig:cifar10_cnn_loss}, where KryBall is initially competitive and achieves a lower training loss, but then is surpassed by Adam and MSGD as training continues. In \cref{fig:cifar10_resnet_acc}, we see that KryBall is more stable than Adam and MSGD in the earlier epochs, but less stable in the later epochs and thus its performance suffers. The late epoch instability is also seen in \cref{fig:cifar10_cnn_acc}. 
+\textbf{CIFAR-10 ResNet-18}: We see a similar comparison here. Adam has the best final training loss, and best peak test and final test accuracy. However, KryBall is generally competitive with Adam and MSGD. It achieves the same best test accuracy as MSGD, and only a slightly lower final test accuracy. Furthermore, \cref{fig:cifar10_resnet_loss} shows the same trend as in \cref{fig:cifar10_cnn_loss}, where KryBall is initially competitive and achieves a lower training loss, but then is surpassed by Adam and MSGD as training continues. In \cref{fig:cifar10_resnet_acc}, we see that KryBall is more stable than Adam and MSGD in the earlier epochs, but less stable in the later epochs and thus its performance suffers.
 
 To recap, KryBall outperforms the state-of-the art Adam and MSGD on the MNIST-1D MLP task, but does not outperform them on the CIFAR-10 tasks. More interestingly, we see that KryBall achieves lower training loss initially in all tasks early on, but then is surpassed by Adam and MSGD as training continues for the CIFAR-10 tasks. Near the end of training, KryBall is less stable than Adam and MSGD and is more variant. We discuss this further in\cref{sec:discussion_and_further_analysis}.
 
@@ -361,7 +359,7 @@ We now perform a sensitivity analysis of our method on the MNIST-1D MLP task. We
 
 \textbf{Krylov Subspace Size $(M)$}: We see that the Krylov subspace size $M$ is sensitive to the performance of KryBall. For low $M$, performance suffers since we are not able to approximate the Hessian well. As $M$ increases, we obtain good performance. However, as we continue to increase $M$ past a certain point (5), our performance plateaus. This is interesting, as usually a higher $M$ results in a better approximation. We suspect that for $M=5$ onwards, the dominant curvature information has already been captured. The new basis vectors that are generated are less relevant and do not add useful information, since we have already captured most of the curvature information previously. We present some further analysis about our approximation in \cref{sec:discussion_and_further_analysis}.
  
-\textbf{Krylov Refresh Rate $(r_{\mathit{refresh}})$}: The Krylov refresh rate is best when $r_{\mathit{refresh}} = 1$. This is because when $r_{\mathit{refresh}} = 1$, we use compute the Krylov subspace at every single iteration and are always using the most information. As $r_{\mathit{refresh}}$ increases, we instead fall back to our approximation not at the current point in the optimisation landscape. This is fine if we our information is not too outdated, as is the case for $r_{\mathit{refresh}} = 2$ and $r_{\mathit{refresh}} = 3$. However, as $r_{\mathit{refresh}} \geq 4$ our information is outdated and thus our quadratic model approximation is no longer accurate. This results in KryBall performing worse. We choose $r_{\mathit{refresh}} = 3$ as our default value.
+\textbf{Krylov Refresh Rate $(r_{\mathit{refresh}})$}: The Krylov refresh rate is best when $r_{\mathit{refresh}} = 1$. This is because when $r_{\mathit{refresh}} = 1$, we compute the Krylov subspace at every iteration and are always using up to date information. As $r_{\mathit{refresh}}$ increases, we instead fall back to our approximation not at the current point in the optimisation landscape. This is fine if we our information is not too outdated, as is the case for $r_{\mathit{refresh}} = 2$ and $r_{\mathit{refresh}} = 3$. However, as $r_{\mathit{refresh}} \geq 4$ our information is outdated and thus our quadratic model approximation is no longer accurate. This results in KryBall performing worse. In practice, we choose $r_{\mathit{refresh}} = 3$ as our default value.
 
 \section{Discussion and Further Analysis}
 \label{sec:discussion_and_further_analysis}
@@ -394,7 +392,7 @@ To illustrate this, we perform a small experiment. We take the MNIST-1D MLP mode
     \label{fig:ll_landscape}
 \end{figure}
 
-At the start of training, we see that the landscape is shaped exactly like a quadratic bowl in \cref{fig:ll_sgd_start}. However, near the end of training, that the landscape is approximately quadratic instead as seen in \cref{fig:ll_sgd_end}. It no longer is shaped exactly like a quadratic, but instead is stretched inwards. This agrees with \cite{ma2022beyond}, and it is plausible that this shape is similar to that of a subquadratic landscape.
+At the start of training, we see that the landscape is shaped exactly like a quadratic bowl in \cref{fig:ll_sgd_start}. However, near the end of training, that the landscape is approximately quadratic instead as seen in \cref{fig:ll_sgd_end}. It no longer is shaped exactly like a quadratic, but instead is stretched inwards. This agrees with \cite{ma2022beyond}, and it is plausible that this illustrates the change in the loss landscape as training progresses.
 
 \textbf{What is the effect of the activation function on our optimiser?}
 
@@ -418,11 +416,11 @@ All classification tasks in \cref{ssec:results_xor_classification} and \cref{sse
     \label{fig:act_results}
 \end{figure}
 
-In \cref{fig:act_results}, there is a stark distinction between the smooth activations and the non-smooth activation function ReLU. When using smooth activation functions, we reach close to training loss and our test accuracy is much better. However, the loss is much higher and our accuracy is lower when using ReLU. We have a good reason for this, which is that the quadratic approximation suffers in the presence of non-smooth activation functions. ReLU introduces non-differentiability at zero. This means that our quadratic model and trust-region framework, whose underlying assumptions are that we operate in smooth regions, is violated. Our method relise on meaningful HVPs for the approximation, but these are not well-defined at the transition points of ReLU units. This leads to poor curvature approximations.At this point, if we try to approximate the Hessian and the surrounding region using a quadratic model, we ultimately will not be able to. As such, it is better to use first-order methods that do not have these assumptions when using non-smooth activation functions. 
+In \cref{fig:act_results}, there is a stark distinction between the smooth activations and the non-smooth activation function ReLU. When using smooth activation functions, we reach close to zero training loss and our test accuracy is much better. However, the loss is much higher and our accuracy is lower when using ReLU. We have a good reason for this, which is that the quadratic approximation suffers in the presence of non-smooth activation functions. ReLU introduces non-differentiability at zero. This means that our quadratic model and trust-region framework, whose underlying assumptions are that we operate in smooth regions, is violated. Our method relise on meaningful HVPs for the approximation, but these are not well-defined at the transition points of ReLU units. This leads to poor curvature approximations. At this point, if we try to approximate the Hessian and the surrounding region using a quadratic model, we ultimately will not be able to. As such, it is better to use first-order methods that do not have these assumptions when using non-smooth activation functions. 
 
 \textbf{Are our directions meaningful and distinct?}
 
-\cite{tinysubspaces} show that gradients exhibit spurious alignment with the dominant eigenspace of the Hessian during training. Specifically, when the gradient appears to align with the top eigenspace, projecting it onto this subspace actually yields poor training progress \cite{tinysubspaces}. This finding suggests that our construction of distinct search directions is likely meaningful. Our method explicitly constructs directions from different sources. The SFN step, where we apply the $\abs{\cdot}$ function to the eigenvalues, alters the dominant subspace by ensuring positive definiteness. We hypothesis that this likely breaks the spurious alignment observed in standard training, making our dominant eigenspace directions genuinely useful rather than being correlated with the gradient. The strong empirical performance of KryBall on ill-conditioned problems, where eigenspace structure is critical. This supports the hypothesis that our multi-directional search strategy captures meaningful aspects of the optimisation landscape that individual directions cannot provide alone.
+\cite{tinysubspaces} show that gradients exhibit spurious alignment with the dominant eigenspace of the Hessian during training. Specifically, when the gradient appears to align with the top eigenspace, projecting it onto this subspace actually yields poor training progress \cite{tinysubspaces}. This finding suggests that our construction of distinct search directions is likely meaningful. Our method explicitly constructs directions from different sources. The SFN step, where we apply the $\abs$ function to the eigenvalues, alters the dominant subspace by ensuring positive definiteness. We hypothesis that this breaks the spurious alignment observed in standard training, making our dominant eigenspace directions genuinely useful rather than being correlated with the gradient. The strong empirical performance of KryBall on ill-conditioned problems, where eigenspace structure is critical. This supports the hypothesis that our multi-directional search strategy captures meaningful aspects of the optimisation landscape that individual directions cannot provide alone.
 
 \textbf{How can we tell if our computed SFN step approximates the true SFN step?}
 
@@ -434,11 +432,11 @@ where $z^*$ is the true SFN direction and $\hat{z}$ is our Krylov approximation:
 \begin{align}
     \hat{z} = \sum_{k=0}^{m-1} \alpha_k H^k \hat{g}.
 \end{align}
-Using the eigendecomposition $H = V \Lambda V^T$ and letting $c = V^T \hat{g}$, we can express both directions in terms of the eigenvalues. The true SFN direction becomes:
+Using the eigendecomposition $H = V \Lambda V^T$ and letting $c = V^T \hat{g}$, we can express both directions in terms of the eigenvalues. The true SFN direction becomes
 \begin{align}
     z^* = -V |\Lambda|^{-1} c,
 \end{align}
-while our Krylov approximation can be written as:
+while our Krylov approximation can be written as
 \begin{align}
     \hat{z} = V \left(\sum_{k=0}^{m-1} \alpha_k \Lambda^k\right) c.
 \end{align}
@@ -446,7 +444,7 @@ We can then minimise the reconstruction error by formulating it as a linear syst
 \begin{align}
     r &= z^* - \hat{z} = V(-|\Lambda|^{-1} - \sum_{k=0}^{m-1} \alpha_k \Lambda^k)c
 \end{align}
-We can minimise $r$ by setting the middle term to zero, in which we get,
+By setting the middle term to zero, we get,
 \begin{align}
     &\Rightarrow -|\Lambda|^{-1} = \sum_{k=0}^{m-1} \alpha_k \Lambda^k \\
     &\Rightarrow -|\lambda_i|^{-1} = \sum_{k=0}^{m-1} \alpha_k \lambda_i^k \quad \text{for each eigenvalue } \lambda_i \\
@@ -457,12 +455,12 @@ Solving this linear system for $\alpha$ and computing $||r||$ tells us how well 
 \section{Limitations and Improvements}
 \label{sec:limitations}
 
-While KryBall demonstrates promising performance across several optimisation tasks, our evaluation reveals important limitations. We now discuss these limitations and how to address them.
+While KryBall demonstrates promising performance across several tasks, our evaluation reveals important limitations. We now discuss these limitations and how to address them.
 
 \subsection{Late-Epoch Instability}
 \label{ssec:late_epoch_instability}
 
-As demonstrated in our CIFAR-10 experiments, KryBall exhibits increased variance and instability in later training epochs. This occurs when the quadratic approximation becomes less accurate near local minima, where the loss landscape exhibits multiscale, subquadratic behaviour \citep{ma2022beyond}. We also saw empirical evidence of this when we sampled the optimiser trajectory in \cref{fig:ll_landscape}. One way to address this is to switch off the quadratic model and only use first-order information as we approach the local minima. This would likely require a heuristic where after a certain point in training, we switch off the quadratic model and only use either SGD or Adam. This is a hybrid approach, and we discuss this further in \cref{ssec:hybrid_approaches}.
+As demonstrated in our CIFAR-10 experiments, KryBall exhibits increased variance and instability in later training epochs. This occurs when the quadratic approximation becomes less accurate near local minima, where the loss landscape exhibits multiscale, subquadratic behaviour \citep{ma2022beyond}. We also saw empirical evidence of this when we sampled the optimiser trajectory in \cref{fig:ll_landscape}. One way to address this is to switch off the quadratic model and only use first-order information as we approach the local minima. This would likely require a heuristic where after a certain point in training, we switch off the quadratic model and only use either SGD or Adam. One such heuristic could be to use the gradient norm to determine when we've entered a region where the quadratic approximation breaks down. We can then switch to first-order methods when $g$ falls below a threshold $\tau$. We can also consider the decay rate of the gradient norm to determine when we should switch. We discuss these further in \cref{ssec:hybrid_approaches}.
     
 \subsection{Dependence on Smooth Activation Functions}
 \label{ssec:dependence_on_smooth_activation_functions}
@@ -472,16 +470,16 @@ A fundamental limitation of KryBall is that it requires smooth activation functi
 \subsection{Hyperparameter Sensitivity}
 \label{ssec:hyperparameter_sensitivity}
 
-Our sensitivity analysis reveals that KryBall is reasonably sensitive and dependent on the Krylov dimension $M$ and refresh rate $r_{\text{refresh}}$. We note that while our hyperparameters are not as sensitive as Adam and MSGD, they still require careful tuning, where suboptimal values can lead to poor performance as we saw in \cref{fig:sensitivity_analysis}. One way to address this could be to use adaptive schemes that automatically adjust $M$ and $r_{\text{refresh}}$. This has been done by \cite{henriques2019small}, who automatically rescale hyperparameters by using an objective change heuristic.
+Our sensitivity analysis reveals that KryBall is reasonably dependent on the Krylov dimension $M$ and refresh rate $r_{\text{refresh}}$. We note that while our hyperparameters are not as sensitive as Adam and MSGD, they still require careful tuning, where suboptimal values can lead to poor performance as we saw in \cref{fig:sensitivity_analysis}. One way to address this could be to use adaptive schemes that automatically adjust $M$ and $r_{\text{refresh}}$. This has been done by \cite{henriques2019small}, who automatically rescale hyperparameters by using an objective change heuristic.
 
 \subsection{Trust-Region Step Rejection}
 \label{ssec:trust_region_step_rejection}
 
-Our trust-region framework can reject optimisation steps when the quadratic model poorly predicts actual function behavior. While this provides stability, frequent step rejections can slow convergence compared to first-order methods that always accept their steps. This is particularly the case when the Hessian approximation degrades or is in highly non-quadratic regions. A good way to address this is to simply use the gradient or momentum as a fallback. Moreover, we can instead consider a hybrid approach where if our step is rejected, we proceed with a first-order optimiser such as Adam or MSGD.
+Our trust-region framework can reject optimisation steps when the quadratic model poorly predicts actual function behavior. While this provides stability, frequent step rejections can slow convergence compared to first-order methods that always accept their steps. This is particularly the case when the Hessian approximation degrades or is in highly non-quadratic regions. A good way to address this is to simply use the gradient or momentum as a fallback. Moreover, we can instead consider the hybrid approach where if our step is rejected, we proceed with a first-order optimiser such as Adam or MSGD.
 
 \subsection{Computational Overhead}
 \label{ssec:computational_overhead}
 
-KryBall requires computing HVPs and constructing Krylov subspaces, introducing additional computational cost compared to first-order methods. While HVPs can be computed efficiently using automatic differentiation, the overall cost per iteration remains higher than gradient-only approaches. The key limitation here is that the main computational cost comes from the construction of the Krylov subspace, as our Krylov dimension $M$ is fixed throughout training. This overhead could be mitigated by adaptively reducing the Krylov dimension $M$ in regions where high-quality approximations are not critical, or by increasing the refresh rate $r_{\text{refresh}}$ when the landscape is relatively stable.
+KryBall requires computing HVPs and constructing Krylov subspaces, introducing additional computational cost compared to first-order methods. While HVPs can be computed efficiently, the overall cost per iteration remains higher than first-order methods. The key limitation here is that the main computational cost comes from the construction of the Krylov subspace. As our Krylov dimension $M$ is fixed throughout training, this means we concur a cost of $O(M \times N)$ per every $r_{\textit{refresh}}$ iterations. This overhead could be mitigated by adaptively reducing the Krylov dimension $M$ in regions where high-quality approximations are not critical, or by increasing the refresh rate $r_{\textit{refresh}}$ when the landscape is relatively stable. 
 
-In this section, we presented the evaluations of our optimiser, KryBall, on a range of tasks. We evaluated KryBall's performance on ill-conditioned problems, simple binary classification, and more complex image classification tasks. We discussed KryBall's performance in comparison to the state-of-the-art optimisers Adam and MSGD. We then followed with a sensitivity analysis, a deeper discussion about key questions and finally the limitations of our method. We now move on to conclude this thesis.
+In this section, we presented the evaluations of our optimiser, KryBall, on a range of tasks. We evaluated KryBall's performance on ill-conditioned problems, simple binary classification, and more complex image classification tasks. We discussed KryBall's performance in comparison to the state-of-the-art optimisers Adam and MSGD. We then followed with a sensitivity analysis, a discussion about key questions and our hypotheses, and finally the limitations of our method. We now move on to conclude this thesis.

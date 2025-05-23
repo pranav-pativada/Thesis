@@ -136,7 +136,7 @@ Here, the previous second moment, $V_{t-1}$ is used to ensure this conditional i
     \theta_{t+1} = \theta_{t} - \alpha \cdot m_{t+1}.
 \end{align}
 ADOPT outperforms Adam, AdamW, and AMSGrad on MNIST and CIFAR10 image classification tasks \citep{taniguchi2024adopt}.
-It achieves substantial improvements in LLM pretraining and finetuning tasks over Adam and the rest of the variants as well \citep{taniguchi2024adopt}. 
+It achieves substantial improvements in large language model pretraining and finetuning tasks over Adam and the rest of the variants as well \citep{taniguchi2024adopt}. 
 
 Our work presents a different paradigm from these Adam variants. While these variants focus on the convergence and reliance on tuning, as we mentioned in the previous section, our work does not need explicit learning rate and moment hyperparameters. Our work has theoretical convergence guarantees due to our trust-region framework, whereas these works address the problem of Adam's convergence rather than exhibiting these guarantees.
 

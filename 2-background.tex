@@ -1,4 +1,4 @@
-\chapter{Background}
+\chapter{Technical Background}
 \label{chap:background}
 
 In this chapter, we provide the relevant technical background required to understand our work. We start by introducing the optimisation problem in \cref{sec:optimisation_problem}. This is continued by a mathematical formulation of the optimisation landscape in \cref{sec:optimisation_landscape}. We then discuss optimisation in deep learning in \cref{sec:optimisation_in_deep_learning}. We end this chapter with a discussion of computationally tractable methods for curvature exploitation in \cref{sec:tractable_curvature_exploitation}.
@@ -14,7 +14,7 @@ where
 \begin{itemize}
     \item $x \in \mathbb{R}^n$ is a real-valued vector with $n \geq 1$ components,
     \item $f: \mathbb{R}^n \to \mathbb{R}$ is a real-valued function,
-    \item $f \in C^k$ s.t. $k \geq 1$ is smooth.
+    \item $f \in C^k$ s.t. $k \geq 1$, where $C^k$ is the space of functions that are $k$ times continuously differentiable.
 \end{itemize}
 We only have a local perspective of $f$, since it is usually expensive to evaluate. We know what $f$ evaluates to on a limited set of points $x_0, x_1, \ldots, x_k$, in which we use this information to iteratively search for an optimal point $x^*$ that minimises $f$. To do this, we must first understand the landscape of $f$ and the scenarios that emerge when traversing it.
 
@@ -55,7 +55,11 @@ When exploring the landscape of an objective function, we are interested in iden
     \label{fig:global_min_max}
 \end{figure}
 
-Finding such global optima is challenging, as we only have a limited set of information about $f$ and are resource constrained when evaluating it. Thus, many optimisation algorithms aim to find \textit{local optima}, which are points that are locally optimal. Similarly, there are \textit{local minimum} or \textit{local maximum} \citep{NoceWrig06, deep_learning_book}. We define these points with respect to a neighbourhood $\mathcal{N}$ of a point $x$. We provide examples in \cref{fig:local_min_max}.
+Finding such global optima is challenging, as we only have a limited set of information about $f$ and are resource constrained when evaluating it. Thus, many optimisation algorithms aim to find \textit{local optima}, which are points that are locally optimal. Similarly, there are \textit{local minimum} or \textit{local maximum} \citep{NoceWrig06, deep_learning_book}. We provide examples in \cref{fig:local_min_max}. We define these points with respect to a neighbourhood $\mathcal{N}$ of a point $x$.
+
+\begin{definition}[Neighbourhood]
+    A neighbourhood $\mathcal{N}$ of a point $x \in \mathbb{R}^n$ is a set that contains an open ball centered at $x$.
+\end{definition}
 
 \begin{definition}[Local Minimum]
     A point $x^*$ is a \textit{local minimum} if there exists a neighbourhood $\mathcal{N}$ around $x^*$ such that $f(x^*) \leq f(x)$ for all $x \in \mathcal{N}$. It is a \textit{strict local minimum} if instead $f(x^*) < f(x)$ for all $x \in \mathcal{N} \setminus \{x^*\}$.
@@ -149,12 +153,12 @@ These properties can now be used to formalise the \textit{necessary second-order
     \end{itemize}
     \label{definition:second_order_necessary}
 \end{definition}
-Similarly, the above definition can be extended to a local maximum when $H$ is negative semi-definite.
+Similarly, the above definition can be extended to a local maximum where $H$ is negative semi-definite.
 
 % Nit: Indefinite matrix definition can have +,- or 0 eigenvalues. [FIXED]
 A special case is when $H$ is \textit{indefinite}.
 \begin{definition}[Indefinite Matrix]
-    An $n \times n$ symmetric matrix $A$ is \textit{indefinite} if it is not positive semidefinite and not negative semidefinite. That is, there exists $\lambda_i > 0$ and $\lambda_j < 0$ for some $i, j \in [1, n]$.
+    An $n \times n$ symmetric matrix $A$ is \textit{indefinite} if it is not positive semidefinite and not negative semidefinite. That is, there exists $\lambda_i > 0$ and $\lambda_j < 0$ for some $i, j \in [1, n]$ and $i \neq j$.
 \end{definition}
 Here, the function curves upwards in some directions and downwards in others. This is a saddle point.
 
@@ -339,7 +343,7 @@ In the Rosenbrock example, the condition number is $2508$ at the minimum, which 
 \subsubsection{Non-Smooth Problems}
 \label{sssec:non_smooth_problems}
 
-So far, we have talked about optimisation problems where the objective function $f$ is smooth and usually twice continuously differentiable. However, many optimisation problems that we encounter, particularly in machine learning, involve \textit{non-smooth functions}. These are functions that possess points at which the function or its derivatives are not well-defined. We provide an example of such functions which have points of non-differentiability in \cref{fig:non_smooth_functions}. 
+So far, we have talked about optimisation problems where the objective function $f$ is smooth and usually twice continuously differentiable. However, many optimisation problems that we encounter involve \textit{non-smooth functions}. These are functions that possess points at which the function or its derivatives are not well-defined. We provide an example of such functions which have points of non-differentiability in \cref{fig:non_smooth_functions}. 
 
 \begin{figure}[h]
     \begin{subfigure}[b]{0.48\linewidth}
@@ -371,6 +375,8 @@ Non-smoothness is common in machine learning, with terms such as ReLU and L1 reg
 %     \caption{The ReLU function (red) and its smooth approximation, the Softplus function (blue), given by $f(x) = \log(1 + e^x)$. The ReLU function is non-differentiable at $x = 0$, but the Softplus function is differentiable everywhere.}
 %     \label{fig:relu_softplus}
 % \end{figure} 
+
+\newpage
 
 \section{Optimisation in Deep Learning}
 \label{sec:optimisation_in_deep_learning}
@@ -617,7 +623,7 @@ While it may seem like Newton's method and the quadratic model approximation are
 \section{Methods for Tractable Curvature Exploitation}
 \label{sec:tractable_curvature_exploitation}
 
-In this section, we discuss strategies that can incorporate curvature information while being computationally tractable. We start by discussing \textit{Hessian-vector} products in \cref{ssec:hessian_vector_products}. This is followed by an introduction to Krylov subspaces in \cref{ssec:krylov_subspaces} and then trust-region methods in \cref{ssec:trust_region_methods}.
+In this section, we discuss strategies that can incorporate curvature information while being computationally tractable. We start by discussing Hessian-vector products in \cref{ssec:hessian_vector_products}. This is followed by an introduction to Krylov subspaces in \cref{ssec:krylov_subspaces} and then trust-region methods in \cref{ssec:trust_region_methods}.
 
 \subsection{Hessian-vector Products}
 \label{ssec:hessian_vector_products}

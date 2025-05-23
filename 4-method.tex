@@ -1,7 +1,7 @@
 \chapter{The KryBall Optimiser}
 \label{chap:method}
 
-In this chapter, we present our method, the Krylov optimiser. We first introduce the concept of the Saddle-Free-Newton that our method builds upon on in \cref{sec:saddle_free_newton}. We then present our algorithm, which includes core components such as Krylov subspace construction, the use of the Saddle-Free-Newton, and a trust-region framework. This is detailed in \cref{sec:kryball_optimisation_algorithm}. We then present the main algorithm in \cref{sec:main_algorithm}.
+In this chapter, we present our method, the KryBall optimisation algorithm. We first introduce the concept of the Saddle-Free-Newton that our method builds upon on in \cref{sec:saddle_free_newton}. We then present our algorithm, which includes core components such as Krylov subspace construction, the computation of the Saddle-Free-Newton, and a trust-region framework. This is detailed in \cref{sec:kryball_optimisation_algorithm}. We then present the main algorithm in \cref{sec:main_algorithm}.
 
 \section{Saddle-Free-Newton}
 \label{sec:saddle_free_newton}
@@ -26,7 +26,7 @@ We use the notation $\| H \|$ and $H^{SFN}$ interchangeably to refer to the reco
     \label{fig:guaranteed_pos_def}
 \end{figure}
 
-As an example, consider once again our 2D horse saddle function from \cref{ssec:second_order_methods}. Recall we split the problem into two cases to optimise: $g(x) = x^2$ and $h(y) = -y^2$. We computed that $H_g = \nabla^2 g(x) = 2$ in the $x$-direction and $H_h = \nabla^2 h(y) = -2$ in the $y$-direction given our starting iterates $(x_0, y_0) = (1.5, 1.5)$. Our problem with Newton's method was that $H_h$ had a negative eigenvalue, which made our Hessian indefinite and thus in the y-direction, we moved towards the local maximum instead. Now, we consider the SFN step and it's behaviour.
+As an example, consider once again our 2D horse saddle function from \cref{ssec:second_order_methods}. Recall we split the problem into two cases to optimise: $g(x) = x^2$ and $h(y) = -y^2$. We computed that $H_g = \nabla^2 g(x) = 2$ in the $x$-direction and $H_h = \nabla^2 h(y) = -2$ in the $y$-direction given our starting iterates $(x_0, y_0) = (1.5, 1.5)$. Our problem with Newton's method was that $H_h$ had a negative eigenvalue, which made our Hessian indefinite and thus in the y-direction, we moved towards the local maximum instead. Now, we consider the SFN step and its behaviour.
 \begin{itemize}
     \item In the $x$-direction, we have $H_g = 2$. Applying $|\cdot|$ to the eigenvalues, we get $H^{SFN} = 2$. This is the same as the Newton step, which behaves correctly for this case, so $x_1 = 0$.
     \item In the $y$-direction, we have $H_h = -2$. Applying $|\cdot|$ to the eigenvalues, we get $H^{SFN} = 2$. Now, we have that
@@ -67,7 +67,7 @@ However, while the SFN method addresses the issue, the core limitation is still 
 
 \section{The KryBall Optimisation Algorithm}
 \label{sec:kryball_optimisation_algorithm}
-This raises the question: how can we compute the SFN step efficiently, especially given the proliferation of saddle points? We thus introduce KryBall, a method that extends the SFN method and uses its advantages while being computationally tractable for deep learning. KryBall is a second-order method that uses Krylov subspaces, the SFN step, and a trust-region framework. At it's core, KryBall consists of two main components: 
+This raises the question: how can we compute the SFN step efficiently, especially given the proliferation of saddle points? We thus introduce KryBall, a method that extends the SFN method and uses its advantages while being computationally tractable for deep learning. KryBall is a second-order method that uses Krylov subspaces, the SFN step, and a trust-region framework. At its core, KryBall consists of two main components: 
 \begin{itemize}
     \item \textbf{SFN Computation}: The efficient computation of the SFN step direction.
     \item \textbf{Trust-Region Framework}: The integration of the SFN step and other useful components into a generalised trust-region framework.
@@ -77,11 +77,11 @@ In this section, we detail these two core components. We first discuss how to co
 \subsection{Computation of the Saddle-Free-Newton}
 \label{sec:computation_of_the_saddle_free_newton}
 
-We introduced Krylov subspaces in \cref{ssec:krylov_subspaces}. We now use them to their best ability in our method. Instead of computing and storing the full Hessian, we can generate a Krylov subspace with the Hessian $H$ and the gradient $g$. This gives us,
+We introduced Krylov subspaces in \cref{ssec:krylov_subspaces}. We now use them to their best ability in our method. Instead of computing and storing the full Hessian, we can generate a Krylov subspace with the Hessian $H$ and the gradient $g$. This gives us
 \begin{align}
-    \mathcal{K}_{M}(H, g) = \text{span} \{g, H g, H^2 g, \ldots, H^{M-1} g \}, 
+    \mathcal{K}_{M}(H, g) = \text{span} \{g, H g, H^2 g, \ldots, H^{M-1} g \}.
 \end{align}
-which allows us to approximate the action of the Hessian. Recall that the Arnoldi iteration not only generates an orthonormal basis $Q_M$ for $\mathcal{K}_{M}(H, g)$, but also the coefficient matrix $H_M$. We know that this is a projection of the original space that we work in. That is, we now have the following relationship,
+ Recall that the Arnoldi iteration not only generates an orthonormal basis $Q_M$ for $\mathcal{K}_{M}(H, g)$, but also the coefficient matrix $H_M$. We know that this is a projection of the original space that we work in. That is, we have the following relationship,
 \begin{align}
     Q_M^T H Q_M = H_M,
 \end{align}
@@ -107,11 +107,11 @@ where the clipping function $\text{clip}(x, \epsilon)$ clips any eigenvalues of 
 
 Having computed the SFN direction $\Delta \theta_{SFN}$, we now integrate into a robust step selection procedure using $N$-dimensional subspace optimisation. We introduced briefly 2D subspace optimisation in \cref{ssec:trust_region_methods}. The general principles are extended to the $N$-dimensional case. 
 
-We define a search subspace $\mathcal{S}_k$ as a $k$-dimensional subspace that is spanned by a set of $k$ informative direction vectors. These vectors are chosen to capture both first-order and approximated second-order information about the loss landscape. Typically, the basis vectors for $\mathcal{S}_k$ include:
+We define a search subspace $\mathcal{S}_k$ as a $k$-dimensional subspace that is spanned by a set of $k$ direction vectors. These vectors are chosen to capture both first-order and approximated second-order information about the optimisation landscape. Typically, the basis vectors for $\mathcal{S}_k$ include:
 \begin{itemize}
     \item The normalised current gradient: $g_t / \|g_t\|_2$.
     \item The normalised SFN direction: $\Delta \theta_{SFN} / \|\Delta \theta_{SFN}\|_2$, as computed in \cref{sec:computation_of_the_saddle_free_newton}.
-    \item The normalised momentum vector: $z_t / \|z_t\|_2$, which aggregates information from past gradients.
+    \item The normalised momentum vector: $z_t / \|z_t\|_2$.
 \end{itemize}
 Let $X_t = [x_1, x_2, \ldots, x_k]$ be the matrix whose columns are these $k$ orthonormalised basis vectors. Any potential step $p_t$ from the current iterate $\theta_t$ is therefore restricted to this subspace, meaning $p_t = X_t \alpha$ for some coefficient vector $\alpha \in \mathbb{R}^k$.
 
@@ -175,6 +175,8 @@ We now bring together the previously described components: the efficient computa
 
 The algorithm iteratively builds a low-dimensional quadratic model of the objective function. It leverages curvature information approximated via the SFN direction computed within a Krylov subspace. An optimal step is then determined within this subspace using the trust-region framework, which adaptively adjusts the step size to ensure reliable progress.
 
-Note that we have a refresh parameter $r_{\mathit{refresh}}$ which controls how often we update our Krylov basis. This is primarily for efficiency reasons, as it is expensive to compute the Arnoldi iteration every single time. As such, when we do not compute the Arnoldi iteration, we leverage the basis vectors previously computed from and add these into our trust-region. In practice, we find that an appropriate choice of $r_{\mathit{refresh}}$ is usually performant even if it is not set to 1. 
+Note that we have a refresh parameter $r_{\mathit{refresh}}$ which controls how often we update our Krylov basis. This is primarily for efficiency reasons, as it is expensive to compute the Arnoldi iteration every single time. As such, when we do not compute the Arnoldi iteration, we leverage the basis vectors previously computed and add these into our trust-region. In practice, we find that an appropriate choice of $r_{\mathit{refresh}}$ is usually performant even if it is not set to 1. 
+
+\newpage
 
 In this chapter, we detailed the innerworkings of our method, the KryBall optimiser. We discussed the need for methods like the SFN. We then introduced our core ideas of efficiently computing the SFN and integrating it into a trust-region framework, resulting in our algorithm. We now present an empirical evaluation of KryBall in the next chapter, assessing its performance in a range of tasks.
