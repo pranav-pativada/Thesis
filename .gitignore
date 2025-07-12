@@ -6,7 +6,6 @@
 *.brf
 *.blg
 *.synctex.gz
-*.pdf 
 
 # Ignoring specific generated files by name
 mainfile.brf
@@ -15,6 +14,8 @@ mainfile.bbl
 mainfile.log
 mainfile.out
 mainfile.synctex.gz
+mainfile.lof
+mainfile.toc
 
 # Any additional temporary files
 *.fls

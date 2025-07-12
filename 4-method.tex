@@ -1,4 +1,4 @@
-\chapter{The KryBall Optimiser}
+\chapter{The KryBall Optimisation Algorithm}
 \label{chap:method}
 
 In this chapter, we present our method, the KryBall optimisation algorithm. We first introduce the concept of the Saddle-Free-Newton that our method builds upon on in \cref{sec:saddle_free_newton}. We then present our algorithm, which includes core components such as Krylov subspace construction, the computation of the Saddle-Free-Newton, and a trust-region framework. This is detailed in \cref{sec:kryball_optimisation_algorithm}. We then present the main algorithm in \cref{sec:main_algorithm}.
@@ -65,7 +65,7 @@ As a result, our next set of iterates $(x_1, y_1) = (0, 3)$ now evaluates to $f(
 
 However, while the SFN method addresses the issue, the core limitation is still the computational intractability. To compute the SFN, we must do an eigendecomposition of the Hessian, apply our abs function, reconstruct it, and then take the inverse. This sequence of steps is infeasible for deep learning.  
 
-\section{The KryBall Optimisation Algorithm}
+\section{Components of KryBall}
 \label{sec:kryball_optimisation_algorithm}
 This raises the question: how can we compute the SFN step efficiently, especially given the proliferation of saddle points? We thus introduce KryBall, a method that extends the SFN method and uses its advantages while being computationally tractable for deep learning. KryBall is a second-order method that uses Krylov subspaces, the SFN step, and a trust-region framework. At its core, KryBall consists of two main components: 
 \begin{itemize}
